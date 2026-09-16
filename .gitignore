@@ -1,0 +1,65 @@
+# Byte-compiled / cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Packaging / install
+build/
+dist/
+*.egg-info/
+.eggs/
+*.egg
+
+# Testing / coverage
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# IDE / OS
+.idea/
+.vscode/
+*.swp
+.DS_Store
+
+# Local secrets / env
+.env
+.env.*
+
+# Large / generated data (keep directory placeholders)
+archive/**
+data/brats/**
+data/real_patients/**
+data/processed/**
+!data/brats/.gitkeep
+!data/real_patients/.gitkeep
+!data/processed/.gitkeep
+
+# Raw clinical DICOM (PHI — never commit)
+MRI DATA/**
+*.h5
+
+# Nested clone (add as submodule separately if needed)
+mri_anonymizer/
+
+# Model checkpoints and outputs
+*.pt
+*.pth
+*.ckpt
+*.nii
+*.nii.gz
+*.dcm
+outputs/
+runs/
+checkpoints/

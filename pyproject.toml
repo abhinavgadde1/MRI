@@ -1,0 +1,59 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mri-pipeline"
+version = "0.1.0"
+description = "Medical imaging pipeline for MRI preprocessing, tumor segmentation, 3D reconstruction, validation, and white-matter tract risk analysis."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "MRI Pipeline Contributors" }]
+keywords = ["mri", "dicom", "nifti", "monai", "segmentation", "tractography"]
+dependencies = [
+    "pydicom",
+    "SimpleITK",
+    "monai",
+    "nibabel",
+    "dicom2nifti",
+    "scikit-image",
+    "trimesh",
+    "plotly",
+    "TractSeg",
+    "dipy",
+    "numpy",
+    "scipy",
+    "pandas",
+    "pydantic>=2.0",
+    "PyYAML",
+    "h5py",
+    "tensorboard",
+    "matplotlib",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "ipykernel",
+    "jupyter",
+]
+hd_bet = [
+    "hd-bet",
+]
+
+[tool.setuptools]
+py-modules = ["config"]
+
+[tool.setuptools.package-dir]
+"" = "src"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+"*" = ["py.typed"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
