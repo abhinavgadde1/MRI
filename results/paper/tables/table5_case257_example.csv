@@ -1,0 +1,2 @@
+subject_id,role,gt_voxel_ml,pred_voxel_ml,gt_ellipsoid_abc2_ml,pred_ellipsoid_abc2_ml,abs_seg_ml,abs_gt_formula_ml
+BraTS20_Training_257,"illustrative (near-perfect seg, residual formula gap)",82.02,82.22,113.73,101.50,0.19,31.71

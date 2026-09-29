@@ -1,22 +1,16 @@
 """Convert BraTS per-slice HDF5 files into cached 3D NIfTI volumes.
 
-Filenames in this project follow::
+Filenames follow::
 
-    volume_{patient_id}_slice_{slice_index}.h5
+    volume_{id}_slice_{index}.h5
 
-Confirmed by scanning ``archive/BraTS2020_training_data/content/data``
-(e.g. ``volume_100_slice_0.h5``, ``volume_9_slice_99.h5``). Each file holds:
+Each file holds:
 
-- ``image`` — shape ``(240, 240, 4)`` — FLAIR, T1, T1ce, T2
-- ``mask``  — shape ``(240, 240, 3)`` — tumor sub-region channels (binary)
+- ``image`` — shape ``(240, 240, 4)`` — FLAIR, T1, T1c, T2
+- ``mask``  — shape ``(240, 240, 3)`` — tumor sub-region channels
 
-No slice thickness / spacing attributes were found on the H5 datasets or in
-``meta_data.csv`` / ``name_mapping.csv`` / ``BraTS20 Training Metadata.csv``.
-NIfTIs therefore use an identity affine (1 mm isotropic in world mm units),
-which matches the nominal BraTS resolution.
-
-Outputs are written once under ``data/processed/brats_nifti/`` and skipped on
-subsequent runs unless ``force=True`` (do not re-convert every training epoch).
+NIfTIs use an identity affine (nominal 1 mm isotropic). Outputs are cached under
+``data/processed/brats_nifti/{study_id}/``.
 """
 
 from __future__ import annotations
@@ -36,12 +30,17 @@ import pandas as pd
 
 logger = logging.getLogger(__name__)
 
-# Confirmed filename pattern for this dataset dump.
-SLICE_NAME_RE = re.compile(r"^volume_(?P<volume_id>\d+)_slice_(?P<slice_index>\d+)\.h5$")
+SLICE_NAME_RE = re.compile(
+    r"^volume_(?P<volume_id>\d+)_slice_(?P<slice_index>\d+)\.h5$"
+)
 
-# Channel order used by the Kaggle BraTS2020 H5 dump.
 MODALITY_NAMES: tuple[str, ...] = ("FLAIR", "T1", "T1c", "T2")
-MASK_CHANNEL_NAMES: tuple[str, ...] = ("mask_ch0", "mask_ch1", "mask_ch2")
+MASK_LABELS: dict[int, str] = {
+    0: "background",
+    1: "necrotic",
+    2: "edema",
+    3: "enhancing",
+}
 
 EXPECTED_IMAGE_SHAPE_2D = (240, 240, 4)
 EXPECTED_MASK_SHAPE_2D = (240, 240, 3)
@@ -109,7 +108,7 @@ def inspect_naming_pattern(h5_dir: str | Path, *, sample_size: int = 12) -> list
 
 
 def load_study_id_mapping(h5_dir: str | Path) -> dict[int, str]:
-    """Map volume index → BraTS_2020_subject_ID via ``name_mapping.csv`` when present."""
+    """Map volume index → BraTS_2020_subject_ID via ``name_mapping.csv``."""
     csv_path = Path(h5_dir) / "name_mapping.csv"
     if not csv_path.is_file():
         logger.warning("No name_mapping.csv in %s; using volume_* study IDs", h5_dir)
@@ -117,7 +116,6 @@ def load_study_id_mapping(h5_dir: str | Path) -> dict[int, str]:
     df = pd.read_csv(csv_path)
     if "BraTS_2020_subject_ID" not in df.columns:
         return {}
-    # Rows are ordered as volume 1..N in this dump.
     return {
         i + 1: str(name)
         for i, name in enumerate(df["BraTS_2020_subject_ID"].tolist())
@@ -125,13 +123,8 @@ def load_study_id_mapping(h5_dir: str | Path) -> dict[int, str]:
 
 
 def probe_spacing_metadata(h5_dir: str | Path) -> tuple[np.ndarray, str]:
-    """Return (affine, source_description).
-
-    Inspects H5 attributes and companion CSVs. When nothing specifies spacing,
-    returns an identity affine (nominal 1 mm isotropic) and logs that fact.
-    """
+    """Return (affine, source). Defaults to identity 1 mm isotropic."""
     h5_dir = Path(h5_dir)
-    # Probe a few H5 files for geometry attributes.
     for path in sorted(h5_dir.glob("volume_*_slice_0.h5"))[:5]:
         with h5py.File(path, "r") as handle:
             file_attrs = dict(handle.attrs)
@@ -146,7 +139,9 @@ def probe_spacing_metadata(h5_dir: str | Path) -> tuple[np.ndarray, str]:
             ):
                 if key in file_attrs or key in image_attrs:
                     value = file_attrs.get(key, image_attrs.get(key))
-                    logger.info("Found spacing-like attr %s=%s in %s", key, value, path.name)
+                    logger.info(
+                        "Found spacing-like attr %s=%s in %s", key, value, path.name
+                    )
                     spacing = np.array(value, dtype=float).ravel()
                     if spacing.size == 1:
                         spacing = np.array([spacing[0], spacing[0], spacing[0]])
@@ -155,23 +150,8 @@ def probe_spacing_metadata(h5_dir: str | Path) -> tuple[np.ndarray, str]:
                         affine[0, 0], affine[1, 1], affine[2, 2] = spacing[:3]
                         return affine, f"h5_attr:{key}"
 
-    # Companion CSVs in this dump do not include spacing columns (verified).
-    for csv_name in ("meta_data.csv", "name_mapping.csv", "survival_info.csv"):
-        csv_path = h5_dir / csv_name
-        if not csv_path.is_file():
-            continue
-        columns = list(pd.read_csv(csv_path, nrows=0).columns)
-        spacing_cols = [
-            c
-            for c in columns
-            if any(tok in c.lower() for tok in ("spacing", "thickness", "pixdim", "zoom"))
-        ]
-        if spacing_cols:
-            logger.info("Spacing columns in %s: %s", csv_name, spacing_cols)
-
     logger.warning(
-        "No slice spacing / thickness metadata found in H5 attrs or CSVs under %s; "
-        "using identity affine (nominal BraTS 1 mm isotropic)",
+        "No spacing metadata under %s; using identity affine (1 mm isotropic)",
         h5_dir,
     )
     return np.eye(4, dtype=float), "identity_nominal_1mm"
@@ -192,7 +172,6 @@ def group_slices_by_patient(h5_dir: str | Path) -> dict[int, PatientH5Group]:
         parsed = parse_slice_filename(path)
         if parsed is None:
             unmatched += 1
-            logger.debug("Skipping unmatched H5 name: %s", path.name)
             continue
         group = groups.get(parsed.volume_id)
         if group is None:
@@ -229,26 +208,24 @@ def validate_slice_sequence(group: PatientH5Group) -> ConversionRecord:
     missing: list[int] = []
     expected_n: int | None = None
     if unique_sorted:
-        expected = list(range(unique_sorted[0], unique_sorted[-1] + 1))
-        expected_n = len(expected)
-        missing = [i for i in expected if i not in counts]
-        # Prefer canonical 0..N-1 coverage when the series starts at 0.
-        if unique_sorted[0] == 0 and unique_sorted[-1] >= 0:
+        if unique_sorted[0] == 0:
             expected_n = unique_sorted[-1] + 1
             missing = [i for i in range(expected_n) if i not in counts]
+        else:
+            expected = list(range(unique_sorted[0], unique_sorted[-1] + 1))
+            expected_n = len(expected)
+            missing = [i for i in expected if i not in counts]
 
     status = "ok"
     if missing or duplicates or out_of_order:
         status = "invalid_slices"
         logger.error(
-            "Patient volume_%s (%s): missing=%s duplicates=%s out_of_order=%s "
-            "(n_files=%d)",
+            "Patient volume_%s (%s): missing=%s duplicates=%s out_of_order=%s",
             group.volume_id,
             group.study_id,
             missing,
             duplicates,
             out_of_order,
-            len(indices),
         )
 
     return ConversionRecord(
@@ -268,24 +245,34 @@ def _patient_output_complete(output_dir: Path) -> bool:
     return output_dir.is_dir() and all((output_dir / name).is_file() for name in required)
 
 
+def multi_channel_mask_to_labels(mask_slice: np.ndarray) -> np.ndarray:
+    """Convert multi-channel BraTS mask to labels 0–3 (bg, necrotic, edema, enhancing)."""
+    if mask_slice.ndim == 2:
+        return mask_slice.astype(np.uint8)
+    if mask_slice.ndim == 3 and mask_slice.shape[-1] == 1:
+        return mask_slice[..., 0].astype(np.uint8)
+    if mask_slice.ndim == 3:
+        label = np.zeros(mask_slice.shape[:2], dtype=np.uint8)
+        for channel in range(min(3, mask_slice.shape[-1])):
+            label[mask_slice[..., channel] > 0] = np.uint8(channel + 1)
+        return label
+    raise ValueError(f"Unsupported mask shape: {mask_slice.shape}")
+
+
 def stack_patient_volume(
     group: PatientH5Group,
 ) -> tuple[dict[str, np.ndarray], np.ndarray]:
-    """Load sorted slices and stack into modality volumes + label mask.
-
-    Returns
-    -------
-    modalities:
-        Mapping name → ``float32`` array shaped ``(240, 240, Z)``.
-    mask:
-        ``uint8`` label volume ``(240, 240, Z)`` with values 0–3 from the
-        three mutually exclusive H5 mask channels.
-    """
+    """Load sorted slices and stack into modality volumes + label mask."""
     n = len(group.slices)
+    # Infer spatial size from first slice when not the canonical 240².
+    with h5py.File(group.slices[0].path, "r") as handle:
+        first = np.asarray(handle["image"])
+    h, w = int(first.shape[0]), int(first.shape[1])
+
     modalities = {
-        name: np.empty((240, 240, n), dtype=np.float32) for name in MODALITY_NAMES
+        name: np.empty((h, w, n), dtype=np.float32) for name in MODALITY_NAMES
     }
-    mask = np.zeros((240, 240, n), dtype=np.uint8)
+    mask = np.zeros((h, w, n), dtype=np.uint8)
 
     for z, slice_ref in enumerate(group.slices):
         with h5py.File(slice_ref.path, "r") as handle:
@@ -294,25 +281,15 @@ def stack_patient_volume(
             image = np.asarray(handle["image"])
             mask_slice = np.asarray(handle["mask"])
 
-        if image.shape != EXPECTED_IMAGE_SHAPE_2D:
+        if image.ndim != 3 or image.shape[-1] < len(MODALITY_NAMES):
             raise ValueError(
-                f"Unexpected image shape {image.shape} in {slice_ref.path}; "
-                f"expected {EXPECTED_IMAGE_SHAPE_2D}"
-            )
-        if mask_slice.shape != EXPECTED_MASK_SHAPE_2D:
-            raise ValueError(
-                f"Unexpected mask shape {mask_slice.shape} in {slice_ref.path}; "
-                f"expected {EXPECTED_MASK_SHAPE_2D}"
+                f"Unexpected image shape {image.shape} in {slice_ref.path}"
             )
 
         for channel, name in enumerate(MODALITY_NAMES):
             modalities[name][:, :, z] = image[:, :, channel].astype(np.float32)
 
-        # Channels are binary and non-overlapping in this dump; encode 1..3.
-        label = np.zeros((240, 240), dtype=np.uint8)
-        for channel in range(3):
-            label[mask_slice[:, :, channel] > 0] = np.uint8(channel + 1)
-        mask[:, :, z] = label
+        mask[:, :, z] = multi_channel_mask_to_labels(mask_slice)
 
     return modalities, mask
 
@@ -342,12 +319,7 @@ def save_patient_niftis(
         "study_id": group.study_id,
         "n_slices": len(group.slices),
         "modalities": list(MODALITY_NAMES),
-        "mask_encoding": {
-            "0": "background",
-            "1": MASK_CHANNEL_NAMES[0],
-            "2": MASK_CHANNEL_NAMES[1],
-            "3": MASK_CHANNEL_NAMES[2],
-        },
+        "mask_encoding": {str(k): v for k, v in MASK_LABELS.items()},
         "affine": affine.tolist(),
         "shape_xyz": list(modalities["T1"].shape),
     }
@@ -373,7 +345,6 @@ def convert_patient(
     record.output_dir = str(output_dir)
 
     if record.status == "invalid_slices":
-        # Do not write a malformed volume.
         return record
 
     if _patient_output_complete(output_dir) and not force:
@@ -411,11 +382,7 @@ def convert_brats_h5_directory(
     volume_ids: Iterable[int] | None = None,
     summary_csv: str | Path | None = None,
 ) -> pd.DataFrame:
-    """Convert all (or selected) BraTS H5 patients to cached NIfTI volumes.
-
-    Safe to call at dataset build time; subsequent calls hit the cache unless
-    ``force=True``. Do not invoke inside the training epoch loop.
-    """
+    """Convert all (or selected) BraTS H5 patients to cached NIfTI volumes."""
     h5_dir = Path(h5_dir)
     output_root = Path(output_root)
     output_root.mkdir(parents=True, exist_ok=True)
@@ -442,21 +409,24 @@ def convert_brats_h5_directory(
         )
 
     df = pd.DataFrame([asdict(r) for r in records])
-    # Flatten list columns for CSV readability.
     for col in ("missing_slices", "duplicate_slices"):
         if col in df.columns:
             df[col] = df[col].apply(lambda x: ",".join(map(str, x)) if x else "")
     if "outputs" in df.columns:
-        df["outputs"] = df["outputs"].apply(lambda x: json.dumps(x) if isinstance(x, dict) else x)
+        df["outputs"] = df["outputs"].apply(
+            lambda x: json.dumps(x) if isinstance(x, dict) else x
+        )
 
-    csv_path = Path(summary_csv) if summary_csv else output_root / "h5_to_nifti_summary.csv"
+    csv_path = (
+        Path(summary_csv) if summary_csv else output_root / "h5_to_nifti_summary.csv"
+    )
     df.to_csv(csv_path, index=False)
 
     n_ok = int(df["status"].isin(["converted", "cached"]).sum()) if len(df) else 0
     n_bad = int((df["status"] == "invalid_slices").sum()) if len(df) else 0
     n_fail = int((df["status"] == "failed").sum()) if len(df) else 0
     logger.info(
-        "H5→NIfTI done: ok/cached=%d invalid_slices=%d failed=%d | summary=%s",
+        "H5→NIfTI done: ok/cached=%d invalid=%d failed=%d | summary=%s",
         n_ok,
         n_bad,
         n_fail,
@@ -481,7 +451,9 @@ def convert_brats_h5_directory(
 def main(argv: Sequence[str] | None = None) -> int:
     from config import load_config
 
-    parser = argparse.ArgumentParser(description="Convert BraTS H5 slices to NIfTI (cached).")
+    parser = argparse.ArgumentParser(
+        description="Convert BraTS H5 slices to NIfTI (cached)."
+    )
     parser.add_argument("--config", type=Path, default=None)
     parser.add_argument("--h5-dir", type=Path, default=None)
     parser.add_argument("--output-dir", type=Path, default=None)
@@ -497,7 +469,7 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     cfg = load_config(args.config)
     h5_dir = args.h5_dir or cfg.paths.brats
-    output_dir = args.output_dir or (cfg.paths.processed / "brats_nifti")
+    output_dir = args.output_dir or cfg.paths.brats_nifti
 
     volume_ids = None
     if args.max_patients is not None:

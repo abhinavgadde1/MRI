@@ -1,0 +1,4 @@
+BraTS20_Training_003
+BraTS20_Training_005
+BraTS20_Training_007
+BraTS20_Training_008

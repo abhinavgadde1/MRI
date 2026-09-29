@@ -1,0 +1,36 @@
+........................................................................ [ 71%]
+.............................                                            [100%]
+=============================== warnings summary ===============================
+../../../Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/torch/jit/_script.py:1643
+  /Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/torch/jit/_script.py:1643: FutureWarning: `torch.jit.interface` is deprecated. Please use `torch.compile` instead.
+    warnings.warn(
+
+tests/test_ellipsoid.py: 48 warnings
+  /Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/skimage/measure/_marching_cubes_lewiner.py:237: DeprecationWarning: Setting the shape on a NumPy array has been deprecated in NumPy 2.5.
+  As an alternative, you can create a new view using np.reshape (with copy=False if needed).
+    ar.shape = shape
+
+tests/test_ellipsoid.py::test_mesh_voxel_agree_within_2pct_on_ellipsoid
+tests/test_measurements.py::test_measure_from_mask_sphere
+tests/test_mesh.py::test_mask_to_mesh_uses_spacing_and_writes_obj
+tests/test_mesh.py::test_mask_to_mesh_writes_stl
+  /Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/skimage/measure/_marching_cubes_lewiner.py:213: DeprecationWarning: Setting the shape on a NumPy array has been deprecated in NumPy 2.5.
+  As an alternative, you can create a new view using np.reshape (with copy=False if needed).
+    faces.shape = -1, 3
+
+tests/test_segmentation_evaluate.py::test_evaluate_case_on_synthetic_volume
+tests/test_segmentation_evaluate.py::test_evaluate_case_empty_et_is_nan
+  /Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/monai/utils/deprecate_utils.py:220: FutureWarning: monai.metrics.utils get_mask_edges:always_return_as_numpy: Argument `always_return_as_numpy` has been deprecated since version 1.5.0. It will be removed in version 1.7.0. The option is removed and the return type will always be equal to the input type.
+    warn_deprecated(argname, msg, warning_category)
+
+tests/test_segmentation_evaluate.py::test_evaluate_case_on_synthetic_volume
+tests/test_segmentation_evaluate.py::test_evaluate_case_empty_et_is_nan
+  /Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/monai/metrics/utils.py:342: UserWarning: the ground truth of class 0 is all 0, this may result in nan/inf distance.
+    warnings.warn(
+
+tests/test_segmentation_evaluate.py::test_evaluate_case_on_synthetic_volume
+  /Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/monai/metrics/utils.py:342: UserWarning: the ground truth of class 1 is all 0, this may result in nan/inf distance.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+101 passed, 58 warnings in 5.13s

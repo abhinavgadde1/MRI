@@ -1,0 +1,3 @@
+tag,subject_id,region,dice_manual,dice_monai,plot_path
+best,BraTS20_Training_163,whole_tumor,0.8865115132254839,0.886511504650116,/Users/cherrygadde/MRI/checkpoints/sanity_checks/sanity_best_BraTS20_Training_163_whole_tumor.png
+worst,BraTS20_Training_086,whole_tumor,0.32353553065652213,0.3235355317592621,/Users/cherrygadde/MRI/checkpoints/sanity_checks/sanity_worst_BraTS20_Training_086_whole_tumor.png

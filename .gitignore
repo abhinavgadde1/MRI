@@ -7,6 +7,7 @@ __pycache__/
 
 # Virtual environments
 .venv/
+.venv_smoke/
 venv/
 env/
 
@@ -37,29 +38,40 @@ htmlcov/
 .env
 .env.*
 
-# Large / generated data (keep directory placeholders)
-archive/**
-data/brats/**
-data/real_patients/**
-data/processed/**
-!data/brats/.gitkeep
-!data/real_patients/.gitkeep
-!data/processed/.gitkeep
-
-# Raw clinical DICOM (PHI — never commit)
-MRI DATA/**
-*.h5
-
-# Nested clone (add as submodule separately if needed)
+# Data (PHI / large volumes — never commit)
+data/
+archive/
+MRI DATA/
 mri_anonymizer/
 
-# Model checkpoints and outputs
+# Model weights and run outputs
+checkpoints/*.pt
+checkpoints/**/*.pt
 *.pt
 *.pth
 *.ckpt
+outputs/
+runs/
+
+# Large imaging / binary formats (typically >>50MB)
 *.nii
 *.nii.gz
 *.dcm
-outputs/
-runs/
-checkpoints/
+*.h5
+*.hdf5
+*.npz
+*.stl
+*.ply
+*.npz.gz
+*.zip
+*.tar
+*.tar.gz
+*.7z
+*.mp4
+*.mov
+*.pkl
+*.pickle
+*.npz.pickle
+
+# TensorBoard event files
+events.out.tfevents.*

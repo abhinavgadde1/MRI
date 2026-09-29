@@ -40,9 +40,23 @@ from segmentation.finetune import (
     finetune_model,
     split_finetune_sets,
 )
+from segmentation.domain_gap_report import (
+    DomainGapConfig,
+    MODEL_BRATS,
+    MODEL_FINETUNED,
+    build_comparison_table,
+    run_domain_gap_report,
+    summarize_comparison,
+)
 from segmentation.inference import run_inference
 
 __all__ = [
+    "DomainGapConfig",
+    "MODEL_BRATS",
+    "MODEL_FINETUNED",
+    "build_comparison_table",
+    "run_domain_gap_report",
+    "summarize_comparison",
     "FinetuneConfig",
     "discover_corrected_cases",
     "finetune_model",

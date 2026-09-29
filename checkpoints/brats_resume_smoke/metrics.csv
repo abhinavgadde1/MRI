@@ -1,0 +1,3 @@
+epoch,train_loss,dice_loss_et,dice_loss_tc,dice_loss_wt,val_dice_et,val_dice_tc,val_dice_wt,val_dice_mean,learning_rate,epoch_seconds
+1,1.007608,0.989644,0.986766,0.949656,0.000216,0.000292,0.099585,0.033364,6.15147862e-05,18.263
+2,1.002274,0.989247,0.985915,0.937712,0.000047,0.000727,0.107304,0.036026,1.00000000e-06,18.663

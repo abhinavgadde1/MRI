@@ -1,0 +1,44 @@
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/torch/jit/_script.py:1643: FutureWarning: `torch.jit.interface` is deprecated. Please use `torch.compile` instead.
+  warnings.warn(
+
+=== n per region (v3-lcc, empty-GT excluded) ===
+region  n_nonempty_gt  n_empty_gt_excluded  mean_dice  mean_hd95
+    ET             58                    2   0.632695  14.016736
+    TC             60                    0   0.715879  13.446743
+    WT             60                    0   0.871283   8.971349
+
+=== v1-lcc / v2-lcc / v3-lcc ===
+region metric  v1_lcc_n  v1_lcc_mean_pm_sd  v1_lcc_median          v1_lcc_ci95  v2_lcc_n v2_lcc_mean_pm_sd  v2_lcc_median        v2_lcc_ci95  v3_lcc_n v3_lcc_mean_pm_sd  v3_lcc_median       v3_lcc_ci95
+    ET   Dice        58    0.0027 ± 0.0038       0.001367     [0.0018, 0.0037]        58   0.2898 ± 0.1697       0.313651   [0.2477, 0.3306]        58   0.6327 ± 0.2643       0.719687  [0.5544, 0.6972]
+    ET   HD95        58 156.9625 ± 11.6796     157.548363 [154.2044, 160.0046]        58 28.9167 ± 20.5027      22.148168 [24.0182, 34.8190]        58 14.0167 ± 21.2603       6.283769 [8.9676, 20.1570]
+    TC   Dice        60    0.0086 ± 0.0063       0.007251     [0.0071, 0.0101]        60   0.5454 ± 0.2787       0.631455   [0.4723, 0.6072]        60   0.7159 ± 0.2570       0.783167  [0.6467, 0.7753]
+    TC   HD95        60 170.9862 ± 12.2879     170.811264 [168.0593, 174.3247]        60 24.7080 ± 25.6719      15.246884 [19.1183, 31.3610]        60 13.4467 ± 20.8855       6.403124 [8.8154, 18.7414]
+    WT   Dice        60    0.7777 ± 0.1781       0.832963     [0.7290, 0.8157]        60   0.5966 ± 0.2092       0.651317   [0.5431, 0.6459]        60   0.8713 ± 0.1474       0.918012  [0.8320, 0.9042]
+    WT   HD95        60  13.3826 ± 15.4806       9.082576   [10.2437, 17.7370]        60 42.2664 ± 23.6451      40.788481 [36.1273, 47.9012]        60  8.9713 ± 15.0210       4.412608 [5.7706, 12.9987]
+
+=== Paired ΔDice ===
+comparison region  n  mean_delta_dice  ci95_low  ci95_high  improved  worsened  unchanged
+     v3−v2     ET 58         0.342889  0.296554   0.384757        53         1          4
+     v3−v2     TC 60         0.170478  0.121888   0.219498        52         5          3
+     v3−v2     WT 60         0.274676  0.221232   0.330734        57         2          1
+     v3−v1     ET 58         0.629958  0.558866   0.695283        53         0          5
+     v3−v1     TC 60         0.707254  0.638608   0.766526        56         1          3
+     v3−v1     WT 60         0.093628  0.043503   0.138076        57         3          0
+
+=== WT recovery check ===
+v3−v2: ET=+0.3429, TC=+0.1705, WT=+0.2747
+v3−v1: ET=+0.6300, TC=+0.7073, WT=+0.0936
+VERDICT: v3 recovers WT vs v2 while keeping ET/TC gains over v1.
+
+=== 5 worst / 5 best WT (v3-lcc) ===
+          subject_id  dice_whole_tumor  hd95_whole_tumor  dice_enhancing_tumor  dice_tumor_core  rank
+BraTS20_Training_259          0.000000        103.282379              0.000000         0.000000 worst
+BraTS20_Training_285          0.465204         35.353214              0.778724         0.323752 worst
+BraTS20_Training_297          0.594077         18.275667                   NaN         0.754187 worst
+BraTS20_Training_058          0.655115         16.492422              0.583065         0.351224 worst
+BraTS20_Training_146          0.677280         49.718201              0.000000         0.000000 worst
+BraTS20_Training_231          0.965131          2.000000              0.940303         0.947785  best
+BraTS20_Training_197          0.961199          2.000000              0.901451         0.933229  best
+BraTS20_Training_327          0.955928          3.000000              0.733460         0.736497  best
+BraTS20_Training_095          0.949374          2.828427              0.723113         0.796263  best
+BraTS20_Training_313          0.947804          3.741657              0.154886         0.774925  best

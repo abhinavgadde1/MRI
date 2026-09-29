@@ -7,7 +7,7 @@ from pathlib import Path
 import SimpleITK as sitk
 
 
-def correct_bias_field(
+def n4_bias_correct(
     input_path: str | Path,
     output_path: str | Path,
     *,
@@ -29,11 +29,9 @@ def correct_bias_field(
     output_path:
         Corrected NIfTI destination.
     mask_path:
-        Optional binary mask NIfTI. When omitted, an Otsu mask is derived from
-        the input intensities.
+        Optional binary mask NIfTI. When omitted, an Otsu mask is derived.
     shrink_factor:
         Integer downsample factor (≥1) used only for bias-field estimation.
-        ``1`` runs N4 at full resolution.
     num_iterations:
         Maximum iterations at each N4 resolution level.
     convergence_threshold:
@@ -55,7 +53,6 @@ def correct_bias_field(
 
     original = sitk.ReadImage(str(input_path))
     image = sitk.Cast(original, sitk.sitkFloat32)
-    # Casting can drop metadata on some SimpleITK builds; restore from source.
     image.CopyInformation(original)
 
     if mask_path is not None:
@@ -80,8 +77,10 @@ def correct_bias_field(
         log_bias = corrector.GetLogBiasFieldAsImage(image)
         corrected = image / sitk.Exp(log_bias)
 
-    # Preserve original spacing / origin / direction exactly.
     corrected.CopyInformation(original)
-
     sitk.WriteImage(corrected, str(output_path))
     return output_path
+
+
+# Backwards-compatible alias.
+correct_bias_field = n4_bias_correct

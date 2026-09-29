@@ -1,0 +1,3 @@
+comparison,n,bias_ml,loa_ml,bias_ci95,median_ratio,iqr_ratio,spearman,icc_2_1,icc_ci95
+pred voxel vs GT voxel,60,-2.60,"[-36.6, 31.3]","[-7.3, 1.4]",1.02,"[0.95, 1.10]",0.91,0.93,"[0.86, 0.97]"
+pred radiologist ABC/2 vs GT voxel,60,31.16,"[-78.3, 140.7]","[19.3, 46.2]",1.21,"[1.10, 1.50]",0.84,0.55,"[0.33, 0.82]"

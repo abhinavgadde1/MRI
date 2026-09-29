@@ -25,22 +25,28 @@ from monai.transforms import (
 
 from config import load_config
 from preprocessing.h5_to_nifti import MODALITY_NAMES
+from preprocessing.registration import REGISTERED_NAMES
 from segmentation.evaluate import load_model_from_checkpoint
 from segmentation.model import BRATS_REGIONS
 from segmentation.train import post_transforms
 
 logger = logging.getLogger(__name__)
 
-# Registered outputs from ``run_patient_preprocessing`` / ``04_registered_1mm``.
-REGISTERED_NAMES: dict[str, str] = {
-    "FLAIR": "FLAIR_registered_1mm.nii.gz",
-    "T1": "T1_1mm.nii.gz",
-    "T1c": "T1c_registered_1mm.nii.gz",
-    "T2": "T2_registered_1mm.nii.gz",
-}
-
 PSEUDO_LABEL_FILENAME = "pseudo_tumor_label.nii.gz"
 PSEUDO_WT_FILENAME = "pseudo_tumor_WT.nii.gz"
+
+__all__ = [
+    "REGISTERED_NAMES",
+    "PSEUDO_LABEL_FILENAME",
+    "PSEUDO_WT_FILENAME",
+    "PseudoLabelResult",
+    "discover_preprocessed_studies",
+    "registered_dir_to_datadict",
+    "get_patient_inference_transforms",
+    "regions_to_label_map",
+    "pseudo_label_study",
+    "pseudo_label_all_patients",
+]
 
 
 @dataclass
@@ -61,6 +67,8 @@ def discover_preprocessed_studies(processed_patients_root: str | Path) -> list[P
 
     studies: list[Path] = []
     for study_dir in sorted(p for p in root.iterdir() if p.is_dir() and not p.name.startswith(".")):
+        if study_dir.name == "corrected":
+            continue
         reg_dir = study_dir / "04_registered_1mm"
         if not reg_dir.is_dir():
             logger.debug("Skipping %s: no 04_registered_1mm/", study_dir.name)
@@ -199,7 +207,10 @@ def pseudo_label_study(
                 "2": "edema",
                 "3": "enhancing_tumor",
             },
-            "viewer_note": "Load T1_1mm.nii.gz and pseudo_tumor_label.nii.gz together in ITK-SNAP or 3D Slicer.",
+            "viewer_note": (
+                "Load T1_1mm.nii.gz and pseudo_tumor_label.nii.gz together "
+                "in ITK-SNAP or 3D Slicer."
+            ),
         }
         sidecar = reg_dir / "pseudo_label_meta.json"
         sidecar.write_text(json.dumps(meta, indent=2) + "\n", encoding="utf-8")

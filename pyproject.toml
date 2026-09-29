@@ -16,12 +16,9 @@ dependencies = [
     "SimpleITK",
     "monai",
     "nibabel",
-    "dicom2nifti",
     "scikit-image",
     "trimesh",
     "plotly",
-    "TractSeg",
-    "dipy",
     "numpy",
     "scipy",
     "pandas",
@@ -30,6 +27,7 @@ dependencies = [
     "h5py",
     "tensorboard",
     "matplotlib",
+    "torch",
 ]
 
 [project.optional-dependencies]
@@ -38,22 +36,17 @@ dev = [
     "ipykernel",
     "jupyter",
 ]
-hd_bet = [
-    "hd-bet",
+dicom = [
+    "dicom2nifti",
 ]
-
-[tool.setuptools]
-py-modules = ["config"]
-
-[tool.setuptools.package-dir]
-"" = "src"
+tracts = [
+    "dipy",
+    "TractSeg",
+]
 
 [tool.setuptools.packages.find]
 where = ["src"]
 
-[tool.setuptools.package-data]
-"*" = ["py.typed"]
-
 [tool.pytest.ini_options]
-testpaths = ["tests"]
 pythonpath = ["src"]
+testpaths = ["tests"]

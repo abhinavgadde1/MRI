@@ -1,0 +1,83 @@
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/torch/jit/_script.py:1643: FutureWarning: `torch.jit.interface` is deprecated. Please use `torch.compile` instead.
+  warnings.warn(
+<frozen runpy>:128: RuntimeWarning: 'validation.ellipsoid_batch' found in sys.modules after import of package 'validation', but prior to execution of 'validation.ellipsoid_batch'; this may result in unpredictable behaviour
+2026-09-29 12:03:57,841 | INFO | __main__ | Ellipsoid case BraTS20_Training_313 on mps (postprocess=lcc)
+2026-09-29 12:04:02,202 | INFO | __main__ | Ellipsoid case BraTS20_Training_161 on mps (postprocess=lcc)
+2026-09-29 12:04:06,483 | INFO | __main__ | Ellipsoid case BraTS20_Training_078 on mps (postprocess=lcc)
+2026-09-29 12:04:11,099 | INFO | __main__ | Ellipsoid case BraTS20_Training_146 on mps (postprocess=lcc)
+2026-09-29 12:04:15,535 | INFO | __main__ | Ellipsoid case BraTS20_Training_327 on mps (postprocess=lcc)
+2026-09-29 12:04:19,999 | INFO | __main__ | Ellipsoid case BraTS20_Training_154 on mps (postprocess=lcc)
+2026-09-29 12:04:24,472 | INFO | __main__ | Ellipsoid case BraTS20_Training_038 on mps (postprocess=lcc)
+2026-09-29 12:04:29,039 | INFO | __main__ | Ellipsoid case BraTS20_Training_169 on mps (postprocess=lcc)
+2026-09-29 12:04:34,304 | INFO | __main__ | Ellipsoid case BraTS20_Training_285 on mps (postprocess=lcc)
+2026-09-29 12:04:39,296 | INFO | __main__ | Ellipsoid case BraTS20_Training_058 on mps (postprocess=lcc)
+2026-09-29 12:04:44,403 | INFO | __main__ | Ellipsoid case BraTS20_Training_106 on mps (postprocess=lcc)
+2026-09-29 12:04:49,085 | INFO | __main__ | Ellipsoid case BraTS20_Training_363 on mps (postprocess=lcc)
+2026-09-29 12:04:53,837 | INFO | __main__ | Ellipsoid case BraTS20_Training_360 on mps (postprocess=lcc)
+2026-09-29 12:04:58,430 | INFO | __main__ | Ellipsoid case BraTS20_Training_366 on mps (postprocess=lcc)
+2026-09-29 12:05:03,370 | INFO | __main__ | Ellipsoid case BraTS20_Training_236 on mps (postprocess=lcc)
+2026-09-29 12:05:07,723 | INFO | __main__ | Ellipsoid case BraTS20_Training_043 on mps (postprocess=lcc)
+2026-09-29 12:05:12,541 | INFO | __main__ | Ellipsoid case BraTS20_Training_022 on mps (postprocess=lcc)
+2026-09-29 12:05:17,312 | INFO | __main__ | Ellipsoid case BraTS20_Training_096 on mps (postprocess=lcc)
+2026-09-29 12:05:22,156 | INFO | __main__ | Ellipsoid case BraTS20_Training_147 on mps (postprocess=lcc)
+2026-09-29 12:05:26,501 | INFO | __main__ | Ellipsoid case BraTS20_Training_002 on mps (postprocess=lcc)
+2026-09-29 12:05:30,945 | INFO | __main__ | Ellipsoid case BraTS20_Training_297 on mps (postprocess=lcc)
+2026-09-29 12:05:35,526 | INFO | __main__ | Ellipsoid case BraTS20_Training_103 on mps (postprocess=lcc)
+2026-09-29 12:05:39,961 | INFO | __main__ | Ellipsoid case BraTS20_Training_292 on mps (postprocess=lcc)
+2026-09-29 12:05:44,295 | INFO | __main__ | Ellipsoid case BraTS20_Training_131 on mps (postprocess=lcc)
+2026-09-29 12:05:48,876 | INFO | __main__ | Ellipsoid case BraTS20_Training_051 on mps (postprocess=lcc)
+2026-09-29 12:05:53,332 | INFO | __main__ | Ellipsoid case BraTS20_Training_288 on mps (postprocess=lcc)
+2026-09-29 12:05:57,821 | INFO | __main__ | Ellipsoid case BraTS20_Training_291 on mps (postprocess=lcc)
+2026-09-29 12:06:02,334 | INFO | __main__ | Ellipsoid case BraTS20_Training_133 on mps (postprocess=lcc)
+2026-09-29 12:06:06,642 | INFO | __main__ | Ellipsoid case BraTS20_Training_186 on mps (postprocess=lcc)
+2026-09-29 12:06:11,198 | INFO | __main__ | Ellipsoid case BraTS20_Training_231 on mps (postprocess=lcc)
+2026-09-29 12:06:15,688 | INFO | __main__ | Ellipsoid case BraTS20_Training_320 on mps (postprocess=lcc)
+2026-09-29 12:06:20,389 | INFO | __main__ | Ellipsoid case BraTS20_Training_227 on mps (postprocess=lcc)
+2026-09-29 12:06:24,972 | INFO | __main__ | Ellipsoid case BraTS20_Training_283 on mps (postprocess=lcc)
+2026-09-29 12:06:29,177 | INFO | __main__ | Ellipsoid case BraTS20_Training_080 on mps (postprocess=lcc)
+2026-09-29 12:06:33,736 | INFO | __main__ | Ellipsoid case BraTS20_Training_095 on mps (postprocess=lcc)
+2026-09-29 12:06:38,188 | INFO | __main__ | Ellipsoid case BraTS20_Training_042 on mps (postprocess=lcc)
+2026-09-29 12:06:42,769 | INFO | __main__ | Ellipsoid case BraTS20_Training_053 on mps (postprocess=lcc)
+2026-09-29 12:06:47,123 | INFO | __main__ | Ellipsoid case BraTS20_Training_197 on mps (postprocess=lcc)
+2026-09-29 12:06:51,710 | INFO | __main__ | Ellipsoid case BraTS20_Training_083 on mps (postprocess=lcc)
+2026-09-29 12:06:55,936 | INFO | __main__ | Ellipsoid case BraTS20_Training_171 on mps (postprocess=lcc)
+2026-09-29 12:07:00,714 | INFO | __main__ | Ellipsoid case BraTS20_Training_028 on mps (postprocess=lcc)
+2026-09-29 12:07:04,835 | INFO | __main__ | Ellipsoid case BraTS20_Training_187 on mps (postprocess=lcc)
+2026-09-29 12:07:09,430 | INFO | __main__ | Ellipsoid case BraTS20_Training_101 on mps (postprocess=lcc)
+2026-09-29 12:07:13,768 | INFO | __main__ | Ellipsoid case BraTS20_Training_218 on mps (postprocess=lcc)
+2026-09-29 12:07:18,339 | INFO | __main__ | Ellipsoid case BraTS20_Training_029 on mps (postprocess=lcc)
+2026-09-29 12:07:22,827 | INFO | __main__ | Ellipsoid case BraTS20_Training_013 on mps (postprocess=lcc)
+2026-09-29 12:07:27,196 | INFO | __main__ | Ellipsoid case BraTS20_Training_257 on mps (postprocess=lcc)
+2026-09-29 12:07:31,897 | INFO | __main__ | Ellipsoid case BraTS20_Training_006 on mps (postprocess=lcc)
+2026-09-29 12:07:36,981 | INFO | __main__ | Ellipsoid case BraTS20_Training_112 on mps (postprocess=lcc)
+2026-09-29 12:07:41,480 | INFO | __main__ | Ellipsoid case BraTS20_Training_039 on mps (postprocess=lcc)
+2026-09-29 12:07:46,126 | INFO | __main__ | Ellipsoid case BraTS20_Training_166 on mps (postprocess=lcc)
+2026-09-29 12:07:50,845 | INFO | __main__ | Ellipsoid case BraTS20_Training_339 on mps (postprocess=lcc)
+2026-09-29 12:07:55,446 | INFO | __main__ | Ellipsoid case BraTS20_Training_093 on mps (postprocess=lcc)
+2026-09-29 12:07:59,882 | INFO | __main__ | Ellipsoid case BraTS20_Training_100 on mps (postprocess=lcc)
+2026-09-29 12:08:04,526 | INFO | __main__ | Ellipsoid case BraTS20_Training_259 on mps (postprocess=lcc)
+2026-09-29 12:08:08,902 | INFO | __main__ | Ellipsoid case BraTS20_Training_113 on mps (postprocess=lcc)
+2026-09-29 12:08:13,302 | INFO | __main__ | Ellipsoid case BraTS20_Training_200 on mps (postprocess=lcc)
+2026-09-29 12:08:17,602 | INFO | __main__ | Ellipsoid case BraTS20_Training_266 on mps (postprocess=lcc)
+2026-09-29 12:08:21,952 | INFO | __main__ | Ellipsoid case BraTS20_Training_271 on mps (postprocess=lcc)
+2026-09-29 12:08:26,313 | INFO | __main__ | Ellipsoid case BraTS20_Training_107 on mps (postprocess=lcc)
+2026-09-29 12:08:30,760 | INFO | __main__ | Mesh vs voxel: all 120 cases within 2%
+2026-09-29 12:08:39,794 | INFO | __main__ | Wrote case table → results/ellipsoid/brats_scale_full/lcc/case_volumes.csv (gt=60 pred=60, postprocess=lcc)
+source diameter_method    formula  n  mean_bias_ml  loa_lower_ml  loa_upper_ml  median_ratio  iqr_ratio_low  iqr_ratio_high  spearman_r   spearman_p  icc_2_1  bias_ci95_low  bias_ci95_high  median_ratio_ci95_low  median_ratio_ci95_high  icc_2_1_ci95_low  icc_2_1_ci95_high
+    gt            aabb abc_over_2 60     83.023642    -66.076056    232.123339      1.630620       1.427523        2.160704    0.770381 6.165932e-13 0.322587      65.945649      103.857813               1.541261                1.891664          0.188565           0.521168
+    gt            aabb  pi_over_6 60     91.457971    -65.720400    248.636342      1.707582       1.494898        2.262684    0.770381 6.165932e-13 0.299334      73.316574      113.164688               1.614005                1.980946          0.176027           0.481944
+    gt             pca abc_over_2 60     82.284829   -103.139256    267.708914      1.690457       1.374614        2.091360    0.787830 8.107740e-14 0.281299      63.371098      108.106890               1.535335                1.780322          0.146732           0.539680
+    gt             pca  pi_over_6 60     90.684288   -104.379713    285.748290      1.770242       1.439493        2.190067    0.787830 8.107740e-14 0.262156      70.824767      117.919692               1.607799                1.864349          0.137008           0.500350
+    gt     radiologist abc_over_2 60     51.311058    -21.215911    123.838028      1.430563       1.271920        1.777715    0.839455 5.365822e-17 0.575203      42.129591       61.413825               1.356856                1.580677          0.448922           0.680374
+    gt     radiologist  pi_over_6 60     58.248631    -19.082144    135.579407      1.498082       1.331952        1.861618    0.839455 5.365822e-17 0.534018      48.649979       68.683860               1.420897                1.655281          0.412039           0.638475
+  pred            aabb abc_over_2 60     54.824542    -58.989940    168.639023      1.494715       1.245376        1.782263    0.906307 2.315147e-23 0.503701            NaN             NaN                    NaN                     NaN               NaN                NaN
+  pred            aabb  pi_over_6 60     61.805050    -59.323699    182.933800      1.565262       1.304155        1.866381    0.906307 2.315147e-23 0.470025            NaN             NaN                    NaN                     NaN               NaN                NaN
+  pred             pca abc_over_2 60     48.342179    -43.147524    139.831882      1.439038       1.266988        1.659825    0.937427 2.952356e-28 0.581971            NaN             NaN                    NaN                     NaN               NaN                NaN
+  pred             pca  pi_over_6 60     55.016736    -43.023417    153.056889      1.506957       1.326787        1.738164    0.937427 2.952356e-28 0.543413            NaN             NaN                    NaN                     NaN               NaN                NaN
+  pred     radiologist abc_over_2 60     33.765700    -59.665601    127.197001      1.236340       1.129566        1.547303    0.928814 1.102095e-26 0.628099            NaN             NaN                    NaN                     NaN               NaN                NaN
+  pred     radiologist  pi_over_6 60     39.752283    -59.764773    139.269339      1.294692       1.182879        1.620332    0.928814 1.102095e-26 0.591883            NaN             NaN                    NaN                     NaN               NaN                NaN
+Output dir: results/ellipsoid/brats_scale_full/lcc
+Cases CSV: results/ellipsoid/brats_scale_full/lcc/case_volumes.csv
+Summary CSV: results/ellipsoid/brats_scale_full/lcc/agreement_summary.csv
+ n_checked  n_exceeding_2pct  max_rel_error  median_rel_error  tolerance  all_within_tolerance
+       120                 0       0.006556          0.000977       0.02                  True

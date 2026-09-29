@@ -1,7 +1,8 @@
-"""Load multi-series DICOM studies, convert to NIfTI, and write metadata sidecars."""
+"""Load multi-series DICOM studies, convert to NIfTI, and write JSON sidecars."""
 
 from __future__ import annotations
 
+import argparse
 import json
 import logging
 import re
@@ -22,15 +23,15 @@ logger = logging.getLogger(__name__)
 
 ModalityLabel = Literal["T1", "T1c", "T2", "FLAIR", "other"]
 
-# Ordered rules: first match wins. Patterns applied to SeriesDescription + ProtocolName.
+# Ordered rules: first match wins (FLAIR / T1c before generic T1 / T2).
 _MODALITY_RULES: tuple[tuple[ModalityLabel, re.Pattern[str]], ...] = (
     ("FLAIR", re.compile(r"flair", re.I)),
-    # Contrast / post-Gd T1 before generic T1
     (
         "T1c",
         re.compile(
             r"(t1\s*[c+]|\+?\s*c\b|gad|gado|gd[\s_-]?dtpa|post[\s_-]?contrast|"
-            r"contrast|ce[\s_-]?t1|t1[\s_-]?ce|t1w?[\s_-]?post|mprage.*post)",
+            r"contrast|ce[\s_-]?t1|t1[\s_-]?ce|t1w?[\s_-]?post|mprage.*post|"
+            r"\bgd\b)",
             re.I,
         ),
     ),
@@ -88,7 +89,9 @@ def discover_dicom_files(root: str | Path) -> list[Path]:
             ds = pydicom.dcmread(str(path), stop_before_pixels=True, force=True)
         except Exception:
             continue
-        if getattr(ds, "SOPClassUID", None) is None and getattr(ds, "SeriesInstanceUID", None) is None:
+        if getattr(ds, "SOPClassUID", None) is None and getattr(
+            ds, "SeriesInstanceUID", None
+        ) is None:
             continue
         found.append(path)
     return sorted(found)
@@ -117,7 +120,7 @@ def identify_modality(
     *,
     sequence_name: str | None = None,
 ) -> ModalityLabel:
-    """Map series/protocol text to T1 / T1c / T2 / FLAIR / other."""
+    """Map SeriesDescription / ProtocolName text to T1 / T1c / T2 / FLAIR / other."""
     blob = " | ".join(
         part for part in (series_description, protocol_name, sequence_name) if part
     )
@@ -148,6 +151,14 @@ def _as_float(value: Any) -> float | None:
         return float(value)
     except (TypeError, ValueError):
         return None
+
+
+def _tag_str(ds: FileDataset, name: str) -> str | None:
+    value = getattr(ds, name, None)
+    if value is None:
+        return None
+    text = str(value).strip()
+    return text or None
 
 
 def extract_series_metadata(
@@ -182,6 +193,17 @@ def extract_series_metadata(
     except (TypeError, ValueError):
         series_number = None
 
+    rows = getattr(ds, "Rows", None)
+    columns = getattr(ds, "Columns", None)
+    try:
+        rows = int(rows) if rows is not None else None
+    except (TypeError, ValueError):
+        rows = None
+    try:
+        columns = int(columns) if columns is not None else None
+    except (TypeError, ValueError):
+        columns = None
+
     return SeriesMeta(
         series_instance_uid=str(ds.SeriesInstanceUID),
         series_number=series_number,
@@ -195,21 +217,15 @@ def extract_series_metadata(
         image_orientation_patient=_as_float_list(
             getattr(ds, "ImageOrientationPatient", None)
         ),
-        image_position_patient=_as_float_list(getattr(ds, "ImagePositionPatient", None)),
-        rows=int(ds.Rows) if getattr(ds, "Rows", None) is not None else None,
-        columns=int(ds.Columns) if getattr(ds, "Columns", None) is not None else None,
+        image_position_patient=_as_float_list(
+            getattr(ds, "ImagePositionPatient", None)
+        ),
+        rows=rows,
+        columns=columns,
         number_of_instances=len(files),
         patient_id=_tag_str(ds, "PatientID"),
         study_instance_uid=_tag_str(ds, "StudyInstanceUID"),
     )
-
-
-def _tag_str(ds: FileDataset, name: str) -> str | None:
-    value = getattr(ds, name, None)
-    if value is None:
-        return None
-    text = str(value).strip()
-    return text or None
 
 
 def _safe_stem(text: str | None, fallback: str) -> str:
@@ -219,11 +235,19 @@ def _safe_stem(text: str | None, fallback: str) -> str:
 
 
 def _series_output_name(meta: SeriesMeta) -> str:
-    parts = [
-        f"ser{meta.series_number:03d}" if meta.series_number is not None else "ser",
-        _safe_stem(meta.series_description, meta.series_instance_uid[-8:]),
-    ]
-    return "_".join(parts)
+    ser = f"ser{meta.series_number:03d}" if meta.series_number is not None else "ser"
+    safe = _safe_stem(meta.series_description, meta.series_instance_uid[-8:])
+    return f"{ser}_{safe}"
+
+
+def _sidecar_path_for(nifti_path: Path) -> Path:
+    """Derive the JSON sidecar path for a NIfTI file."""
+    name = nifti_path.name
+    if name.endswith(".nii.gz"):
+        return nifti_path.with_name(name[: -len(".nii.gz")] + ".json")
+    if name.endswith(".nii"):
+        return nifti_path.with_name(name[: -len(".nii")] + ".json")
+    return nifti_path.with_suffix(".json")
 
 
 def convert_series_to_nifti(
@@ -232,22 +256,17 @@ def convert_series_to_nifti(
     *,
     backend: Literal["auto", "simpleitk", "dicom2nifti"] = "auto",
 ) -> tuple[Path, str]:
-    """Convert one series (file list) to NIfTI.
-
-    Returns ``(nifti_path, backend_used)``.
-    """
+    """Convert one series (file list) to NIfTI. Returns ``(path, backend_used)``."""
     output_nifti = Path(output_nifti)
     output_nifti.parent.mkdir(parents=True, exist_ok=True)
     files = sorted(Path(p) for p in files)
-    if len(files) < 1:
+    if not files:
         raise ValueError("No DICOM files to convert")
 
     errors: list[str] = []
-    backends: list[str]
-    if backend == "auto":
-        backends = ["simpleitk", "dicom2nifti"]
-    else:
-        backends = [backend]
+    backends: list[str] = (
+        ["simpleitk", "dicom2nifti"] if backend == "auto" else [backend]
+    )
 
     for name in backends:
         try:
@@ -256,19 +275,19 @@ def convert_series_to_nifti(
             else:
                 _convert_with_dicom2nifti(files, output_nifti)
             return output_nifti, name
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             errors.append(f"{name}: {exc}")
-            logger.warning("Conversion via %s failed for %s: %s", name, output_nifti.name, exc)
+            logger.warning(
+                "Conversion via %s failed for %s: %s", name, output_nifti.name, exc
+            )
 
     raise RuntimeError(
-        "All conversion backends failed for series "
-        f"({len(files)} files): " + " | ".join(errors)
+        f"All conversion backends failed ({len(files)} files): " + " | ".join(errors)
     )
 
 
 def _convert_with_simpleitk(files: Sequence[Path], output_nifti: Path) -> None:
     reader = sitk.ImageSeriesReader()
-    # Prefer ITK's own series file sorting when a common directory exists.
     dirs = {p.parent for p in files}
     file_names: list[str]
     if len(dirs) == 1:
@@ -298,7 +317,6 @@ def _convert_with_dicom2nifti(files: Sequence[Path], output_nifti: Path) -> None
     compress = output_nifti.name.endswith(".nii.gz")
     with tempfile.TemporaryDirectory(prefix="dicom2nifti_") as tmp:
         tmp_dir = Path(tmp)
-        # dicom2nifti expects a directory of instances belonging to one series.
         for idx, src in enumerate(files):
             dest = tmp_dir / f"{idx:05d}_{src.name}"
             try:
@@ -316,7 +334,6 @@ def _convert_with_dicom2nifti(files: Sequence[Path], output_nifti: Path) -> None
         )
         produced = sorted(out_dir.glob("*.nii*"))
         if not produced:
-            # Fallback: convert unsorted list API if available
             if hasattr(dicom2nifti, "dicom_series_to_nifti"):
                 dicom2nifti.dicom_series_to_nifti(
                     str(tmp_dir),
@@ -330,32 +347,39 @@ def _convert_with_dicom2nifti(files: Sequence[Path], output_nifti: Path) -> None
         nib.save(img, str(output_nifti))
 
 
-def _sidecar_path_for(nifti_path: Path) -> Path:
-    name = nifti_path.name
-    if name.endswith(".nii.gz"):
-        return nifti_path.with_name(name[: -len(".nii.gz")] + ".json")
-    if name.endswith(".nii"):
-        return nifti_path.with_name(name[: -len(".nii")] + ".json")
-    return nifti_path.with_suffix(".json")
-
-
-def write_sidecar(meta: SeriesMeta, sidecar_path: str | Path, *, extra: dict[str, Any] | None = None) -> Path:
-    """Write series metadata JSON next to the NIfTI output."""
+def write_sidecar(
+    meta: SeriesMeta,
+    sidecar_path: str | Path,
+    *,
+    extra: dict[str, Any] | None = None,
+) -> Path:
+    """Write series metadata JSON (PixelSpacing, SliceThickness, IOP, …)."""
     sidecar_path = Path(sidecar_path)
     sidecar_path.parent.mkdir(parents=True, exist_ok=True)
-    payload = asdict(meta)
+
+    # Canonical keys requested by the pipeline, plus full SeriesMeta.
+    payload: dict[str, Any] = {
+        "PixelSpacing": meta.pixel_spacing,
+        "SliceThickness": meta.slice_thickness,
+        "ImageOrientationPatient": meta.image_orientation_patient,
+        "SeriesDescription": meta.series_description,
+        "modality": meta.modality_label,
+        "SeriesInstanceUID": meta.series_instance_uid,
+        **asdict(meta),
+    }
     if extra:
         payload.update(extra)
-    # Ensure JSON-serializable paths / numpy types are plain Python.
-    text = json.dumps(payload, indent=2, default=_json_default)
-    sidecar_path.write_text(text + "\n", encoding="utf-8")
+
+    sidecar_path.write_text(
+        json.dumps(payload, indent=2, default=_json_default) + "\n",
+        encoding="utf-8",
+    )
     logger.info(
-        "Sidecar %s | modality=%s | PixelSpacing=%s | SliceThickness=%s | IOP=%s",
+        "Sidecar %s | modality=%s | PixelSpacing=%s | SliceThickness=%s",
         sidecar_path.name,
         meta.modality_label,
         meta.pixel_spacing,
         meta.slice_thickness,
-        meta.image_orientation_patient,
     )
     return sidecar_path
 
@@ -378,31 +402,12 @@ def load_study_to_nifti(
     compress: bool = True,
     include_other: bool = True,
 ) -> list[ConvertedSeries]:
-    """Convert all series under a DICOM study directory to modality-organized NIfTI.
+    """Convert all series under a DICOM study to modality-organized NIfTI + JSON.
 
-    Parameters
-    ----------
-    dicom_root:
-        Study (or multi-series) directory tree containing DICOM files.
-    output_root:
-        Destination root. Outputs are written to
-        ``{output_root}/{study_name}/{modality}/{series}.nii.gz`` plus ``.json``.
-    study_name:
-        Folder name for this study; defaults to ``dicom_root.name``.
-    modalities:
-        Optional whitelist of modality labels to convert. When omitted, all
-        identified modalities are kept (``other`` controlled by ``include_other``).
-    backend:
-        Conversion engine preference.
-    compress:
-        Write ``.nii.gz`` when True, else ``.nii``.
-    include_other:
-        Keep series that do not match T1 / T1c / T2 / FLAIR.
+    Outputs::
 
-    Returns
-    -------
-    list[ConvertedSeries]
-        Successfully converted series (failed series are logged and skipped).
+        {output_root}/{study_id}/{modality}/ser{N}_{safe_name}.nii.gz
+        {output_root}/{study_id}/{modality}/ser{N}_{safe_name}.json
     """
     dicom_root = Path(dicom_root)
     output_root = Path(output_root)
@@ -450,7 +455,6 @@ def load_study_to_nifti(
         out_dir.mkdir(parents=True, exist_ok=True)
         stem = _series_output_name(meta)
         nifti_path = out_dir / f"{stem}{ext}"
-        # Avoid collisions when descriptions repeat.
         if nifti_path.exists():
             nifti_path = out_dir / f"{stem}_{uid[-8:]}{ext}"
         sidecar_path = _sidecar_path_for(nifti_path)
@@ -475,11 +479,12 @@ def load_study_to_nifti(
             extra={
                 "nifti_path": str(nifti_path),
                 "source_dicom_root": str(dicom_root),
-                "source_files": [str(p) for p in series_files],
             },
         )
         results.append(
-            ConvertedSeries(nifti_path=nifti_path, sidecar_path=sidecar_path, meta=meta)
+            ConvertedSeries(
+                nifti_path=nifti_path, sidecar_path=sidecar_path, meta=meta
+            )
         )
         logger.info(
             "Wrote %s (%s, %d instances, backend=%s)",
@@ -490,3 +495,41 @@ def load_study_to_nifti(
         )
 
     return results
+
+
+def main(argv: Sequence[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(
+        description="Convert a DICOM study directory to modality-organized NIfTI."
+    )
+    parser.add_argument("dicom_dir", type=Path, help="Study DICOM root")
+    parser.add_argument(
+        "-o",
+        "--output",
+        type=Path,
+        required=True,
+        help="Output root ({out}/{study_id}/{modality}/…)",
+    )
+    parser.add_argument(
+        "--include-other",
+        action="store_true",
+        help="Also convert series that are not T1/T1c/T2/FLAIR",
+    )
+    parser.add_argument("-q", "--quiet", action="store_true")
+    args = parser.parse_args(list(argv) if argv is not None else None)
+
+    logging.basicConfig(
+        level=logging.WARNING if args.quiet else logging.INFO,
+        format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
+    )
+
+    results = load_study_to_nifti(
+        args.dicom_dir,
+        args.output,
+        include_other=args.include_other,
+    )
+    logger.info("Converted %d series", len(results))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

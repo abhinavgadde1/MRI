@@ -1,0 +1,31 @@
+{
+  "max_epochs": 20,
+  "batch_size": 1,
+  "learning_rate": 0.0001,
+  "weight_decay": 0.0,
+  "val_fraction": 0.2,
+  "seed": 42,
+  "crop_size": [
+    96,
+    96,
+    96
+  ],
+  "roi_size": [
+    96,
+    96,
+    96
+  ],
+  "num_train_samples": 2,
+  "model_name": "segresnet",
+  "scheduler_patience": 10,
+  "scheduler_factor": 0.5,
+  "amp": true,
+  "num_workers": 0,
+  "pixdim": [
+    1.0,
+    1.0,
+    1.0
+  ],
+  "max_cases": null,
+  "log_every_n_batches": 1
+}

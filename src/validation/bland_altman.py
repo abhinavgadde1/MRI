@@ -17,7 +17,10 @@ class BlandAltmanResult:
     n: int
 
 
-def bland_altman_stats(method_a: np.ndarray | list[float], method_b: np.ndarray | list[float]) -> BlandAltmanResult:
+def bland_altman_stats(
+    method_a: np.ndarray | list[float],
+    method_b: np.ndarray | list[float],
+) -> BlandAltmanResult:
     """Compute Bland–Altman mean difference and 95% limits of agreement."""
     a = np.asarray(method_a, dtype=float).ravel()
     b = np.asarray(method_b, dtype=float).ravel()

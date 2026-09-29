@@ -1,0 +1,721 @@
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/torch/jit/_script.py:1643: FutureWarning: `torch.jit.interface` is deprecated. Please use `torch.compile` instead.
+  warnings.warn(
+<frozen runpy>:128: RuntimeWarning: 'segmentation.train' found in sys.modules after import of package 'segmentation', but prior to execution of 'segmentation.train'; this may result in unpredictable behaviour
+2026-09-28 21:16:23,086 | INFO | __main__ | Confirmed train/val disjoint from held-out (60 subjects)
+2026-09-28 21:16:23,090 | INFO | __main__ | Wrote train/val lists + config -> checkpoints/brats_scale_full
+2026-09-28 21:16:23,092 | INFO | __main__ | Using lazy Dataset (cache_rate=0) — safest for laptop RAM
+2026-09-28 21:16:23,661 | INFO | __main__ | LR schedule: linear warmup 289 steps (5%) then cosine 5491 steps (eta_min=1.0e-06); total_steps=5780
+2026-09-28 21:16:23,662 | INFO | __main__ | Training segresnet on mps | train=289 val=20 | amp=False | loss=DiceCELoss(bg=True) | sched=cosine_warmup | grad_clip=1.0 | cache_rate=0.00
+2026-09-28 21:16:23,662 | INFO | __main__ | Regions / channels: ['enhancing_tumor', 'tumor_core', 'whole_tumor']
+2026-09-28 21:16:26,892 | INFO | __main__ | Epoch 1 train batch 1/289 | loss=1.0150 | dice_ch=[0.9855, 0.9836, 0.8959] | lr=1.34e-06
+2026-09-28 21:16:54,617 | INFO | __main__ | Epoch 1 train batch 10/289 | loss=1.0701 | dice_ch=[0.9666, 0.9111, 0.7316] | lr=4.43e-06
+2026-09-28 21:17:25,554 | INFO | __main__ | Epoch 1 train batch 20/289 | loss=1.0093 | dice_ch=[0.9961, 0.9945, 0.8914] | lr=7.85e-06
+2026-09-28 21:17:56,146 | INFO | __main__ | Epoch 1 train batch 30/289 | loss=1.0270 | dice_ch=[0.9625, 0.8849, 0.7735] | lr=1.13e-05
+2026-09-28 21:18:27,022 | INFO | __main__ | Epoch 1 train batch 40/289 | loss=1.0419 | dice_ch=[1.0, 0.7355, 0.5619] | lr=1.47e-05
+2026-09-28 21:18:57,704 | INFO | __main__ | Epoch 1 train batch 50/289 | loss=1.0035 | dice_ch=[1.0, 0.9849, 0.8295] | lr=1.81e-05
+2026-09-28 21:19:28,443 | INFO | __main__ | Epoch 1 train batch 60/289 | loss=1.0396 | dice_ch=[0.9368, 0.8164, 0.5045] | lr=2.16e-05
+2026-09-28 21:19:59,260 | INFO | __main__ | Epoch 1 train batch 70/289 | loss=1.0087 | dice_ch=[0.9547, 0.9348, 0.6205] | lr=2.50e-05
+2026-09-28 21:20:29,977 | INFO | __main__ | Epoch 1 train batch 80/289 | loss=0.9931 | dice_ch=[0.9616, 0.9445, 0.6908] | lr=2.84e-05
+2026-09-28 21:21:01,915 | INFO | __main__ | Epoch 1 train batch 90/289 | loss=1.0478 | dice_ch=[0.8273, 0.7545, 0.3262] | lr=3.18e-05
+2026-09-28 21:21:34,725 | INFO | __main__ | Epoch 1 train batch 100/289 | loss=0.9861 | dice_ch=[0.995, 0.961, 0.819] | lr=3.53e-05
+2026-09-28 21:22:06,906 | INFO | __main__ | Epoch 1 train batch 110/289 | loss=0.9910 | dice_ch=[0.9998, 0.9596, 0.9094] | lr=3.87e-05
+2026-09-28 21:22:41,740 | INFO | __main__ | Epoch 1 train batch 120/289 | loss=0.9903 | dice_ch=[1.0, 1.0, 0.913] | lr=4.21e-05
+2026-09-28 21:23:17,792 | INFO | __main__ | Epoch 1 train batch 130/289 | loss=1.0023 | dice_ch=[0.8292, 0.8158, 0.273] | lr=4.55e-05
+2026-09-28 21:23:52,816 | INFO | __main__ | Epoch 1 train batch 140/289 | loss=0.9772 | dice_ch=[0.9706, 0.9568, 0.733] | lr=4.90e-05
+2026-09-28 21:24:28,782 | INFO | __main__ | Epoch 1 train batch 150/289 | loss=0.9726 | dice_ch=[0.9151, 0.7921, 0.3422] | lr=5.24e-05
+2026-09-28 21:25:05,587 | INFO | __main__ | Epoch 1 train batch 160/289 | loss=0.9857 | dice_ch=[0.8731, 0.8519, 0.4437] | lr=5.58e-05
+2026-09-28 21:25:41,608 | INFO | __main__ | Epoch 1 train batch 170/289 | loss=0.9992 | dice_ch=[0.9979, 0.994, 0.971] | lr=5.92e-05
+2026-09-28 21:26:17,289 | INFO | __main__ | Epoch 1 train batch 180/289 | loss=0.9780 | dice_ch=[1.0, 0.9139, 0.7917] | lr=6.27e-05
+2026-09-28 21:26:53,610 | INFO | __main__ | Epoch 1 train batch 190/289 | loss=0.9988 | dice_ch=[0.9697, 0.9516, 0.9045] | lr=6.61e-05
+2026-09-28 21:27:30,551 | INFO | __main__ | Epoch 1 train batch 200/289 | loss=0.9803 | dice_ch=[1.0, 0.9789, 0.8207] | lr=6.95e-05
+2026-09-28 21:28:11,058 | INFO | __main__ | Epoch 1 train batch 210/289 | loss=0.9899 | dice_ch=[0.9767, 0.9216, 0.8343] | lr=7.29e-05
+2026-09-28 21:28:50,791 | INFO | __main__ | Epoch 1 train batch 220/289 | loss=0.9923 | dice_ch=[0.9509, 0.8551, 0.7287] | lr=7.64e-05
+2026-09-28 21:29:29,768 | INFO | __main__ | Epoch 1 train batch 230/289 | loss=0.9830 | dice_ch=[0.9072, 0.8051, 0.622] | lr=7.98e-05
+2026-09-28 21:30:08,909 | INFO | __main__ | Epoch 1 train batch 240/289 | loss=0.9734 | dice_ch=[0.9356, 0.8964, 0.6532] | lr=8.32e-05
+2026-09-28 21:30:46,008 | INFO | __main__ | Epoch 1 train batch 250/289 | loss=1.0048 | dice_ch=[0.9914, 0.7473, 0.6113] | lr=8.66e-05
+2026-09-28 21:31:22,233 | INFO | __main__ | Epoch 1 train batch 260/289 | loss=0.9392 | dice_ch=[0.9108, 0.912, 0.421] | lr=9.01e-05
+2026-09-28 21:31:59,933 | INFO | __main__ | Epoch 1 train batch 270/289 | loss=0.9728 | dice_ch=[0.9806, 0.6088, 0.2804] | lr=9.35e-05
+2026-09-28 21:32:36,994 | INFO | __main__ | Epoch 1 train batch 280/289 | loss=0.9955 | dice_ch=[1.0, 0.7464, 0.6393] | lr=9.69e-05
+2026-09-28 21:33:09,670 | INFO | __main__ | Epoch 1 train batch 289/289 | loss=0.9874 | dice_ch=[0.9518, 0.8835, 0.7579] | lr=1.00e-04
+2026-09-28 21:33:09,673 | INFO | __main__ | Epoch 1 train channel Dice losses ET/TC/WT = 0.9440 / 0.8829 / 0.6918
+2026-09-28 21:33:13,472 | INFO | __main__ | Epoch 1 val batch 1/20
+2026-09-28 21:33:46,237 | INFO | __main__ | Epoch 1 val batch 10/20
+2026-09-28 21:34:22,558 | INFO | __main__ | Epoch 1 val batch 20/20
+2026-09-28 21:34:22,569 | INFO | __main__ | Epoch 1/20 | train_loss=1.0038 | dice_ch=[0.944,0.883,0.692] | val_dice=0.1873 (ET=0.245 TC=0.131 WT=0.185) | 1078.9s | lr=1.00e-04
+2026-09-28 21:34:23,058 | INFO | __main__ | New best mean val Dice 0.1873 -> checkpoints/brats_scale_full/best_model.pt
+2026-09-28 21:34:26,651 | INFO | __main__ | Epoch 2 train batch 1/289 | loss=0.9864 | dice_ch=[0.9967, 0.9947, 0.8881] | lr=1.00e-04
+2026-09-28 21:34:59,711 | INFO | __main__ | Epoch 2 train batch 10/289 | loss=0.9679 | dice_ch=[0.9946, 0.8934, 0.6715] | lr=1.00e-04
+2026-09-28 21:35:38,756 | INFO | __main__ | Epoch 2 train batch 20/289 | loss=0.9711 | dice_ch=[0.9457, 0.9433, 0.6827] | lr=1.00e-04
+2026-09-28 21:36:18,941 | INFO | __main__ | Epoch 2 train batch 30/289 | loss=0.9841 | dice_ch=[0.9319, 0.9024, 0.7623] | lr=1.00e-04
+2026-09-28 21:36:56,977 | INFO | __main__ | Epoch 2 train batch 40/289 | loss=0.9662 | dice_ch=[1.0, 0.8619, 0.7131] | lr=1.00e-04
+2026-09-28 21:37:34,006 | INFO | __main__ | Epoch 2 train batch 50/289 | loss=1.0000 | dice_ch=[1.0, 1.0, 1.0] | lr=1.00e-04
+2026-09-28 21:38:11,816 | INFO | __main__ | Epoch 2 train batch 60/289 | loss=0.9803 | dice_ch=[0.947, 0.9583, 0.8145] | lr=1.00e-04
+2026-09-28 21:38:53,294 | INFO | __main__ | Epoch 2 train batch 70/289 | loss=0.9888 | dice_ch=[0.8673, 0.7566, 0.613] | lr=1.00e-04
+2026-09-28 21:39:32,642 | INFO | __main__ | Epoch 2 train batch 80/289 | loss=0.9744 | dice_ch=[0.9037, 0.8997, 0.7109] | lr=9.99e-05
+2026-09-28 21:40:11,737 | INFO | __main__ | Epoch 2 train batch 90/289 | loss=0.9832 | dice_ch=[0.9968, 0.9527, 0.8685] | lr=9.99e-05
+2026-09-28 21:40:50,307 | INFO | __main__ | Epoch 2 train batch 100/289 | loss=0.9887 | dice_ch=[1.0, 0.9833, 0.9021] | lr=9.99e-05
+2026-09-28 21:41:30,448 | INFO | __main__ | Epoch 2 train batch 110/289 | loss=0.9794 | dice_ch=[0.8988, 0.8129, 0.6311] | lr=9.99e-05
+2026-09-28 21:42:07,461 | INFO | __main__ | Epoch 2 train batch 120/289 | loss=0.9779 | dice_ch=[0.7235, 0.5389, 0.299] | lr=9.99e-05
+2026-09-28 21:42:44,802 | INFO | __main__ | Epoch 2 train batch 130/289 | loss=0.9856 | dice_ch=[0.9613, 0.9437, 0.8661] | lr=9.99e-05
+2026-09-28 21:43:23,653 | INFO | __main__ | Epoch 2 train batch 140/289 | loss=0.9861 | dice_ch=[0.9592, 0.9199, 0.8548] | lr=9.98e-05
+2026-09-28 21:44:01,165 | INFO | __main__ | Epoch 2 train batch 150/289 | loss=0.9723 | dice_ch=[0.9249, 0.8431, 0.6802] | lr=9.98e-05
+2026-09-28 21:44:38,309 | INFO | __main__ | Epoch 2 train batch 160/289 | loss=0.9755 | dice_ch=[0.6203, 0.6057, 0.2646] | lr=9.98e-05
+2026-09-28 21:45:16,659 | INFO | __main__ | Epoch 2 train batch 170/289 | loss=0.9721 | dice_ch=[1.0, 0.9977, 0.7239] | lr=9.98e-05
+2026-09-28 21:45:52,990 | INFO | __main__ | Epoch 2 train batch 180/289 | loss=0.9556 | dice_ch=[0.95, 0.9163, 0.6572] | lr=9.97e-05
+2026-09-28 21:46:30,032 | INFO | __main__ | Epoch 2 train batch 190/289 | loss=0.9608 | dice_ch=[0.8186, 0.7479, 0.4508] | lr=9.97e-05
+2026-09-28 21:47:07,043 | INFO | __main__ | Epoch 2 train batch 200/289 | loss=0.9676 | dice_ch=[0.9949, 0.9943, 0.7517] | lr=9.97e-05
+2026-09-28 21:47:45,692 | INFO | __main__ | Epoch 2 train batch 210/289 | loss=0.9885 | dice_ch=[0.9438, 0.9468, 0.8835] | lr=9.96e-05
+2026-09-28 21:48:22,838 | INFO | __main__ | Epoch 2 train batch 220/289 | loss=0.9709 | dice_ch=[0.9419, 0.911, 0.6614] | lr=9.96e-05
+2026-09-28 21:49:01,603 | INFO | __main__ | Epoch 2 train batch 230/289 | loss=0.9496 | dice_ch=[0.9521, 0.9431, 0.5775] | lr=9.96e-05
+2026-09-28 21:49:39,483 | INFO | __main__ | Epoch 2 train batch 240/289 | loss=0.9633 | dice_ch=[0.8588, 0.8281, 0.5912] | lr=9.95e-05
+2026-09-28 21:50:17,045 | INFO | __main__ | Epoch 2 train batch 250/289 | loss=0.9731 | dice_ch=[0.7958, 0.4459, 0.2057] | lr=9.95e-05
+2026-09-28 21:50:54,207 | INFO | __main__ | Epoch 2 train batch 260/289 | loss=0.9596 | dice_ch=[0.9925, 0.7469, 0.5647] | lr=9.95e-05
+2026-09-28 21:51:31,035 | INFO | __main__ | Epoch 2 train batch 270/289 | loss=0.9596 | dice_ch=[0.8194, 0.751, 0.4931] | lr=9.94e-05
+2026-09-28 21:52:08,488 | INFO | __main__ | Epoch 2 train batch 280/289 | loss=0.9893 | dice_ch=[0.9474, 0.9422, 0.8569] | lr=9.94e-05
+2026-09-28 21:52:41,981 | INFO | __main__ | Epoch 2 train batch 289/289 | loss=0.9499 | dice_ch=[0.9444, 0.9231, 0.602] | lr=9.93e-05
+2026-09-28 21:52:41,986 | INFO | __main__ | Epoch 2 train channel Dice losses ET/TC/WT = 0.9076 / 0.8439 / 0.6033
+2026-09-28 21:52:45,528 | INFO | __main__ | Epoch 2 val batch 1/20
+2026-09-28 21:53:18,234 | INFO | __main__ | Epoch 2 val batch 10/20
+2026-09-28 21:53:53,809 | INFO | __main__ | Epoch 2 val batch 20/20
+2026-09-28 21:53:53,817 | INFO | __main__ | Epoch 2/20 | train_loss=0.9689 | dice_ch=[0.908,0.844,0.603] | val_dice=0.2616 (ET=0.266 TC=0.212 WT=0.307) | 1170.7s | lr=9.93e-05
+2026-09-28 21:53:54,142 | INFO | __main__ | New best mean val Dice 0.2616 -> checkpoints/brats_scale_full/best_model.pt
+2026-09-28 21:53:57,568 | INFO | __main__ | Epoch 3 train batch 1/289 | loss=0.9300 | dice_ch=[0.772, 0.5566, 0.2458] | lr=9.93e-05
+2026-09-28 21:54:29,171 | INFO | __main__ | Epoch 3 train batch 10/289 | loss=1.0001 | dice_ch=[1.0, 1.0, 0.9986] | lr=9.93e-05
+2026-09-28 21:55:04,154 | INFO | __main__ | Epoch 3 train batch 20/289 | loss=0.9187 | dice_ch=[0.9891, 0.5885, 0.339] | lr=9.92e-05
+2026-09-28 21:55:41,009 | INFO | __main__ | Epoch 3 train batch 30/289 | loss=1.0236 | dice_ch=[0.9792, 0.4003, 0.2102] | lr=9.92e-05
+2026-09-28 21:56:18,432 | INFO | __main__ | Epoch 3 train batch 40/289 | loss=0.9182 | dice_ch=[1.0, 0.6173, 0.4179] | lr=9.91e-05
+2026-09-28 21:56:58,165 | INFO | __main__ | Epoch 3 train batch 50/289 | loss=0.9502 | dice_ch=[0.8534, 0.8216, 0.5916] | lr=9.91e-05
+2026-09-28 21:57:38,153 | INFO | __main__ | Epoch 3 train batch 60/289 | loss=0.9542 | dice_ch=[0.9078, 0.8771, 0.5785] | lr=9.90e-05
+2026-09-28 21:58:16,813 | INFO | __main__ | Epoch 3 train batch 70/289 | loss=0.9029 | dice_ch=[0.6687, 0.6162, 0.1719] | lr=9.90e-05
+2026-09-28 21:58:55,934 | INFO | __main__ | Epoch 3 train batch 80/289 | loss=0.9858 | dice_ch=[0.5775, 0.5288, 0.2318] | lr=9.89e-05
+2026-09-28 21:59:34,228 | INFO | __main__ | Epoch 3 train batch 90/289 | loss=0.9436 | dice_ch=[1.0, 0.9405, 0.6129] | lr=9.88e-05
+2026-09-28 22:00:11,306 | INFO | __main__ | Epoch 3 train batch 100/289 | loss=0.9996 | dice_ch=[0.4838, 0.4509, 0.1819] | lr=9.88e-05
+2026-09-28 22:00:47,970 | INFO | __main__ | Epoch 3 train batch 110/289 | loss=0.9478 | dice_ch=[0.84, 0.787, 0.5599] | lr=9.87e-05
+2026-09-28 22:01:25,248 | INFO | __main__ | Epoch 3 train batch 120/289 | loss=0.9655 | dice_ch=[0.9898, 0.9901, 0.7592] | lr=9.87e-05
+2026-09-28 22:02:03,187 | INFO | __main__ | Epoch 3 train batch 130/289 | loss=0.9611 | dice_ch=[0.9301, 0.893, 0.7166] | lr=9.86e-05
+2026-09-28 22:02:40,998 | INFO | __main__ | Epoch 3 train batch 140/289 | loss=0.9571 | dice_ch=[1.0, 0.8555, 0.6357] | lr=9.85e-05
+2026-09-28 22:03:19,628 | INFO | __main__ | Epoch 3 train batch 150/289 | loss=0.9645 | dice_ch=[0.8444, 0.7403, 0.6423] | lr=9.84e-05
+2026-09-28 22:03:59,959 | INFO | __main__ | Epoch 3 train batch 160/289 | loss=0.8883 | dice_ch=[0.7849, 0.7686, 0.1575] | lr=9.84e-05
+2026-09-28 22:04:40,544 | INFO | __main__ | Epoch 3 train batch 170/289 | loss=0.9308 | dice_ch=[0.9834, 0.5326, 0.248] | lr=9.83e-05
+2026-09-28 22:05:23,402 | INFO | __main__ | Epoch 3 train batch 180/289 | loss=0.9560 | dice_ch=[0.8589, 0.8341, 0.6657] | lr=9.82e-05
+2026-09-28 22:06:05,400 | INFO | __main__ | Epoch 3 train batch 190/289 | loss=0.9732 | dice_ch=[1.0, 0.856, 0.752] | lr=9.82e-05
+2026-09-28 22:06:47,076 | INFO | __main__ | Epoch 3 train batch 200/289 | loss=0.9684 | dice_ch=[0.8038, 0.7903, 0.68] | lr=9.81e-05
+2026-09-28 22:07:25,576 | INFO | __main__ | Epoch 3 train batch 210/289 | loss=1.0042 | dice_ch=[0.8087, 0.7044, 0.6262] | lr=9.80e-05
+2026-09-28 22:08:03,236 | INFO | __main__ | Epoch 3 train batch 220/289 | loss=0.9656 | dice_ch=[0.8421, 0.8082, 0.6512] | lr=9.79e-05
+2026-09-28 22:08:41,700 | INFO | __main__ | Epoch 3 train batch 230/289 | loss=0.9669 | dice_ch=[0.974, 0.9751, 0.7404] | lr=9.78e-05
+2026-09-28 22:09:23,146 | INFO | __main__ | Epoch 3 train batch 240/289 | loss=0.9476 | dice_ch=[0.8154, 0.7808, 0.582] | lr=9.78e-05
+2026-09-28 22:10:05,604 | INFO | __main__ | Epoch 3 train batch 250/289 | loss=0.9426 | dice_ch=[0.9977, 0.9978, 0.6095] | lr=9.77e-05
+2026-09-28 22:10:47,917 | INFO | __main__ | Epoch 3 train batch 260/289 | loss=0.9496 | dice_ch=[1.0, 0.8215, 0.7227] | lr=9.76e-05
+2026-09-28 22:11:27,971 | INFO | __main__ | Epoch 3 train batch 270/289 | loss=0.9716 | dice_ch=[0.8683, 0.8138, 0.7327] | lr=9.75e-05
+2026-09-28 22:12:08,371 | INFO | __main__ | Epoch 3 train batch 280/289 | loss=0.9687 | dice_ch=[0.8799, 0.8214, 0.6441] | lr=9.74e-05
+2026-09-28 22:12:43,903 | INFO | __main__ | Epoch 3 train batch 289/289 | loss=0.9537 | dice_ch=[0.921, 0.8176, 0.6692] | lr=9.73e-05
+2026-09-28 22:12:43,906 | INFO | __main__ | Epoch 3 train channel Dice losses ET/TC/WT = 0.8804 / 0.8082 / 0.5525
+2026-09-28 22:12:47,777 | INFO | __main__ | Epoch 3 val batch 1/20
+2026-09-28 22:13:25,534 | INFO | __main__ | Epoch 3 val batch 10/20
+2026-09-28 22:14:06,432 | INFO | __main__ | Epoch 3 val batch 20/20
+2026-09-28 22:14:06,441 | INFO | __main__ | Epoch 3/20 | train_loss=0.9504 | dice_ch=[0.880,0.808,0.552] | val_dice=0.2064 (ET=0.180 TC=0.175 WT=0.265) | 1212.3s | lr=9.73e-05
+2026-09-28 22:14:10,533 | INFO | __main__ | Epoch 4 train batch 1/289 | loss=0.9340 | dice_ch=[0.8731, 0.7738, 0.5671] | lr=9.73e-05
+2026-09-28 22:14:47,580 | INFO | __main__ | Epoch 4 train batch 10/289 | loss=0.9260 | dice_ch=[0.8499, 0.8207, 0.5683] | lr=9.72e-05
+2026-09-28 22:15:28,054 | INFO | __main__ | Epoch 4 train batch 20/289 | loss=0.9413 | dice_ch=[0.9848, 0.7798, 0.5606] | lr=9.71e-05
+2026-09-28 22:16:09,055 | INFO | __main__ | Epoch 4 train batch 30/289 | loss=0.9678 | dice_ch=[0.9572, 0.9246, 0.7505] | lr=9.70e-05
+2026-09-28 22:16:49,866 | INFO | __main__ | Epoch 4 train batch 40/289 | loss=0.9286 | dice_ch=[0.9614, 0.776, 0.5597] | lr=9.69e-05
+2026-09-28 22:17:30,800 | INFO | __main__ | Epoch 4 train batch 50/289 | loss=0.9840 | dice_ch=[0.9621, 0.9611, 0.8412] | lr=9.68e-05
+2026-09-28 22:18:12,252 | INFO | __main__ | Epoch 4 train batch 60/289 | loss=0.9818 | dice_ch=[0.9967, 0.9971, 0.8364] | lr=9.67e-05
+2026-09-28 22:18:55,116 | INFO | __main__ | Epoch 4 train batch 70/289 | loss=1.0092 | dice_ch=[0.7319, 0.6647, 0.5727] | lr=9.66e-05
+2026-09-28 22:19:38,030 | INFO | __main__ | Epoch 4 train batch 80/289 | loss=0.9357 | dice_ch=[0.9127, 0.9179, 0.4905] | lr=9.65e-05
+2026-09-28 22:20:20,243 | INFO | __main__ | Epoch 4 train batch 90/289 | loss=0.8690 | dice_ch=[0.5998, 0.6287, 0.1275] | lr=9.64e-05
+2026-09-28 22:21:02,036 | INFO | __main__ | Epoch 4 train batch 100/289 | loss=0.9017 | dice_ch=[0.7676, 0.6337, 0.3146] | lr=9.63e-05
+2026-09-28 22:21:43,259 | INFO | __main__ | Epoch 4 train batch 110/289 | loss=0.8988 | dice_ch=[0.8436, 0.8109, 0.4015] | lr=9.62e-05
+2026-09-28 22:22:25,261 | INFO | __main__ | Epoch 4 train batch 120/289 | loss=0.8900 | dice_ch=[0.7186, 0.6029, 0.2071] | lr=9.61e-05
+2026-09-28 22:23:07,461 | INFO | __main__ | Epoch 4 train batch 130/289 | loss=0.9424 | dice_ch=[0.8214, 0.8418, 0.5955] | lr=9.60e-05
+2026-09-28 22:23:47,100 | INFO | __main__ | Epoch 4 train batch 140/289 | loss=0.9247 | dice_ch=[1.0, 0.7036, 0.2695] | lr=9.59e-05
+2026-09-28 22:24:24,993 | INFO | __main__ | Epoch 4 train batch 150/289 | loss=0.9311 | dice_ch=[0.9049, 0.8144, 0.5765] | lr=9.58e-05
+2026-09-28 22:25:01,485 | INFO | __main__ | Epoch 4 train batch 160/289 | loss=0.9501 | dice_ch=[0.9989, 0.895, 0.6752] | lr=9.57e-05
+2026-09-28 22:25:37,520 | INFO | __main__ | Epoch 4 train batch 170/289 | loss=0.9159 | dice_ch=[0.8443, 0.8829, 0.5873] | lr=9.55e-05
+2026-09-28 22:26:13,605 | INFO | __main__ | Epoch 4 train batch 180/289 | loss=0.8955 | dice_ch=[0.5285, 0.3893, 0.1525] | lr=9.54e-05
+2026-09-28 22:26:50,565 | INFO | __main__ | Epoch 4 train batch 190/289 | loss=0.8541 | dice_ch=[0.5927, 0.515, 0.1572] | lr=9.53e-05
+2026-09-28 22:27:27,460 | INFO | __main__ | Epoch 4 train batch 200/289 | loss=0.9893 | dice_ch=[0.5239, 0.4056, 0.1383] | lr=9.52e-05
+2026-09-28 22:28:07,201 | INFO | __main__ | Epoch 4 train batch 210/289 | loss=0.9109 | dice_ch=[0.77, 0.6979, 0.3495] | lr=9.51e-05
+2026-09-28 22:28:48,991 | INFO | __main__ | Epoch 4 train batch 220/289 | loss=0.9246 | dice_ch=[0.785, 0.7471, 0.5465] | lr=9.49e-05
+2026-09-28 22:29:28,662 | INFO | __main__ | Epoch 4 train batch 230/289 | loss=0.9478 | dice_ch=[0.977, 0.9807, 0.6966] | lr=9.48e-05
+2026-09-28 22:30:07,700 | INFO | __main__ | Epoch 4 train batch 240/289 | loss=0.9176 | dice_ch=[0.8707, 0.8643, 0.5659] | lr=9.47e-05
+2026-09-28 22:30:45,956 | INFO | __main__ | Epoch 4 train batch 250/289 | loss=0.8689 | dice_ch=[0.6173, 0.6237, 0.141] | lr=9.45e-05
+2026-09-28 22:31:23,499 | INFO | __main__ | Epoch 4 train batch 260/289 | loss=0.8499 | dice_ch=[0.4868, 0.3978, 0.0815] | lr=9.44e-05
+2026-09-28 22:32:01,308 | INFO | __main__ | Epoch 4 train batch 270/289 | loss=0.8865 | dice_ch=[0.4722, 0.4063, 0.1389] | lr=9.43e-05
+2026-09-28 22:32:40,021 | INFO | __main__ | Epoch 4 train batch 280/289 | loss=0.9867 | dice_ch=[0.9723, 0.9755, 0.896] | lr=9.42e-05
+2026-09-28 22:33:15,725 | INFO | __main__ | Epoch 4 train batch 289/289 | loss=0.8424 | dice_ch=[0.7243, 0.6588, 0.2036] | lr=9.40e-05
+2026-09-28 22:33:15,726 | INFO | __main__ | Epoch 4 train channel Dice losses ET/TC/WT = 0.8409 / 0.7682 / 0.4989
+2026-09-28 22:33:19,514 | INFO | __main__ | Epoch 4 val batch 1/20
+2026-09-28 22:33:56,280 | INFO | __main__ | Epoch 4 val batch 10/20
+2026-09-28 22:34:35,194 | INFO | __main__ | Epoch 4 val batch 20/20
+2026-09-28 22:34:35,207 | INFO | __main__ | Epoch 4/20 | train_loss=0.9267 | dice_ch=[0.841,0.768,0.499] | val_dice=0.3182 (ET=0.346 TC=0.283 WT=0.326) | 1228.6s | lr=9.40e-05
+2026-09-28 22:34:35,716 | INFO | __main__ | New best mean val Dice 0.3182 -> checkpoints/brats_scale_full/best_model.pt
+2026-09-28 22:34:39,673 | INFO | __main__ | Epoch 5 train batch 1/289 | loss=0.8713 | dice_ch=[0.658, 0.5062, 0.3363] | lr=9.40e-05
+2026-09-28 22:35:16,178 | INFO | __main__ | Epoch 5 train batch 10/289 | loss=0.9220 | dice_ch=[1.0, 0.6622, 0.5581] | lr=9.39e-05
+2026-09-28 22:35:55,327 | INFO | __main__ | Epoch 5 train batch 20/289 | loss=0.8373 | dice_ch=[0.6616, 0.5984, 0.171] | lr=9.38e-05
+2026-09-28 22:36:38,075 | INFO | __main__ | Epoch 5 train batch 30/289 | loss=1.0000 | dice_ch=[1.0, 1.0, 1.0] | lr=9.36e-05
+2026-09-28 22:37:19,561 | INFO | __main__ | Epoch 5 train batch 40/289 | loss=1.0000 | dice_ch=[1.0, 1.0, 1.0] | lr=9.35e-05
+2026-09-28 22:37:57,909 | INFO | __main__ | Epoch 5 train batch 50/289 | loss=0.9973 | dice_ch=[0.9993, 0.9989, 0.9654] | lr=9.33e-05
+2026-09-28 22:38:34,419 | INFO | __main__ | Epoch 5 train batch 60/289 | loss=0.8440 | dice_ch=[1.0, 0.4992, 0.1904] | lr=9.32e-05
+2026-09-28 22:39:11,838 | INFO | __main__ | Epoch 5 train batch 70/289 | loss=0.9149 | dice_ch=[0.8543, 0.7943, 0.5834] | lr=9.31e-05
+2026-09-28 22:39:48,849 | INFO | __main__ | Epoch 5 train batch 80/289 | loss=0.9294 | dice_ch=[0.9012, 0.921, 0.6048] | lr=9.29e-05
+2026-09-28 22:40:26,299 | INFO | __main__ | Epoch 5 train batch 90/289 | loss=0.8751 | dice_ch=[0.4391, 0.4031, 0.1964] | lr=9.28e-05
+2026-09-28 22:41:04,351 | INFO | __main__ | Epoch 5 train batch 100/289 | loss=0.9076 | dice_ch=[0.8949, 0.8613, 0.4736] | lr=9.26e-05
+2026-09-28 22:41:42,707 | INFO | __main__ | Epoch 5 train batch 110/289 | loss=0.9734 | dice_ch=[0.9212, 0.6093, 0.5364] | lr=9.25e-05
+2026-09-28 22:42:21,920 | INFO | __main__ | Epoch 5 train batch 120/289 | loss=0.9279 | dice_ch=[0.9813, 0.9414, 0.4714] | lr=9.23e-05
+2026-09-28 22:43:01,011 | INFO | __main__ | Epoch 5 train batch 130/289 | loss=0.9327 | dice_ch=[0.9767, 0.6465, 0.5414] | lr=9.22e-05
+2026-09-28 22:43:40,309 | INFO | __main__ | Epoch 5 train batch 140/289 | loss=0.9054 | dice_ch=[0.8218, 0.7643, 0.2544] | lr=9.20e-05
+2026-09-28 22:44:19,429 | INFO | __main__ | Epoch 5 train batch 150/289 | loss=0.9018 | dice_ch=[0.962, 0.6546, 0.4411] | lr=9.19e-05
+2026-09-28 22:44:59,462 | INFO | __main__ | Epoch 5 train batch 160/289 | loss=0.8423 | dice_ch=[0.712, 0.7588, 0.1842] | lr=9.17e-05
+2026-09-28 22:45:39,418 | INFO | __main__ | Epoch 5 train batch 170/289 | loss=0.9993 | dice_ch=[1.0, 1.0, 0.9896] | lr=9.15e-05
+2026-09-28 22:46:18,988 | INFO | __main__ | Epoch 5 train batch 180/289 | loss=0.8473 | dice_ch=[0.5896, 0.4735, 0.2582] | lr=9.14e-05
+2026-09-28 22:46:58,335 | INFO | __main__ | Epoch 5 train batch 190/289 | loss=0.9238 | dice_ch=[0.7476, 0.7705, 0.6312] | lr=9.12e-05
+2026-09-28 22:47:38,024 | INFO | __main__ | Epoch 5 train batch 200/289 | loss=0.8992 | dice_ch=[0.7302, 0.8089, 0.535] | lr=9.11e-05
+2026-09-28 22:48:17,910 | INFO | __main__ | Epoch 5 train batch 210/289 | loss=0.8819 | dice_ch=[0.9771, 0.9786, 0.302] | lr=9.09e-05
+2026-09-28 22:48:57,775 | INFO | __main__ | Epoch 5 train batch 220/289 | loss=0.7993 | dice_ch=[0.741, 0.7244, 0.1118] | lr=9.07e-05
+2026-09-28 22:49:37,674 | INFO | __main__ | Epoch 5 train batch 230/289 | loss=0.9927 | dice_ch=[1.0, 1.0, 0.9377] | lr=9.06e-05
+2026-09-28 22:50:17,472 | INFO | __main__ | Epoch 5 train batch 240/289 | loss=0.8627 | dice_ch=[0.9827, 0.6176, 0.2383] | lr=9.04e-05
+2026-09-28 22:50:56,987 | INFO | __main__ | Epoch 5 train batch 250/289 | loss=0.8116 | dice_ch=[0.5839, 0.413, 0.1572] | lr=9.02e-05
+2026-09-28 22:51:36,432 | INFO | __main__ | Epoch 5 train batch 260/289 | loss=0.8109 | dice_ch=[0.5899, 0.4579, 0.1593] | lr=9.01e-05
+2026-09-28 22:52:16,605 | INFO | __main__ | Epoch 5 train batch 270/289 | loss=0.8501 | dice_ch=[0.8162, 0.8402, 0.1797] | lr=8.99e-05
+2026-09-28 22:52:57,555 | INFO | __main__ | Epoch 5 train batch 280/289 | loss=0.8452 | dice_ch=[0.7845, 0.8316, 0.2432] | lr=8.97e-05
+2026-09-28 22:53:34,716 | INFO | __main__ | Epoch 5 train batch 289/289 | loss=0.8752 | dice_ch=[0.7691, 0.8465, 0.4275] | lr=8.96e-05
+2026-09-28 22:53:34,717 | INFO | __main__ | Epoch 5 train channel Dice losses ET/TC/WT = 0.8149 / 0.7475 / 0.4978
+2026-09-28 22:53:38,642 | INFO | __main__ | Epoch 5 val batch 1/20
+2026-09-28 22:54:14,641 | INFO | __main__ | Epoch 5 val batch 10/20
+2026-09-28 22:54:53,683 | INFO | __main__ | Epoch 5 val batch 20/20
+2026-09-28 22:54:53,687 | INFO | __main__ | Epoch 5/20 | train_loss=0.9107 | dice_ch=[0.815,0.748,0.498] | val_dice=0.3796 (ET=0.330 TC=0.346 WT=0.463) | 1218.0s | lr=8.96e-05
+2026-09-28 22:54:54,055 | INFO | __main__ | New best mean val Dice 0.3796 -> checkpoints/brats_scale_full/best_model.pt
+2026-09-28 22:54:57,933 | INFO | __main__ | Epoch 6 train batch 1/289 | loss=0.8908 | dice_ch=[0.7856, 0.764, 0.4521] | lr=8.95e-05
+2026-09-28 22:55:32,724 | INFO | __main__ | Epoch 6 train batch 10/289 | loss=0.9213 | dice_ch=[0.939, 0.925, 0.3455] | lr=8.94e-05
+2026-09-28 22:56:11,729 | INFO | __main__ | Epoch 6 train batch 20/289 | loss=0.8273 | dice_ch=[0.5041, 0.3277, 0.1817] | lr=8.92e-05
+2026-09-28 22:56:52,110 | INFO | __main__ | Epoch 6 train batch 30/289 | loss=0.8701 | dice_ch=[0.41, 0.4132, 0.215] | lr=8.90e-05
+2026-09-28 22:57:33,412 | INFO | __main__ | Epoch 6 train batch 40/289 | loss=0.9014 | dice_ch=[0.8601, 0.917, 0.5626] | lr=8.89e-05
+2026-09-28 22:58:15,146 | INFO | __main__ | Epoch 6 train batch 50/289 | loss=0.8872 | dice_ch=[1.0, 0.8632, 0.3592] | lr=8.87e-05
+2026-09-28 22:58:56,591 | INFO | __main__ | Epoch 6 train batch 60/289 | loss=0.9152 | dice_ch=[0.8373, 0.8165, 0.6258] | lr=8.85e-05
+2026-09-28 22:59:37,696 | INFO | __main__ | Epoch 6 train batch 70/289 | loss=0.9099 | dice_ch=[0.8072, 0.7273, 0.4237] | lr=8.83e-05
+2026-09-28 23:00:17,967 | INFO | __main__ | Epoch 6 train batch 80/289 | loss=0.9508 | dice_ch=[0.9865, 0.8627, 0.6562] | lr=8.81e-05
+2026-09-28 23:00:58,270 | INFO | __main__ | Epoch 6 train batch 90/289 | loss=0.8664 | dice_ch=[0.6986, 0.7087, 0.3179] | lr=8.79e-05
+2026-09-28 23:01:35,413 | INFO | __main__ | Epoch 6 train batch 100/289 | loss=0.8702 | dice_ch=[0.9388, 0.2517, 0.0887] | lr=8.78e-05
+2026-09-28 23:02:11,629 | INFO | __main__ | Epoch 6 train batch 110/289 | loss=0.8357 | dice_ch=[0.5121, 0.4531, 0.3093] | lr=8.76e-05
+2026-09-28 23:02:47,817 | INFO | __main__ | Epoch 6 train batch 120/289 | loss=0.9133 | dice_ch=[0.7596, 0.7772, 0.6501] | lr=8.74e-05
+2026-09-28 23:03:24,889 | INFO | __main__ | Epoch 6 train batch 130/289 | loss=0.7571 | dice_ch=[0.498, 0.6247, 0.0732] | lr=8.72e-05
+2026-09-28 23:04:03,100 | INFO | __main__ | Epoch 6 train batch 140/289 | loss=0.7814 | dice_ch=[0.4685, 0.4678, 0.0972] | lr=8.70e-05
+2026-09-28 23:04:42,043 | INFO | __main__ | Epoch 6 train batch 150/289 | loss=0.8047 | dice_ch=[0.4108, 0.4505, 0.0746] | lr=8.68e-05
+2026-09-28 23:05:21,943 | INFO | __main__ | Epoch 6 train batch 160/289 | loss=0.9763 | dice_ch=[0.9349, 0.9394, 0.745] | lr=8.66e-05
+2026-09-28 23:06:03,131 | INFO | __main__ | Epoch 6 train batch 170/289 | loss=0.8127 | dice_ch=[0.6546, 0.7177, 0.2083] | lr=8.64e-05
+2026-09-28 23:06:45,200 | INFO | __main__ | Epoch 6 train batch 180/289 | loss=0.8077 | dice_ch=[0.7329, 0.6942, 0.1601] | lr=8.62e-05
+2026-09-28 23:07:28,612 | INFO | __main__ | Epoch 6 train batch 190/289 | loss=0.7667 | dice_ch=[0.491, 0.5868, 0.088] | lr=8.60e-05
+2026-09-28 23:08:11,945 | INFO | __main__ | Epoch 6 train batch 200/289 | loss=0.8368 | dice_ch=[0.7654, 0.7491, 0.2436] | lr=8.58e-05
+2026-09-28 23:08:55,882 | INFO | __main__ | Epoch 6 train batch 210/289 | loss=0.8313 | dice_ch=[0.5999, 0.4721, 0.2736] | lr=8.56e-05
+2026-09-28 23:09:40,067 | INFO | __main__ | Epoch 6 train batch 220/289 | loss=0.8936 | dice_ch=[0.7529, 0.7343, 0.5799] | lr=8.54e-05
+2026-09-28 23:10:24,573 | INFO | __main__ | Epoch 6 train batch 230/289 | loss=0.9622 | dice_ch=[0.9917, 0.9607, 0.7398] | lr=8.52e-05
+2026-09-28 23:11:09,853 | INFO | __main__ | Epoch 6 train batch 240/289 | loss=0.9106 | dice_ch=[0.8248, 0.8841, 0.5748] | lr=8.50e-05
+2026-09-28 23:11:56,634 | INFO | __main__ | Epoch 6 train batch 250/289 | loss=0.8675 | dice_ch=[0.9586, 0.4235, 0.1546] | lr=8.48e-05
+2026-09-28 23:12:44,203 | INFO | __main__ | Epoch 6 train batch 260/289 | loss=0.7883 | dice_ch=[1.0, 0.326, 0.1311] | lr=8.46e-05
+2026-09-28 23:13:32,410 | INFO | __main__ | Epoch 6 train batch 270/289 | loss=0.9291 | dice_ch=[0.998, 0.7801, 0.6407] | lr=8.44e-05
+2026-09-28 23:14:20,968 | INFO | __main__ | Epoch 6 train batch 280/289 | loss=0.9019 | dice_ch=[0.9946, 0.995, 0.3039] | lr=8.42e-05
+2026-09-28 23:15:04,064 | INFO | __main__ | Epoch 6 train batch 289/289 | loss=0.8924 | dice_ch=[0.6285, 0.7068, 0.396] | lr=8.40e-05
+2026-09-28 23:15:04,065 | INFO | __main__ | Epoch 6 train channel Dice losses ET/TC/WT = 0.7683 / 0.6913 / 0.4453
+2026-09-28 23:15:09,079 | INFO | __main__ | Epoch 6 val batch 1/20
+2026-09-28 23:15:55,315 | INFO | __main__ | Epoch 6 val batch 10/20
+2026-09-28 23:16:45,668 | INFO | __main__ | Epoch 6 val batch 20/20
+2026-09-28 23:16:45,673 | INFO | __main__ | Epoch 6/20 | train_loss=0.8840 | dice_ch=[0.768,0.691,0.445] | val_dice=0.4063 (ET=0.346 TC=0.380 WT=0.493) | 1311.6s | lr=8.40e-05
+2026-09-28 23:16:46,316 | INFO | __main__ | New best mean val Dice 0.4063 -> checkpoints/brats_scale_full/best_model.pt
+2026-09-28 23:16:51,169 | INFO | __main__ | Epoch 7 train batch 1/289 | loss=0.8878 | dice_ch=[0.6287, 0.6115, 0.5373] | lr=8.40e-05
+2026-09-28 23:17:35,904 | INFO | __main__ | Epoch 7 train batch 10/289 | loss=0.8165 | dice_ch=[0.4336, 0.3624, 0.2404] | lr=8.38e-05
+2026-09-28 23:18:26,593 | INFO | __main__ | Epoch 7 train batch 20/289 | loss=1.0000 | dice_ch=[1.0, 1.0, 1.0] | lr=8.36e-05
+2026-09-28 23:19:19,013 | INFO | __main__ | Epoch 7 train batch 30/289 | loss=0.8727 | dice_ch=[0.6904, 0.6681, 0.5358] | lr=8.34e-05
+2026-09-28 23:20:09,882 | INFO | __main__ | Epoch 7 train batch 40/289 | loss=0.7818 | dice_ch=[0.4423, 0.2815, 0.14] | lr=8.32e-05
+2026-09-28 23:21:01,273 | INFO | __main__ | Epoch 7 train batch 50/289 | loss=0.9693 | dice_ch=[0.9284, 0.8941, 0.5004] | lr=8.30e-05
+2026-09-28 23:21:53,704 | INFO | __main__ | Epoch 7 train batch 60/289 | loss=0.7535 | dice_ch=[0.243, 0.2799, 0.1031] | lr=8.28e-05
+2026-09-28 23:22:46,927 | INFO | __main__ | Epoch 7 train batch 70/289 | loss=0.7567 | dice_ch=[0.2031, 0.226, 0.0566] | lr=8.25e-05
+2026-09-28 23:23:40,140 | INFO | __main__ | Epoch 7 train batch 80/289 | loss=0.7504 | dice_ch=[0.6202, 0.596, 0.0728] | lr=8.23e-05
+2026-09-28 23:24:32,884 | INFO | __main__ | Epoch 7 train batch 90/289 | loss=0.8773 | dice_ch=[0.7621, 0.6797, 0.5516] | lr=8.21e-05
+2026-09-28 23:25:25,049 | INFO | __main__ | Epoch 7 train batch 100/289 | loss=0.7824 | dice_ch=[1.0, 0.2723, 0.0675] | lr=8.19e-05
+2026-09-28 23:26:17,385 | INFO | __main__ | Epoch 7 train batch 110/289 | loss=0.8137 | dice_ch=[0.9918, 0.4084, 0.2002] | lr=8.17e-05
+2026-09-28 23:27:11,582 | INFO | __main__ | Epoch 7 train batch 120/289 | loss=0.7311 | dice_ch=[0.4131, 0.3411, 0.0667] | lr=8.14e-05
+2026-09-28 23:28:05,848 | INFO | __main__ | Epoch 7 train batch 130/289 | loss=0.7280 | dice_ch=[0.4391, 0.5797, 0.0784] | lr=8.12e-05
+2026-09-28 23:29:00,959 | INFO | __main__ | Epoch 7 train batch 140/289 | loss=0.7441 | dice_ch=[0.4415, 0.3879, 0.1096] | lr=8.10e-05
+2026-09-28 23:29:56,622 | INFO | __main__ | Epoch 7 train batch 150/289 | loss=0.9398 | dice_ch=[0.9891, 0.9562, 0.6255] | lr=8.08e-05
+2026-09-28 23:30:51,297 | INFO | __main__ | Epoch 7 train batch 160/289 | loss=0.8556 | dice_ch=[0.6731, 0.7868, 0.5324] | lr=8.06e-05
+2026-09-28 23:31:47,074 | INFO | __main__ | Epoch 7 train batch 170/289 | loss=0.9151 | dice_ch=[0.7945, 0.7362, 0.6413] | lr=8.03e-05
+2026-09-28 23:32:43,500 | INFO | __main__ | Epoch 7 train batch 180/289 | loss=0.8981 | dice_ch=[0.3127, 0.2012, 0.0978] | lr=8.01e-05
+2026-09-28 23:33:38,995 | INFO | __main__ | Epoch 7 train batch 190/289 | loss=0.7272 | dice_ch=[0.5056, 0.4973, 0.0562] | lr=7.99e-05
+2026-09-28 23:34:34,083 | INFO | __main__ | Epoch 7 train batch 200/289 | loss=0.8628 | dice_ch=[0.6949, 0.6805, 0.4925] | lr=7.96e-05
+2026-09-28 23:35:29,670 | INFO | __main__ | Epoch 7 train batch 210/289 | loss=1.0000 | dice_ch=[1.0, 1.0, 1.0] | lr=7.94e-05
+2026-09-28 23:36:31,753 | INFO | __main__ | Epoch 7 train batch 220/289 | loss=0.9084 | dice_ch=[0.9246, 0.5583, 0.5426] | lr=7.92e-05
+2026-09-28 23:37:19,925 | INFO | __main__ | Epoch 7 train batch 230/289 | loss=0.8066 | dice_ch=[0.8589, 0.7173, 0.2199] | lr=7.90e-05
+2026-09-28 23:38:02,352 | INFO | __main__ | Epoch 7 train batch 240/289 | loss=0.8228 | dice_ch=[1.0, 0.4709, 0.1863] | lr=7.87e-05
+2026-09-28 23:38:42,978 | INFO | __main__ | Epoch 7 train batch 250/289 | loss=0.9509 | dice_ch=[1.0, 0.9907, 0.6277] | lr=7.85e-05
+2026-09-28 23:39:23,374 | INFO | __main__ | Epoch 7 train batch 260/289 | loss=1.0000 | dice_ch=[1.0, 1.0, 1.0] | lr=7.83e-05
+2026-09-28 23:40:02,422 | INFO | __main__ | Epoch 7 train batch 270/289 | loss=0.9334 | dice_ch=[0.9995, 0.7644, 0.4549] | lr=7.80e-05
+2026-09-28 23:40:40,977 | INFO | __main__ | Epoch 7 train batch 280/289 | loss=0.8229 | dice_ch=[0.6004, 0.6676, 0.2631] | lr=7.78e-05
+2026-09-28 23:41:15,582 | INFO | __main__ | Epoch 7 train batch 289/289 | loss=0.7706 | dice_ch=[0.5536, 0.2156, 0.0902] | lr=7.76e-05
+2026-09-28 23:41:15,583 | INFO | __main__ | Epoch 7 train channel Dice losses ET/TC/WT = 0.7220 / 0.6514 / 0.4085
+2026-09-28 23:41:19,442 | INFO | __main__ | Epoch 7 val batch 1/20
+2026-09-28 23:41:53,956 | INFO | __main__ | Epoch 7 val batch 10/20
+2026-09-28 23:42:31,495 | INFO | __main__ | Epoch 7 val batch 20/20
+2026-09-28 23:42:31,499 | INFO | __main__ | Epoch 7/20 | train_loss=0.8588 | dice_ch=[0.722,0.651,0.409] | val_dice=0.4044 (ET=0.347 TC=0.407 WT=0.459) | 1545.3s | lr=7.76e-05
+2026-09-28 23:42:35,476 | INFO | __main__ | Epoch 8 train batch 1/289 | loss=0.8303 | dice_ch=[0.5135, 0.4938, 0.4376] | lr=7.76e-05
+2026-09-28 23:43:09,624 | INFO | __main__ | Epoch 8 train batch 10/289 | loss=0.7533 | dice_ch=[1.0, 0.4801, 0.0663] | lr=7.73e-05
+2026-09-28 23:43:49,292 | INFO | __main__ | Epoch 8 train batch 20/289 | loss=0.8609 | dice_ch=[0.6753, 0.6207, 0.4086] | lr=7.71e-05
+2026-09-28 23:44:29,153 | INFO | __main__ | Epoch 8 train batch 30/289 | loss=0.7301 | dice_ch=[0.3486, 0.4505, 0.1441] | lr=7.69e-05
+2026-09-28 23:45:09,543 | INFO | __main__ | Epoch 8 train batch 40/289 | loss=0.7735 | dice_ch=[0.9551, 0.1544, 0.0562] | lr=7.66e-05
+2026-09-28 23:45:50,899 | INFO | __main__ | Epoch 8 train batch 50/289 | loss=0.7621 | dice_ch=[0.195, 0.1197, 0.1148] | lr=7.64e-05
+2026-09-28 23:46:32,154 | INFO | __main__ | Epoch 8 train batch 60/289 | loss=0.8418 | dice_ch=[0.7172, 0.616, 0.26] | lr=7.61e-05
+2026-09-28 23:47:12,845 | INFO | __main__ | Epoch 8 train batch 70/289 | loss=0.8390 | dice_ch=[0.5, 0.284, 0.1881] | lr=7.59e-05
+2026-09-28 23:47:53,983 | INFO | __main__ | Epoch 8 train batch 80/289 | loss=0.8464 | dice_ch=[0.8561, 0.9175, 0.3311] | lr=7.56e-05
+2026-09-28 23:48:35,141 | INFO | __main__ | Epoch 8 train batch 90/289 | loss=0.9327 | dice_ch=[0.9131, 0.9007, 0.5429] | lr=7.54e-05
+2026-09-28 23:49:16,069 | INFO | __main__ | Epoch 8 train batch 100/289 | loss=0.9828 | dice_ch=[1.0, 1.0, 0.7995] | lr=7.52e-05
+2026-09-28 23:49:58,650 | INFO | __main__ | Epoch 8 train batch 110/289 | loss=0.8161 | dice_ch=[0.6852, 0.6793, 0.2436] | lr=7.49e-05
+2026-09-28 23:50:39,690 | INFO | __main__ | Epoch 8 train batch 120/289 | loss=0.7140 | dice_ch=[0.3163, 0.2549, 0.0772] | lr=7.47e-05
+2026-09-28 23:51:21,093 | INFO | __main__ | Epoch 8 train batch 130/289 | loss=0.8519 | dice_ch=[0.6964, 0.7067, 0.4494] | lr=7.44e-05
+2026-09-28 23:52:03,162 | INFO | __main__ | Epoch 8 train batch 140/289 | loss=0.8437 | dice_ch=[0.705, 0.6824, 0.5306] | lr=7.42e-05
+2026-09-28 23:52:44,485 | INFO | __main__ | Epoch 8 train batch 150/289 | loss=0.8294 | dice_ch=[0.6182, 0.6481, 0.5302] | lr=7.39e-05
+2026-09-28 23:53:26,249 | INFO | __main__ | Epoch 8 train batch 160/289 | loss=0.8451 | dice_ch=[0.6556, 0.6607, 0.5539] | lr=7.37e-05
+2026-09-28 23:54:07,217 | INFO | __main__ | Epoch 8 train batch 170/289 | loss=0.7648 | dice_ch=[1.0, 0.3021, 0.0971] | lr=7.34e-05
+2026-09-28 23:54:47,573 | INFO | __main__ | Epoch 8 train batch 180/289 | loss=0.8691 | dice_ch=[0.9904, 0.9945, 0.2733] | lr=7.32e-05
+2026-09-28 23:55:27,302 | INFO | __main__ | Epoch 8 train batch 190/289 | loss=0.8855 | dice_ch=[1.0, 0.7165, 0.5006] | lr=7.29e-05
+2026-09-28 23:56:06,818 | INFO | __main__ | Epoch 8 train batch 200/289 | loss=0.6602 | dice_ch=[0.2, 0.2704, 0.059] | lr=7.27e-05
+2026-09-28 23:56:47,354 | INFO | __main__ | Epoch 8 train batch 210/289 | loss=0.8942 | dice_ch=[0.6466, 0.6468, 0.7079] | lr=7.24e-05
+2026-09-28 23:57:28,148 | INFO | __main__ | Epoch 8 train batch 220/289 | loss=1.0000 | dice_ch=[1.0, 1.0, 1.0] | lr=7.22e-05
+2026-09-28 23:58:09,991 | INFO | __main__ | Epoch 8 train batch 230/289 | loss=0.9426 | dice_ch=[0.9934, 0.9824, 0.6857] | lr=7.19e-05
+2026-09-28 23:58:52,124 | INFO | __main__ | Epoch 8 train batch 240/289 | loss=0.8727 | dice_ch=[0.7431, 0.7454, 0.564] | lr=7.16e-05
+2026-09-28 23:59:34,128 | INFO | __main__ | Epoch 8 train batch 250/289 | loss=0.7208 | dice_ch=[0.4913, 0.563, 0.0779] | lr=7.14e-05
+2026-09-29 00:00:16,884 | INFO | __main__ | Epoch 8 train batch 260/289 | loss=0.6588 | dice_ch=[0.3074, 0.3293, 0.0596] | lr=7.11e-05
+2026-09-29 00:00:58,471 | INFO | __main__ | Epoch 8 train batch 270/289 | loss=0.8321 | dice_ch=[0.5997, 0.5015, 0.2652] | lr=7.09e-05
+2026-09-29 00:01:40,788 | INFO | __main__ | Epoch 8 train batch 280/289 | loss=0.8988 | dice_ch=[0.9947, 0.7522, 0.5797] | lr=7.06e-05
+2026-09-29 00:02:19,795 | INFO | __main__ | Epoch 8 train batch 289/289 | loss=0.8374 | dice_ch=[0.5751, 0.5252, 0.5236] | lr=7.04e-05
+2026-09-29 00:02:19,796 | INFO | __main__ | Epoch 8 train channel Dice losses ET/TC/WT = 0.6768 / 0.6003 / 0.3882
+2026-09-29 00:02:24,113 | INFO | __main__ | Epoch 8 val batch 1/20
+2026-09-29 00:03:03,574 | INFO | __main__ | Epoch 8 val batch 10/20
+2026-09-29 00:03:45,215 | INFO | __main__ | Epoch 8 val batch 20/20
+2026-09-29 00:03:45,219 | INFO | __main__ | Epoch 8/20 | train_loss=0.8348 | dice_ch=[0.677,0.600,0.388] | val_dice=0.4737 (ET=0.328 TC=0.458 WT=0.635) | 1273.4s | lr=7.04e-05
+2026-09-29 00:03:45,532 | INFO | __main__ | New best mean val Dice 0.4737 -> checkpoints/brats_scale_full/best_model.pt
+2026-09-29 00:03:49,619 | INFO | __main__ | Epoch 9 train batch 1/289 | loss=1.0000 | dice_ch=[1.0, 1.0, 1.0] | lr=7.04e-05
+2026-09-29 00:04:26,595 | INFO | __main__ | Epoch 9 train batch 10/289 | loss=0.7363 | dice_ch=[0.6702, 0.2482, 0.1616] | lr=7.01e-05
+2026-09-29 00:05:07,642 | INFO | __main__ | Epoch 9 train batch 20/289 | loss=0.7270 | dice_ch=[0.3831, 0.3353, 0.0862] | lr=6.99e-05
+2026-09-29 00:05:48,638 | INFO | __main__ | Epoch 9 train batch 30/289 | loss=0.9148 | dice_ch=[0.78, 0.8463, 0.6434] | lr=6.96e-05
+2026-09-29 00:06:29,656 | INFO | __main__ | Epoch 9 train batch 40/289 | loss=0.8442 | dice_ch=[0.6768, 0.6616, 0.5685] | lr=6.93e-05
+2026-09-29 00:07:11,327 | INFO | __main__ | Epoch 9 train batch 50/289 | loss=0.7604 | dice_ch=[0.461, 0.3108, 0.21] | lr=6.91e-05
+2026-09-29 00:07:53,183 | INFO | __main__ | Epoch 9 train batch 60/289 | loss=0.8489 | dice_ch=[0.6788, 0.688, 0.5625] | lr=6.88e-05
+2026-09-29 00:08:35,268 | INFO | __main__ | Epoch 9 train batch 70/289 | loss=0.7960 | dice_ch=[0.4553, 0.3781, 0.282] | lr=6.86e-05
+2026-09-29 00:09:16,404 | INFO | __main__ | Epoch 9 train batch 80/289 | loss=0.8854 | dice_ch=[1.0, 0.4565, 0.3653] | lr=6.83e-05
+2026-09-29 00:09:56,139 | INFO | __main__ | Epoch 9 train batch 90/289 | loss=0.9289 | dice_ch=[0.8329, 0.8872, 0.5832] | lr=6.80e-05
+2026-09-29 00:10:35,287 | INFO | __main__ | Epoch 9 train batch 100/289 | loss=0.6156 | dice_ch=[0.1668, 0.1669, 0.0568] | lr=6.78e-05
+2026-09-29 00:11:15,271 | INFO | __main__ | Epoch 9 train batch 110/289 | loss=0.8723 | dice_ch=[0.5718, 0.5575, 0.5417] | lr=6.75e-05
+2026-09-29 00:11:55,299 | INFO | __main__ | Epoch 9 train batch 120/289 | loss=0.9091 | dice_ch=[0.7892, 0.5313, 0.3261] | lr=6.72e-05
+2026-09-29 00:12:36,390 | INFO | __main__ | Epoch 9 train batch 130/289 | loss=0.9117 | dice_ch=[0.6718, 0.7408, 0.6376] | lr=6.70e-05
+2026-09-29 00:13:17,784 | INFO | __main__ | Epoch 9 train batch 140/289 | loss=0.8259 | dice_ch=[0.6742, 0.7815, 0.4062] | lr=6.67e-05
+2026-09-29 00:13:58,793 | INFO | __main__ | Epoch 9 train batch 150/289 | loss=0.7782 | dice_ch=[0.4387, 0.4326, 0.3293] | lr=6.64e-05
+2026-09-29 00:14:39,219 | INFO | __main__ | Epoch 9 train batch 160/289 | loss=0.9441 | dice_ch=[0.9732, 0.9828, 0.6093] | lr=6.62e-05
+2026-09-29 00:15:19,038 | INFO | __main__ | Epoch 9 train batch 170/289 | loss=0.8253 | dice_ch=[0.5958, 0.6426, 0.5481] | lr=6.59e-05
+2026-09-29 00:15:59,137 | INFO | __main__ | Epoch 9 train batch 180/289 | loss=0.6906 | dice_ch=[0.271, 0.2087, 0.0762] | lr=6.56e-05
+2026-09-29 00:16:39,536 | INFO | __main__ | Epoch 9 train batch 190/289 | loss=0.8517 | dice_ch=[0.6681, 0.6518, 0.5852] | lr=6.53e-05
+2026-09-29 00:17:20,349 | INFO | __main__ | Epoch 9 train batch 200/289 | loss=0.8372 | dice_ch=[0.602, 0.5824, 0.1649] | lr=6.51e-05
+2026-09-29 00:18:01,291 | INFO | __main__ | Epoch 9 train batch 210/289 | loss=0.8243 | dice_ch=[0.6239, 0.5467, 0.5011] | lr=6.48e-05
+2026-09-29 00:18:42,557 | INFO | __main__ | Epoch 9 train batch 220/289 | loss=0.8430 | dice_ch=[0.593, 0.6293, 0.5764] | lr=6.45e-05
+2026-09-29 00:19:23,893 | INFO | __main__ | Epoch 9 train batch 230/289 | loss=0.8637 | dice_ch=[1.0, 0.3616, 0.2293] | lr=6.43e-05
+2026-09-29 00:20:04,845 | INFO | __main__ | Epoch 9 train batch 240/289 | loss=0.8276 | dice_ch=[0.685, 0.6123, 0.4888] | lr=6.40e-05
+2026-09-29 00:20:45,814 | INFO | __main__ | Epoch 9 train batch 250/289 | loss=0.7672 | dice_ch=[0.5671, 0.6076, 0.2695] | lr=6.37e-05
+2026-09-29 00:21:26,850 | INFO | __main__ | Epoch 9 train batch 260/289 | loss=1.0000 | dice_ch=[1.0, 1.0, 1.0] | lr=6.34e-05
+2026-09-29 00:22:08,301 | INFO | __main__ | Epoch 9 train batch 270/289 | loss=0.8677 | dice_ch=[0.7698, 0.7479, 0.5387] | lr=6.32e-05
+2026-09-29 00:22:48,218 | INFO | __main__ | Epoch 9 train batch 280/289 | loss=0.6318 | dice_ch=[0.2224, 0.1717, 0.0953] | lr=6.29e-05
+2026-09-29 00:23:24,086 | INFO | __main__ | Epoch 9 train batch 289/289 | loss=0.8122 | dice_ch=[0.5744, 0.5571, 0.5565] | lr=6.27e-05
+2026-09-29 00:23:24,087 | INFO | __main__ | Epoch 9 train channel Dice losses ET/TC/WT = 0.6397 / 0.5589 / 0.3691
+2026-09-29 00:23:27,998 | INFO | __main__ | Epoch 9 val batch 1/20
+2026-09-29 00:24:04,833 | INFO | __main__ | Epoch 9 val batch 10/20
+2026-09-29 00:24:47,830 | INFO | __main__ | Epoch 9 val batch 20/20
+2026-09-29 00:24:47,834 | INFO | __main__ | Epoch 9/20 | train_loss=0.8067 | dice_ch=[0.640,0.559,0.369] | val_dice=0.5095 (ET=0.407 TC=0.497 WT=0.625) | 1262.3s | lr=6.27e-05
+2026-09-29 00:24:48,196 | INFO | __main__ | New best mean val Dice 0.5095 -> checkpoints/brats_scale_full/best_model.pt
+2026-09-29 00:24:52,438 | INFO | __main__ | Epoch 10 train batch 1/289 | loss=0.8714 | dice_ch=[0.6782, 0.7249, 0.5907] | lr=6.26e-05
+2026-09-29 00:25:31,392 | INFO | __main__ | Epoch 10 train batch 10/289 | loss=0.7601 | dice_ch=[0.4554, 0.4653, 0.1866] | lr=6.24e-05
+2026-09-29 00:26:15,686 | INFO | __main__ | Epoch 10 train batch 20/289 | loss=0.8789 | dice_ch=[0.2547, 0.3965, 0.3785] | lr=6.21e-05
+2026-09-29 00:27:01,380 | INFO | __main__ | Epoch 10 train batch 30/289 | loss=0.9312 | dice_ch=[0.9889, 0.9699, 0.605] | lr=6.18e-05
+2026-09-29 00:27:47,264 | INFO | __main__ | Epoch 10 train batch 40/289 | loss=0.6183 | dice_ch=[0.1205, 0.122, 0.07] | lr=6.16e-05
+2026-09-29 00:28:33,344 | INFO | __main__ | Epoch 10 train batch 50/289 | loss=0.5939 | dice_ch=[0.2001, 0.1431, 0.0543] | lr=6.13e-05
+2026-09-29 00:29:20,004 | INFO | __main__ | Epoch 10 train batch 60/289 | loss=0.6208 | dice_ch=[0.1736, 0.1159, 0.065] | lr=6.10e-05
+2026-09-29 00:30:06,917 | INFO | __main__ | Epoch 10 train batch 70/289 | loss=0.9457 | dice_ch=[0.9874, 0.8276, 0.6212] | lr=6.07e-05
+2026-09-29 00:30:54,193 | INFO | __main__ | Epoch 10 train batch 80/289 | loss=0.7224 | dice_ch=[0.2834, 0.2652, 0.1511] | lr=6.04e-05
+2026-09-29 00:31:42,363 | INFO | __main__ | Epoch 10 train batch 90/289 | loss=0.8114 | dice_ch=[0.6011, 0.5685, 0.5894] | lr=6.02e-05
+2026-09-29 00:32:30,715 | INFO | __main__ | Epoch 10 train batch 100/289 | loss=0.8417 | dice_ch=[0.7562, 0.7262, 0.5484] | lr=5.99e-05
+2026-09-29 00:33:19,992 | INFO | __main__ | Epoch 10 train batch 110/289 | loss=0.7845 | dice_ch=[0.688, 0.6896, 0.1771] | lr=5.96e-05
+2026-09-29 00:34:13,859 | INFO | __main__ | Epoch 10 train batch 120/289 | loss=0.7030 | dice_ch=[0.9401, 0.1815, 0.103] | lr=5.93e-05
+2026-09-29 00:35:05,348 | INFO | __main__ | Epoch 10 train batch 130/289 | loss=0.9134 | dice_ch=[0.7586, 0.8393, 0.5627] | lr=5.91e-05
+2026-09-29 00:35:55,879 | INFO | __main__ | Epoch 10 train batch 140/289 | loss=1.0000 | dice_ch=[1.0, 1.0, 1.0] | lr=5.88e-05
+2026-09-29 00:36:47,318 | INFO | __main__ | Epoch 10 train batch 150/289 | loss=0.6977 | dice_ch=[0.5895, 0.5665, 0.1037] | lr=5.85e-05
+2026-09-29 00:37:38,596 | INFO | __main__ | Epoch 10 train batch 160/289 | loss=0.6775 | dice_ch=[0.5608, 0.5751, 0.0802] | lr=5.82e-05
+2026-09-29 00:38:30,425 | INFO | __main__ | Epoch 10 train batch 170/289 | loss=0.8770 | dice_ch=[0.6392, 0.6831, 0.3213] | lr=5.79e-05
+2026-09-29 00:39:22,605 | INFO | __main__ | Epoch 10 train batch 180/289 | loss=0.8109 | dice_ch=[0.63, 0.6098, 0.5428] | lr=5.77e-05
+2026-09-29 00:40:13,879 | INFO | __main__ | Epoch 10 train batch 190/289 | loss=0.8067 | dice_ch=[0.6063, 0.5493, 0.5243] | lr=5.74e-05
+2026-09-29 00:41:03,266 | INFO | __main__ | Epoch 10 train batch 200/289 | loss=0.6295 | dice_ch=[0.2104, 0.1949, 0.0991] | lr=5.71e-05
+2026-09-29 00:41:54,157 | INFO | __main__ | Epoch 10 train batch 210/289 | loss=0.9625 | dice_ch=[0.9624, 0.9544, 0.6244] | lr=5.68e-05
+2026-09-29 00:42:47,663 | INFO | __main__ | Epoch 10 train batch 220/289 | loss=0.9148 | dice_ch=[1.0, 0.8433, 0.666] | lr=5.65e-05
+2026-09-29 00:43:41,171 | INFO | __main__ | Epoch 10 train batch 230/289 | loss=0.8023 | dice_ch=[0.6216, 0.6606, 0.4374] | lr=5.63e-05
+2026-09-29 00:44:33,930 | INFO | __main__ | Epoch 10 train batch 240/289 | loss=1.0000 | dice_ch=[1.0, 1.0, 1.0] | lr=5.60e-05
+2026-09-29 00:45:26,911 | INFO | __main__ | Epoch 10 train batch 250/289 | loss=0.9995 | dice_ch=[1.0, 1.0, 0.9771] | lr=5.57e-05
+2026-09-29 00:46:20,549 | INFO | __main__ | Epoch 10 train batch 260/289 | loss=0.8838 | dice_ch=[0.9085, 0.5881, 0.5414] | lr=5.54e-05
+2026-09-29 00:47:14,921 | INFO | __main__ | Epoch 10 train batch 270/289 | loss=0.8353 | dice_ch=[1.0, 0.4189, 0.1604] | lr=5.51e-05
+2026-09-29 00:48:08,729 | INFO | __main__ | Epoch 10 train batch 280/289 | loss=0.7177 | dice_ch=[0.4353, 0.6155, 0.1981] | lr=5.48e-05
+2026-09-29 00:48:57,239 | INFO | __main__ | Epoch 10 train batch 289/289 | loss=0.6823 | dice_ch=[0.9984, 0.1408, 0.069] | lr=5.46e-05
+2026-09-29 00:48:57,239 | INFO | __main__ | Epoch 10 train channel Dice losses ET/TC/WT = 0.6494 / 0.5731 / 0.4075
+2026-09-29 00:49:03,045 | INFO | __main__ | Epoch 10 val batch 1/20
+2026-09-29 00:50:00,318 | INFO | __main__ | Epoch 10 val batch 10/20
+2026-09-29 00:51:00,507 | INFO | __main__ | Epoch 10 val batch 20/20
+2026-09-29 00:51:00,512 | INFO | __main__ | Epoch 10/20 | train_loss=0.8044 | dice_ch=[0.649,0.573,0.408] | val_dice=0.5750 (ET=0.439 TC=0.572 WT=0.714) | 1572.3s | lr=5.46e-05
+2026-09-29 00:51:01,056 | INFO | __main__ | New best mean val Dice 0.5750 -> checkpoints/brats_scale_full/best_model.pt
+2026-09-29 00:51:06,454 | INFO | __main__ | Epoch 11 train batch 1/289 | loss=0.7798 | dice_ch=[0.5969, 0.581, 0.5267] | lr=5.46e-05
+2026-09-29 00:51:56,022 | INFO | __main__ | Epoch 11 train batch 10/289 | loss=0.6979 | dice_ch=[0.4969, 0.4093, 0.1174] | lr=5.43e-05
+2026-09-29 00:52:51,789 | INFO | __main__ | Epoch 11 train batch 20/289 | loss=0.6513 | dice_ch=[0.1865, 0.1653, 0.1504] | lr=5.40e-05
+2026-09-29 00:53:47,492 | INFO | __main__ | Epoch 11 train batch 30/289 | loss=0.8616 | dice_ch=[1.0, 0.6116, 0.5371] | lr=5.37e-05
+2026-09-29 00:54:42,223 | INFO | __main__ | Epoch 11 train batch 40/289 | loss=0.8408 | dice_ch=[0.8134, 0.909, 0.3012] | lr=5.35e-05
+2026-09-29 00:55:36,496 | INFO | __main__ | Epoch 11 train batch 50/289 | loss=0.5988 | dice_ch=[0.3581, 0.144, 0.0757] | lr=5.32e-05
+2026-09-29 00:56:31,106 | INFO | __main__ | Epoch 11 train batch 60/289 | loss=0.5781 | dice_ch=[0.1299, 0.154, 0.1028] | lr=5.29e-05
+2026-09-29 00:57:27,344 | INFO | __main__ | Epoch 11 train batch 70/289 | loss=1.0000 | dice_ch=[1.0, 1.0, 1.0] | lr=5.26e-05
+2026-09-29 00:58:24,320 | INFO | __main__ | Epoch 11 train batch 80/289 | loss=0.8976 | dice_ch=[1.0, 0.8612, 0.603] | lr=5.23e-05
+2026-09-29 00:59:20,103 | INFO | __main__ | Epoch 11 train batch 90/289 | loss=0.8574 | dice_ch=[1.0, 0.5954, 0.5867] | lr=5.20e-05
+2026-09-29 01:00:16,103 | INFO | __main__ | Epoch 11 train batch 100/289 | loss=0.8573 | dice_ch=[0.85, 0.5639, 0.5476] | lr=5.18e-05
+2026-09-29 01:01:11,347 | INFO | __main__ | Epoch 11 train batch 110/289 | loss=0.6535 | dice_ch=[0.1687, 0.2037, 0.082] | lr=5.15e-05
+2026-09-29 01:02:08,127 | INFO | __main__ | Epoch 11 train batch 120/289 | loss=0.6571 | dice_ch=[0.1243, 0.0894, 0.1025] | lr=5.12e-05
+2026-09-29 01:03:05,878 | INFO | __main__ | Epoch 11 train batch 130/289 | loss=0.8369 | dice_ch=[1.0, 0.6493, 0.5421] | lr=5.09e-05
+2026-09-29 01:04:04,408 | INFO | __main__ | Epoch 11 train batch 140/289 | loss=0.5833 | dice_ch=[0.2277, 0.0935, 0.121] | lr=5.06e-05
+2026-09-29 01:05:02,291 | INFO | __main__ | Epoch 11 train batch 150/289 | loss=0.6712 | dice_ch=[0.5319, 0.1244, 0.065] | lr=5.03e-05
+2026-09-29 01:06:00,169 | INFO | __main__ | Epoch 11 train batch 160/289 | loss=0.8921 | dice_ch=[0.6776, 0.7045, 0.6099] | lr=5.01e-05
+2026-09-29 01:06:57,468 | INFO | __main__ | Epoch 11 train batch 170/289 | loss=0.8943 | dice_ch=[0.844, 0.9071, 0.5845] | lr=4.98e-05
+2026-09-29 01:07:57,196 | INFO | __main__ | Epoch 11 train batch 180/289 | loss=1.0000 | dice_ch=[1.0, 1.0, 1.0] | lr=4.95e-05
+2026-09-29 01:08:56,656 | INFO | __main__ | Epoch 11 train batch 190/289 | loss=0.7885 | dice_ch=[0.7495, 0.8132, 0.2477] | lr=4.92e-05
+2026-09-29 01:09:54,712 | INFO | __main__ | Epoch 11 train batch 200/289 | loss=0.8753 | dice_ch=[1.0, 0.9008, 0.5518] | lr=4.89e-05
+2026-09-29 01:10:53,433 | INFO | __main__ | Epoch 11 train batch 210/289 | loss=0.6566 | dice_ch=[0.3862, 0.2376, 0.127] | lr=4.86e-05
+2026-09-29 01:11:53,244 | INFO | __main__ | Epoch 11 train batch 220/289 | loss=0.9999 | dice_ch=[1.0, 1.0, 0.996] | lr=4.84e-05
+2026-09-29 01:12:52,416 | INFO | __main__ | Epoch 11 train batch 230/289 | loss=0.7829 | dice_ch=[0.803, 0.889, 0.1332] | lr=4.81e-05
+2026-09-29 01:13:52,468 | INFO | __main__ | Epoch 11 train batch 240/289 | loss=0.7421 | dice_ch=[1.0, 0.6514, 0.1066] | lr=4.78e-05
+2026-09-29 01:14:51,804 | INFO | __main__ | Epoch 11 train batch 250/289 | loss=0.7407 | dice_ch=[0.5075, 0.5341, 0.1896] | lr=4.75e-05
+2026-09-29 01:15:52,064 | INFO | __main__ | Epoch 11 train batch 260/289 | loss=0.7676 | dice_ch=[0.5593, 0.549, 0.538] | lr=4.72e-05
+2026-09-29 01:16:52,510 | INFO | __main__ | Epoch 11 train batch 270/289 | loss=0.8459 | dice_ch=[0.59, 0.6223, 0.5928] | lr=4.69e-05
+2026-09-29 01:17:53,007 | INFO | __main__ | Epoch 11 train batch 280/289 | loss=0.7075 | dice_ch=[0.3455, 0.3086, 0.1618] | lr=4.67e-05
+2026-09-29 01:18:47,308 | INFO | __main__ | Epoch 11 train batch 289/289 | loss=0.7357 | dice_ch=[0.6441, 0.6177, 0.1529] | lr=4.64e-05
+2026-09-29 01:18:47,308 | INFO | __main__ | Epoch 11 train channel Dice losses ET/TC/WT = 0.6210 / 0.5423 / 0.3959
+2026-09-29 01:18:53,887 | INFO | __main__ | Epoch 11 val batch 1/20
+2026-09-29 01:19:53,678 | INFO | __main__ | Epoch 11 val batch 10/20
+2026-09-29 01:20:58,310 | INFO | __main__ | Epoch 11 val batch 20/20
+2026-09-29 01:20:58,315 | INFO | __main__ | Epoch 11/20 | train_loss=0.7828 | dice_ch=[0.621,0.542,0.396] | val_dice=0.6205 (ET=0.509 TC=0.616 WT=0.736) | 1797.3s | lr=4.64e-05
+2026-09-29 01:20:58,917 | INFO | __main__ | New best mean val Dice 0.6205 -> checkpoints/brats_scale_full/best_model.pt
+2026-09-29 01:21:04,744 | INFO | __main__ | Epoch 12 train batch 1/289 | loss=0.8008 | dice_ch=[0.6171, 0.6363, 0.5283] | lr=4.64e-05
+2026-09-29 01:22:00,478 | INFO | __main__ | Epoch 12 train batch 10/289 | loss=0.8505 | dice_ch=[0.6632, 0.6764, 0.4632] | lr=4.61e-05
+2026-09-29 01:23:03,687 | INFO | __main__ | Epoch 12 train batch 20/289 | loss=0.9489 | dice_ch=[0.7763, 0.8292, 0.6372] | lr=4.58e-05
+2026-09-29 01:24:04,863 | INFO | __main__ | Epoch 12 train batch 30/289 | loss=0.7963 | dice_ch=[0.5411, 0.538, 0.2309] | lr=4.56e-05
+2026-09-29 01:25:05,850 | INFO | __main__ | Epoch 12 train batch 40/289 | loss=0.5979 | dice_ch=[0.2367, 0.1267, 0.0775] | lr=4.53e-05
+2026-09-29 01:26:07,180 | INFO | __main__ | Epoch 12 train batch 50/289 | loss=0.9002 | dice_ch=[0.886, 0.9467, 0.5586] | lr=4.50e-05
+2026-09-29 01:27:09,828 | INFO | __main__ | Epoch 12 train batch 60/289 | loss=0.8084 | dice_ch=[0.6751, 0.5795, 0.5634] | lr=4.47e-05
+2026-09-29 01:28:12,581 | INFO | __main__ | Epoch 12 train batch 70/289 | loss=0.5249 | dice_ch=[0.162, 0.1271, 0.0465] | lr=4.44e-05
+2026-09-29 01:29:15,400 | INFO | __main__ | Epoch 12 train batch 80/289 | loss=0.6513 | dice_ch=[0.9378, 0.1244, 0.0995] | lr=4.42e-05
+2026-09-29 01:30:17,910 | INFO | __main__ | Epoch 12 train batch 90/289 | loss=0.7357 | dice_ch=[0.5105, 0.244, 0.1195] | lr=4.39e-05
+2026-09-29 01:31:19,843 | INFO | __main__ | Epoch 12 train batch 100/289 | loss=0.7745 | dice_ch=[0.6191, 0.5311, 0.5338] | lr=4.36e-05
+2026-09-29 01:32:23,018 | INFO | __main__ | Epoch 12 train batch 110/289 | loss=0.5872 | dice_ch=[0.1461, 0.0812, 0.0936] | lr=4.33e-05
+2026-09-29 01:33:27,074 | INFO | __main__ | Epoch 12 train batch 120/289 | loss=0.5549 | dice_ch=[0.1002, 0.0991, 0.0649] | lr=4.30e-05
+2026-09-29 01:34:29,576 | INFO | __main__ | Epoch 12 train batch 130/289 | loss=0.6972 | dice_ch=[0.5828, 0.3881, 0.1175] | lr=4.28e-05
+2026-09-29 01:35:32,292 | INFO | __main__ | Epoch 12 train batch 140/289 | loss=0.8258 | dice_ch=[0.6572, 0.635, 0.555] | lr=4.25e-05
+2026-09-29 01:36:36,624 | INFO | __main__ | Epoch 12 train batch 150/289 | loss=0.5666 | dice_ch=[0.3477, 0.1984, 0.0799] | lr=4.22e-05
+2026-09-29 01:37:41,036 | INFO | __main__ | Epoch 12 train batch 160/289 | loss=0.7838 | dice_ch=[0.6418, 0.5975, 0.5428] | lr=4.19e-05
+2026-09-29 01:38:44,445 | INFO | __main__ | Epoch 12 train batch 170/289 | loss=0.5938 | dice_ch=[0.2732, 0.2637, 0.0552] | lr=4.16e-05
+2026-09-29 01:39:48,127 | INFO | __main__ | Epoch 12 train batch 180/289 | loss=0.7913 | dice_ch=[0.3284, 0.2572, 0.3681] | lr=4.14e-05
+2026-09-29 01:40:50,891 | INFO | __main__ | Epoch 12 train batch 190/289 | loss=0.6987 | dice_ch=[0.5687, 0.5881, 0.1244] | lr=4.11e-05
+2026-09-29 01:41:54,043 | INFO | __main__ | Epoch 12 train batch 200/289 | loss=0.7848 | dice_ch=[0.7308, 0.8687, 0.1806] | lr=4.08e-05
+2026-09-29 01:42:59,463 | INFO | __main__ | Epoch 12 train batch 210/289 | loss=0.8260 | dice_ch=[1.0, 0.5995, 0.5272] | lr=4.05e-05
+2026-09-29 01:44:04,448 | INFO | __main__ | Epoch 12 train batch 220/289 | loss=0.6578 | dice_ch=[0.3932, 0.3853, 0.1033] | lr=4.03e-05
+2026-09-29 01:45:08,608 | INFO | __main__ | Epoch 12 train batch 230/289 | loss=0.8837 | dice_ch=[0.9816, 0.9466, 0.3544] | lr=4.00e-05
+2026-09-29 01:46:12,802 | INFO | __main__ | Epoch 12 train batch 240/289 | loss=0.8181 | dice_ch=[0.8088, 0.6067, 0.5526] | lr=3.97e-05
+2026-09-29 01:47:18,089 | INFO | __main__ | Epoch 12 train batch 250/289 | loss=0.7694 | dice_ch=[0.5775, 0.5417, 0.4484] | lr=3.94e-05
+2026-09-29 01:48:23,318 | INFO | __main__ | Epoch 12 train batch 260/289 | loss=0.5670 | dice_ch=[0.1894, 0.1161, 0.0526] | lr=3.91e-05
+2026-09-29 01:49:26,669 | INFO | __main__ | Epoch 12 train batch 270/289 | loss=0.6985 | dice_ch=[1.0, 0.1844, 0.0671] | lr=3.89e-05
+2026-09-29 01:50:31,305 | INFO | __main__ | Epoch 12 train batch 280/289 | loss=0.7582 | dice_ch=[0.6227, 0.2039, 0.1276] | lr=3.86e-05
+2026-09-29 01:51:28,896 | INFO | __main__ | Epoch 12 train batch 289/289 | loss=0.9334 | dice_ch=[0.7902, 0.7761, 0.6784] | lr=3.83e-05
+2026-09-29 01:51:28,897 | INFO | __main__ | Epoch 12 train channel Dice losses ET/TC/WT = 0.5854 / 0.4939 / 0.3571
+2026-09-29 01:51:36,199 | INFO | __main__ | Epoch 12 val batch 1/20
+2026-09-29 01:52:40,038 | INFO | __main__ | Epoch 12 val batch 10/20
+2026-09-29 01:53:47,523 | INFO | __main__ | Epoch 12 val batch 20/20
+2026-09-29 01:53:47,530 | INFO | __main__ | Epoch 12/20 | train_loss=0.7527 | dice_ch=[0.585,0.494,0.357] | val_dice=0.6260 (ET=0.481 TC=0.634 WT=0.763) | 1968.6s | lr=3.83e-05
+2026-09-29 01:53:48,257 | INFO | __main__ | New best mean val Dice 0.6260 -> checkpoints/brats_scale_full/best_model.pt
+2026-09-29 01:53:54,208 | INFO | __main__ | Epoch 13 train batch 1/289 | loss=0.7836 | dice_ch=[0.9034, 0.4153, 0.3564] | lr=3.83e-05
+2026-09-29 01:54:49,861 | INFO | __main__ | Epoch 13 train batch 10/289 | loss=0.7948 | dice_ch=[0.5958, 0.6776, 0.532] | lr=3.81e-05
+2026-09-29 01:55:54,524 | INFO | __main__ | Epoch 13 train batch 20/289 | loss=0.9941 | dice_ch=[1.0, 0.9995, 0.8396] | lr=3.78e-05
+2026-09-29 01:56:58,859 | INFO | __main__ | Epoch 13 train batch 30/289 | loss=0.7527 | dice_ch=[0.6646, 0.8791, 0.1005] | lr=3.75e-05
+2026-09-29 01:58:03,002 | INFO | __main__ | Epoch 13 train batch 40/289 | loss=0.5848 | dice_ch=[0.3236, 0.1942, 0.061] | lr=3.73e-05
+2026-09-29 01:59:06,746 | INFO | __main__ | Epoch 13 train batch 50/289 | loss=0.5241 | dice_ch=[0.0928, 0.1063, 0.0685] | lr=3.70e-05
+2026-09-29 02:00:09,247 | INFO | __main__ | Epoch 13 train batch 60/289 | loss=0.8918 | dice_ch=[0.7598, 0.722, 0.6273] | lr=3.67e-05
+2026-09-29 02:01:12,307 | INFO | __main__ | Epoch 13 train batch 70/289 | loss=0.5648 | dice_ch=[0.0919, 0.0967, 0.1214] | lr=3.64e-05
+2026-09-29 02:02:16,746 | INFO | __main__ | Epoch 13 train batch 80/289 | loss=0.4824 | dice_ch=[0.116, 0.0771, 0.0453] | lr=3.62e-05
+2026-09-29 02:03:20,457 | INFO | __main__ | Epoch 13 train batch 90/289 | loss=0.6321 | dice_ch=[0.2239, 0.1085, 0.1187] | lr=3.59e-05
+2026-09-29 02:04:23,022 | INFO | __main__ | Epoch 13 train batch 100/289 | loss=0.7959 | dice_ch=[0.587, 0.5811, 0.5404] | lr=3.56e-05
+2026-09-29 02:05:25,949 | INFO | __main__ | Epoch 13 train batch 110/289 | loss=0.7834 | dice_ch=[0.6053, 0.6474, 0.3351] | lr=3.54e-05
+2026-09-29 02:06:28,480 | INFO | __main__ | Epoch 13 train batch 120/289 | loss=0.8817 | dice_ch=[0.7771, 0.8623, 0.6291] | lr=3.51e-05
+2026-09-29 02:07:32,231 | INFO | __main__ | Epoch 13 train batch 130/289 | loss=0.9649 | dice_ch=[1.0, 1.0, 0.7978] | lr=3.48e-05
+2026-09-29 02:08:35,649 | INFO | __main__ | Epoch 13 train batch 140/289 | loss=0.6604 | dice_ch=[0.5288, 0.5284, 0.0991] | lr=3.45e-05
+2026-09-29 02:09:37,441 | INFO | __main__ | Epoch 13 train batch 150/289 | loss=0.9142 | dice_ch=[0.8905, 0.8986, 0.5895] | lr=3.43e-05
+2026-09-29 02:10:40,445 | INFO | __main__ | Epoch 13 train batch 160/289 | loss=0.8438 | dice_ch=[0.755, 0.6932, 0.6489] | lr=3.40e-05
+2026-09-29 02:11:43,691 | INFO | __main__ | Epoch 13 train batch 170/289 | loss=0.8892 | dice_ch=[0.9554, 0.8739, 0.551] | lr=3.37e-05
+2026-09-29 02:12:48,033 | INFO | __main__ | Epoch 13 train batch 180/289 | loss=0.5573 | dice_ch=[0.2436, 0.2192, 0.067] | lr=3.35e-05
+2026-09-29 02:13:53,416 | INFO | __main__ | Epoch 13 train batch 190/289 | loss=0.8120 | dice_ch=[0.6434, 0.6119, 0.5524] | lr=3.32e-05
+2026-09-29 02:14:57,301 | INFO | __main__ | Epoch 13 train batch 200/289 | loss=0.8048 | dice_ch=[0.696, 0.618, 0.5413] | lr=3.29e-05
+2026-09-29 02:15:59,589 | INFO | __main__ | Epoch 13 train batch 210/289 | loss=0.7345 | dice_ch=[0.2914, 0.2224, 0.1868] | lr=3.27e-05
+2026-09-29 02:17:03,792 | INFO | __main__ | Epoch 13 train batch 220/289 | loss=0.8878 | dice_ch=[1.0, 0.6634, 0.603] | lr=3.24e-05
+2026-09-29 02:18:07,506 | INFO | __main__ | Epoch 13 train batch 230/289 | loss=0.6276 | dice_ch=[0.2471, 0.1288, 0.0677] | lr=3.22e-05
+2026-09-29 02:19:10,947 | INFO | __main__ | Epoch 13 train batch 240/289 | loss=0.7561 | dice_ch=[0.7282, 0.4349, 0.0813] | lr=3.19e-05
+2026-09-29 02:20:13,952 | INFO | __main__ | Epoch 13 train batch 250/289 | loss=0.5663 | dice_ch=[0.2609, 0.1418, 0.1038] | lr=3.16e-05
+2026-09-29 02:21:16,494 | INFO | __main__ | Epoch 13 train batch 260/289 | loss=0.4883 | dice_ch=[0.0955, 0.0807, 0.049] | lr=3.14e-05
+2026-09-29 02:22:19,858 | INFO | __main__ | Epoch 13 train batch 270/289 | loss=0.7458 | dice_ch=[0.4249, 0.5223, 0.2459] | lr=3.11e-05
+2026-09-29 02:23:23,783 | INFO | __main__ | Epoch 13 train batch 280/289 | loss=0.6920 | dice_ch=[0.5245, 0.7204, 0.1092] | lr=3.08e-05
+2026-09-29 02:24:20,265 | INFO | __main__ | Epoch 13 train batch 289/289 | loss=0.7676 | dice_ch=[0.5871, 0.5711, 0.5188] | lr=3.06e-05
+2026-09-29 02:24:20,266 | INFO | __main__ | Epoch 13 train channel Dice losses ET/TC/WT = 0.5946 / 0.5107 / 0.3821
+2026-09-29 02:24:27,424 | INFO | __main__ | Epoch 13 val batch 1/20
+2026-09-29 02:25:29,668 | INFO | __main__ | Epoch 13 val batch 10/20
+2026-09-29 02:26:35,098 | INFO | __main__ | Epoch 13 val batch 20/20
+2026-09-29 02:26:35,103 | INFO | __main__ | Epoch 13/20 | train_loss=0.7492 | dice_ch=[0.595,0.511,0.382] | val_dice=0.6503 (ET=0.539 TC=0.693 WT=0.719) | 1966.8s | lr=3.06e-05
+2026-09-29 02:26:35,758 | INFO | __main__ | New best mean val Dice 0.6503 -> checkpoints/brats_scale_full/best_model.pt
+2026-09-29 02:26:41,566 | INFO | __main__ | Epoch 14 train batch 1/289 | loss=0.5728 | dice_ch=[0.1449, 0.2173, 0.0643] | lr=3.06e-05
+2026-09-29 02:27:37,520 | INFO | __main__ | Epoch 14 train batch 10/289 | loss=0.6075 | dice_ch=[0.1761, 0.1374, 0.0736] | lr=3.04e-05
+2026-09-29 02:28:41,466 | INFO | __main__ | Epoch 14 train batch 20/289 | loss=0.5530 | dice_ch=[0.1967, 0.1209, 0.0892] | lr=3.01e-05
+2026-09-29 02:29:45,345 | INFO | __main__ | Epoch 14 train batch 30/289 | loss=0.6721 | dice_ch=[0.5818, 0.563, 0.2002] | lr=2.98e-05
+2026-09-29 02:30:49,563 | INFO | __main__ | Epoch 14 train batch 40/289 | loss=0.5573 | dice_ch=[0.2363, 0.1144, 0.1315] | lr=2.96e-05
+2026-09-29 02:31:52,578 | INFO | __main__ | Epoch 14 train batch 50/289 | loss=0.8820 | dice_ch=[0.638, 0.677, 0.5644] | lr=2.93e-05
+2026-09-29 02:32:56,799 | INFO | __main__ | Epoch 14 train batch 60/289 | loss=0.8635 | dice_ch=[1.0, 0.6206, 0.5595] | lr=2.91e-05
+2026-09-29 02:34:00,285 | INFO | __main__ | Epoch 14 train batch 70/289 | loss=0.9009 | dice_ch=[0.8266, 0.8673, 0.6401] | lr=2.88e-05
+2026-09-29 02:35:03,263 | INFO | __main__ | Epoch 14 train batch 80/289 | loss=0.6042 | dice_ch=[0.1968, 0.1281, 0.1403] | lr=2.86e-05
+2026-09-29 02:36:06,218 | INFO | __main__ | Epoch 14 train batch 90/289 | loss=0.6792 | dice_ch=[0.7893, 0.2264, 0.0631] | lr=2.83e-05
+2026-09-29 02:37:09,609 | INFO | __main__ | Epoch 14 train batch 100/289 | loss=0.8040 | dice_ch=[0.6461, 0.6319, 0.5773] | lr=2.81e-05
+2026-09-29 02:38:15,205 | INFO | __main__ | Epoch 14 train batch 110/289 | loss=0.9723 | dice_ch=[1.0, 1.0, 0.7839] | lr=2.78e-05
+2026-09-29 02:39:18,975 | INFO | __main__ | Epoch 14 train batch 120/289 | loss=1.0000 | dice_ch=[1.0, 1.0, 1.0] | lr=2.76e-05
+2026-09-29 02:40:22,905 | INFO | __main__ | Epoch 14 train batch 130/289 | loss=1.0000 | dice_ch=[1.0, 1.0, 1.0] | lr=2.73e-05
+2026-09-29 02:41:25,552 | INFO | __main__ | Epoch 14 train batch 140/289 | loss=0.6449 | dice_ch=[1.0, 0.2976, 0.0555] | lr=2.71e-05
+2026-09-29 02:42:29,951 | INFO | __main__ | Epoch 14 train batch 150/289 | loss=0.6093 | dice_ch=[0.338, 0.4843, 0.049] | lr=2.68e-05
+2026-09-29 02:43:34,759 | INFO | __main__ | Epoch 14 train batch 160/289 | loss=0.7363 | dice_ch=[0.5339, 0.5266, 0.5203] | lr=2.66e-05
+2026-09-29 02:44:36,179 | INFO | __main__ | Epoch 14 train batch 170/289 | loss=0.9838 | dice_ch=[0.9998, 0.9994, 0.8092] | lr=2.63e-05
+2026-09-29 02:45:37,583 | INFO | __main__ | Epoch 14 train batch 180/289 | loss=0.6883 | dice_ch=[0.2071, 0.2492, 0.1806] | lr=2.61e-05
+2026-09-29 02:46:39,586 | INFO | __main__ | Epoch 14 train batch 190/289 | loss=0.7403 | dice_ch=[0.2461, 0.1641, 0.2021] | lr=2.58e-05
+2026-09-29 02:47:42,594 | INFO | __main__ | Epoch 14 train batch 200/289 | loss=0.4901 | dice_ch=[0.1021, 0.0736, 0.0678] | lr=2.56e-05
+2026-09-29 02:48:44,803 | INFO | __main__ | Epoch 14 train batch 210/289 | loss=0.5848 | dice_ch=[0.4046, 0.1743, 0.1471] | lr=2.53e-05
+2026-09-29 02:49:45,976 | INFO | __main__ | Epoch 14 train batch 220/289 | loss=0.9387 | dice_ch=[0.7359, 0.8046, 0.6651] | lr=2.51e-05
+2026-09-29 02:50:47,336 | INFO | __main__ | Epoch 14 train batch 230/289 | loss=0.9663 | dice_ch=[0.9895, 0.9918, 0.6138] | lr=2.48e-05
+2026-09-29 02:51:48,378 | INFO | __main__ | Epoch 14 train batch 240/289 | loss=0.4945 | dice_ch=[0.1124, 0.1095, 0.0554] | lr=2.46e-05
+2026-09-29 02:52:49,192 | INFO | __main__ | Epoch 14 train batch 250/289 | loss=0.7962 | dice_ch=[0.441, 0.3588, 0.3662] | lr=2.44e-05
+2026-09-29 02:53:49,992 | INFO | __main__ | Epoch 14 train batch 260/289 | loss=0.7651 | dice_ch=[0.6081, 0.5906, 0.2887] | lr=2.41e-05
+2026-09-29 02:54:49,563 | INFO | __main__ | Epoch 14 train batch 270/289 | loss=0.7701 | dice_ch=[0.4834, 0.3419, 0.2376] | lr=2.39e-05
+2026-09-29 02:55:49,140 | INFO | __main__ | Epoch 14 train batch 280/289 | loss=0.8554 | dice_ch=[0.912, 0.6683, 0.5778] | lr=2.36e-05
+2026-09-29 02:56:42,960 | INFO | __main__ | Epoch 14 train batch 289/289 | loss=0.9512 | dice_ch=[1.0, 0.7399, 0.7048] | lr=2.34e-05
+2026-09-29 02:56:42,961 | INFO | __main__ | Epoch 14 train channel Dice losses ET/TC/WT = 0.5797 / 0.4798 / 0.3712
+2026-09-29 02:56:49,586 | INFO | __main__ | Epoch 14 val batch 1/20
+2026-09-29 02:57:48,157 | INFO | __main__ | Epoch 14 val batch 10/20
+2026-09-29 02:58:49,828 | INFO | __main__ | Epoch 14 val batch 20/20
+2026-09-29 02:58:49,834 | INFO | __main__ | Epoch 14/20 | train_loss=0.7350 | dice_ch=[0.580,0.480,0.371] | val_dice=0.6463 (ET=0.497 TC=0.666 WT=0.776) | 1934.0s | lr=2.34e-05
+2026-09-29 02:58:55,736 | INFO | __main__ | Epoch 15 train batch 1/289 | loss=0.7367 | dice_ch=[0.5793, 0.5596, 0.4604] | lr=2.34e-05
+2026-09-29 02:59:48,119 | INFO | __main__ | Epoch 15 train batch 10/289 | loss=0.8512 | dice_ch=[0.5745, 0.5852, 0.5815] | lr=2.32e-05
+2026-09-29 03:00:47,230 | INFO | __main__ | Epoch 15 train batch 20/289 | loss=0.7361 | dice_ch=[0.583, 0.5321, 0.5237] | lr=2.30e-05
+2026-09-29 03:01:46,046 | INFO | __main__ | Epoch 15 train batch 30/289 | loss=0.8532 | dice_ch=[0.9027, 0.6717, 0.5518] | lr=2.27e-05
+2026-09-29 03:02:45,664 | INFO | __main__ | Epoch 15 train batch 40/289 | loss=0.8489 | dice_ch=[0.604, 0.6201, 0.56] | lr=2.25e-05
+2026-09-29 03:03:44,699 | INFO | __main__ | Epoch 15 train batch 50/289 | loss=0.7581 | dice_ch=[1.0, 0.612, 0.128] | lr=2.23e-05
+2026-09-29 03:04:42,882 | INFO | __main__ | Epoch 15 train batch 60/289 | loss=1.0000 | dice_ch=[1.0, 1.0, 1.0] | lr=2.20e-05
+2026-09-29 03:05:40,491 | INFO | __main__ | Epoch 15 train batch 70/289 | loss=0.6874 | dice_ch=[0.5831, 0.5519, 0.1108] | lr=2.18e-05
+2026-09-29 03:06:38,049 | INFO | __main__ | Epoch 15 train batch 80/289 | loss=0.9406 | dice_ch=[0.9412, 0.8851, 0.7695] | lr=2.16e-05
+2026-09-29 03:07:36,333 | INFO | __main__ | Epoch 15 train batch 90/289 | loss=0.7269 | dice_ch=[0.5582, 0.5243, 0.5229] | lr=2.13e-05
+2026-09-29 03:08:34,168 | INFO | __main__ | Epoch 15 train batch 100/289 | loss=0.7307 | dice_ch=[0.594, 0.5328, 0.5204] | lr=2.11e-05
+2026-09-29 03:09:31,621 | INFO | __main__ | Epoch 15 train batch 110/289 | loss=0.6406 | dice_ch=[0.4264, 0.6396, 0.054] | lr=2.09e-05
+2026-09-29 03:10:29,061 | INFO | __main__ | Epoch 15 train batch 120/289 | loss=0.7448 | dice_ch=[0.545, 0.5356, 0.5311] | lr=2.06e-05
+2026-09-29 03:11:26,416 | INFO | __main__ | Epoch 15 train batch 130/289 | loss=0.5876 | dice_ch=[0.2659, 0.1021, 0.1274] | lr=2.04e-05
+2026-09-29 03:12:24,961 | INFO | __main__ | Epoch 15 train batch 140/289 | loss=0.6790 | dice_ch=[0.499, 0.5686, 0.2115] | lr=2.02e-05
+2026-09-29 03:13:22,737 | INFO | __main__ | Epoch 15 train batch 150/289 | loss=0.8754 | dice_ch=[0.8717, 0.9437, 0.5636] | lr=2.00e-05
+2026-09-29 03:14:20,814 | INFO | __main__ | Epoch 15 train batch 160/289 | loss=1.0000 | dice_ch=[1.0, 1.0, 1.0] | lr=1.98e-05
+2026-09-29 03:15:18,975 | INFO | __main__ | Epoch 15 train batch 170/289 | loss=0.6352 | dice_ch=[0.1803, 0.2154, 0.0881] | lr=1.95e-05
+2026-09-29 03:16:16,255 | INFO | __main__ | Epoch 15 train batch 180/289 | loss=0.9902 | dice_ch=[1.0, 1.0, 0.842] | lr=1.93e-05
+2026-09-29 03:17:14,421 | INFO | __main__ | Epoch 15 train batch 190/289 | loss=0.7481 | dice_ch=[0.6226, 0.5421, 0.5321] | lr=1.91e-05
+2026-09-29 03:18:12,485 | INFO | __main__ | Epoch 15 train batch 200/289 | loss=0.5237 | dice_ch=[0.1374, 0.161, 0.0611] | lr=1.89e-05
+2026-09-29 03:19:10,229 | INFO | __main__ | Epoch 15 train batch 210/289 | loss=0.6203 | dice_ch=[0.5423, 0.536, 0.0587] | lr=1.87e-05
+2026-09-29 03:20:07,755 | INFO | __main__ | Epoch 15 train batch 220/289 | loss=0.4896 | dice_ch=[0.1791, 0.0643, 0.0395] | lr=1.84e-05
+2026-09-29 03:21:05,177 | INFO | __main__ | Epoch 15 train batch 230/289 | loss=1.0000 | dice_ch=[1.0, 1.0, 1.0] | lr=1.82e-05
+2026-09-29 03:22:04,094 | INFO | __main__ | Epoch 15 train batch 240/289 | loss=0.7615 | dice_ch=[0.6132, 0.5607, 0.5499] | lr=1.80e-05
+2026-09-29 03:23:02,347 | INFO | __main__ | Epoch 15 train batch 250/289 | loss=0.5728 | dice_ch=[0.1658, 0.1243, 0.0726] | lr=1.78e-05
+2026-09-29 03:23:59,773 | INFO | __main__ | Epoch 15 train batch 260/289 | loss=0.5139 | dice_ch=[0.24, 0.1547, 0.0691] | lr=1.76e-05
+2026-09-29 03:24:56,535 | INFO | __main__ | Epoch 15 train batch 270/289 | loss=0.5992 | dice_ch=[1.0, 0.1174, 0.0761] | lr=1.74e-05
+2026-09-29 03:25:54,128 | INFO | __main__ | Epoch 15 train batch 280/289 | loss=0.4869 | dice_ch=[0.1215, 0.0863, 0.0833] | lr=1.72e-05
+2026-09-29 03:26:45,784 | INFO | __main__ | Epoch 15 train batch 289/289 | loss=0.8634 | dice_ch=[0.5908, 0.6608, 0.6248] | lr=1.70e-05
+2026-09-29 03:26:45,785 | INFO | __main__ | Epoch 15 train channel Dice losses ET/TC/WT = 0.5687 / 0.4688 / 0.3424
+2026-09-29 03:26:52,311 | INFO | __main__ | Epoch 15 val batch 1/20
+2026-09-29 03:27:49,349 | INFO | __main__ | Epoch 15 val batch 10/20
+2026-09-29 03:28:49,300 | INFO | __main__ | Epoch 15 val batch 20/20
+2026-09-29 03:28:49,304 | INFO | __main__ | Epoch 15/20 | train_loss=0.7147 | dice_ch=[0.569,0.469,0.342] | val_dice=0.7109 (ET=0.562 TC=0.730 WT=0.841) | 1799.1s | lr=1.70e-05
+2026-09-29 03:28:49,876 | INFO | __main__ | New best mean val Dice 0.7109 -> checkpoints/brats_scale_full/best_model.pt
+2026-09-29 03:28:55,129 | INFO | __main__ | Epoch 16 train batch 1/289 | loss=0.5054 | dice_ch=[0.259, 0.1111, 0.0519] | lr=1.70e-05
+2026-09-29 03:29:45,376 | INFO | __main__ | Epoch 16 train batch 10/289 | loss=0.7949 | dice_ch=[0.5536, 0.6094, 0.6108] | lr=1.68e-05
+2026-09-29 03:30:44,622 | INFO | __main__ | Epoch 16 train batch 20/289 | loss=0.4537 | dice_ch=[0.1244, 0.1217, 0.0485] | lr=1.66e-05
+2026-09-29 03:31:43,932 | INFO | __main__ | Epoch 16 train batch 30/289 | loss=0.9588 | dice_ch=[0.7903, 0.7928, 0.7576] | lr=1.64e-05
+2026-09-29 03:32:42,225 | INFO | __main__ | Epoch 16 train batch 40/289 | loss=0.8517 | dice_ch=[1.0, 0.574, 0.5784] | lr=1.61e-05
+2026-09-29 03:33:39,672 | INFO | __main__ | Epoch 16 train batch 50/289 | loss=0.4883 | dice_ch=[0.1372, 0.1436, 0.0376] | lr=1.59e-05
+2026-09-29 03:34:37,234 | INFO | __main__ | Epoch 16 train batch 60/289 | loss=0.4520 | dice_ch=[0.103, 0.0522, 0.0582] | lr=1.57e-05
+2026-09-29 03:35:34,033 | INFO | __main__ | Epoch 16 train batch 70/289 | loss=0.4974 | dice_ch=[0.129, 0.0695, 0.1541] | lr=1.55e-05
+2026-09-29 03:36:30,150 | INFO | __main__ | Epoch 16 train batch 80/289 | loss=0.6729 | dice_ch=[1.0, 0.2956, 0.0773] | lr=1.53e-05
+2026-09-29 03:37:27,588 | INFO | __main__ | Epoch 16 train batch 90/289 | loss=0.6058 | dice_ch=[0.2048, 0.3691, 0.1615] | lr=1.51e-05
+2026-09-29 03:38:24,666 | INFO | __main__ | Epoch 16 train batch 100/289 | loss=0.7477 | dice_ch=[0.6468, 0.5576, 0.5283] | lr=1.49e-05
+2026-09-29 03:39:20,660 | INFO | __main__ | Epoch 16 train batch 110/289 | loss=0.7675 | dice_ch=[0.657, 0.5506, 0.5451] | lr=1.48e-05
+2026-09-29 03:40:24,244 | INFO | __main__ | Epoch 16 train batch 120/289 | loss=0.7473 | dice_ch=[0.5749, 0.549, 0.5348] | lr=1.46e-05
+2026-09-29 03:41:23,591 | INFO | __main__ | Epoch 16 train batch 130/289 | loss=0.5981 | dice_ch=[0.2767, 0.2591, 0.0588] | lr=1.44e-05
+2026-09-29 03:42:23,778 | INFO | __main__ | Epoch 16 train batch 140/289 | loss=0.4964 | dice_ch=[0.0843, 0.053, 0.0523] | lr=1.42e-05
+2026-09-29 03:43:21,342 | INFO | __main__ | Epoch 16 train batch 150/289 | loss=0.7319 | dice_ch=[0.573, 0.5386, 0.5407] | lr=1.40e-05
+2026-09-29 03:44:18,116 | INFO | __main__ | Epoch 16 train batch 160/289 | loss=0.7468 | dice_ch=[0.5543, 0.5343, 0.5453] | lr=1.38e-05
+2026-09-29 03:45:14,231 | INFO | __main__ | Epoch 16 train batch 170/289 | loss=0.8344 | dice_ch=[0.7056, 0.6325, 0.5544] | lr=1.36e-05
+2026-09-29 03:46:10,173 | INFO | __main__ | Epoch 16 train batch 180/289 | loss=0.6611 | dice_ch=[0.2998, 0.2177, 0.2264] | lr=1.34e-05
+2026-09-29 03:47:09,055 | INFO | __main__ | Epoch 16 train batch 190/289 | loss=0.7549 | dice_ch=[0.6175, 0.5535, 0.5466] | lr=1.32e-05
+2026-09-29 03:48:06,967 | INFO | __main__ | Epoch 16 train batch 200/289 | loss=0.7675 | dice_ch=[0.8538, 0.1659, 0.1076] | lr=1.30e-05
+2026-09-29 03:49:04,977 | INFO | __main__ | Epoch 16 train batch 210/289 | loss=0.5725 | dice_ch=[0.2352, 0.2114, 0.0849] | lr=1.29e-05
+2026-09-29 03:50:03,844 | INFO | __main__ | Epoch 16 train batch 220/289 | loss=0.5125 | dice_ch=[0.1771, 0.1491, 0.0905] | lr=1.27e-05
+2026-09-29 03:51:01,121 | INFO | __main__ | Epoch 16 train batch 230/289 | loss=0.5322 | dice_ch=[0.1363, 0.0564, 0.0456] | lr=1.25e-05
+2026-09-29 03:51:58,428 | INFO | __main__ | Epoch 16 train batch 240/289 | loss=0.6295 | dice_ch=[0.8737, 0.0954, 0.0873] | lr=1.23e-05
+2026-09-29 03:52:59,653 | INFO | __main__ | Epoch 16 train batch 250/289 | loss=0.8066 | dice_ch=[0.6058, 0.6161, 0.5844] | lr=1.21e-05
+2026-09-29 03:53:57,855 | INFO | __main__ | Epoch 16 train batch 260/289 | loss=1.0000 | dice_ch=[1.0, 1.0, 1.0] | lr=1.19e-05
+2026-09-29 03:54:54,583 | INFO | __main__ | Epoch 16 train batch 270/289 | loss=0.9264 | dice_ch=[1.0, 1.0, 0.5814] | lr=1.18e-05
+2026-09-29 03:55:51,208 | INFO | __main__ | Epoch 16 train batch 280/289 | loss=0.8416 | dice_ch=[1.0, 0.5966, 0.559] | lr=1.16e-05
+2026-09-29 03:56:42,447 | INFO | __main__ | Epoch 16 train batch 289/289 | loss=0.7406 | dice_ch=[0.6012, 0.5207, 0.5267] | lr=1.14e-05
+2026-09-29 03:56:42,448 | INFO | __main__ | Epoch 16 train channel Dice losses ET/TC/WT = 0.5608 / 0.4676 / 0.3602
+2026-09-29 03:56:48,924 | INFO | __main__ | Epoch 16 val batch 1/20
+2026-09-29 03:57:45,321 | INFO | __main__ | Epoch 16 val batch 10/20
+2026-09-29 03:58:45,483 | INFO | __main__ | Epoch 16 val batch 20/20
+2026-09-29 03:58:45,488 | INFO | __main__ | Epoch 16/20 | train_loss=0.7155 | dice_ch=[0.561,0.468,0.360] | val_dice=0.7000 (ET=0.566 TC=0.721 WT=0.813) | 1795.6s | lr=1.14e-05
+2026-09-29 03:58:51,339 | INFO | __main__ | Epoch 17 train batch 1/289 | loss=0.9876 | dice_ch=[1.0, 0.9452, 0.734] | lr=1.14e-05
+2026-09-29 03:59:42,130 | INFO | __main__ | Epoch 17 train batch 10/289 | loss=0.5262 | dice_ch=[0.1042, 0.1575, 0.0748] | lr=1.13e-05
+2026-09-29 04:00:40,229 | INFO | __main__ | Epoch 17 train batch 20/289 | loss=0.8311 | dice_ch=[0.8202, 0.8062, 0.5496] | lr=1.11e-05
+2026-09-29 04:01:37,450 | INFO | __main__ | Epoch 17 train batch 30/289 | loss=1.0000 | dice_ch=[1.0, 1.0, 1.0] | lr=1.09e-05
+2026-09-29 04:02:35,129 | INFO | __main__ | Epoch 17 train batch 40/289 | loss=0.6777 | dice_ch=[0.4116, 0.5727, 0.1674] | lr=1.08e-05
+2026-09-29 04:03:32,999 | INFO | __main__ | Epoch 17 train batch 50/289 | loss=0.9986 | dice_ch=[1.0, 1.0, 0.9852] | lr=1.06e-05
+2026-09-29 04:04:29,873 | INFO | __main__ | Epoch 17 train batch 60/289 | loss=0.7995 | dice_ch=[0.5969, 0.5629, 0.5508] | lr=1.04e-05
+2026-09-29 04:05:27,355 | INFO | __main__ | Epoch 17 train batch 70/289 | loss=0.5071 | dice_ch=[0.1517, 0.0563, 0.0435] | lr=1.03e-05
+2026-09-29 04:06:24,135 | INFO | __main__ | Epoch 17 train batch 80/289 | loss=0.5585 | dice_ch=[0.1376, 0.1265, 0.0696] | lr=1.01e-05
+2026-09-29 04:07:22,139 | INFO | __main__ | Epoch 17 train batch 90/289 | loss=0.7325 | dice_ch=[0.5643, 0.5454, 0.5228] | lr=9.92e-06
+2026-09-29 04:08:19,318 | INFO | __main__ | Epoch 17 train batch 100/289 | loss=0.5979 | dice_ch=[1.0, 0.1274, 0.0478] | lr=9.76e-06
+2026-09-29 04:09:15,668 | INFO | __main__ | Epoch 17 train batch 110/289 | loss=0.8721 | dice_ch=[0.6231, 0.6269, 0.5552] | lr=9.60e-06
+2026-09-29 04:10:12,198 | INFO | __main__ | Epoch 17 train batch 120/289 | loss=0.6893 | dice_ch=[0.7324, 0.0608, 0.0905] | lr=9.44e-06
+2026-09-29 04:11:08,509 | INFO | __main__ | Epoch 17 train batch 130/289 | loss=0.4837 | dice_ch=[0.1975, 0.0965, 0.0862] | lr=9.29e-06
+2026-09-29 04:12:06,325 | INFO | __main__ | Epoch 17 train batch 140/289 | loss=0.7963 | dice_ch=[0.5921, 0.6034, 0.3006] | lr=9.13e-06
+2026-09-29 04:13:04,137 | INFO | __main__ | Epoch 17 train batch 150/289 | loss=0.4750 | dice_ch=[0.2077, 0.0418, 0.0569] | lr=8.98e-06
+2026-09-29 04:14:00,308 | INFO | __main__ | Epoch 17 train batch 160/289 | loss=0.7379 | dice_ch=[0.5586, 0.5269, 0.5918] | lr=8.82e-06
+2026-09-29 04:14:56,693 | INFO | __main__ | Epoch 17 train batch 170/289 | loss=0.7308 | dice_ch=[0.6482, 0.5409, 0.446] | lr=8.67e-06
+2026-09-29 04:15:53,289 | INFO | __main__ | Epoch 17 train batch 180/289 | loss=0.4745 | dice_ch=[0.212, 0.0864, 0.0661] | lr=8.52e-06
+2026-09-29 04:16:50,426 | INFO | __main__ | Epoch 17 train batch 190/289 | loss=1.0000 | dice_ch=[1.0, 1.0, 0.9998] | lr=8.37e-06
+2026-09-29 04:17:48,393 | INFO | __main__ | Epoch 17 train batch 200/289 | loss=0.5065 | dice_ch=[0.2845, 0.1138, 0.0964] | lr=8.22e-06
+2026-09-29 04:18:45,112 | INFO | __main__ | Epoch 17 train batch 210/289 | loss=0.4732 | dice_ch=[0.0987, 0.1076, 0.0676] | lr=8.08e-06
+2026-09-29 04:19:41,602 | INFO | __main__ | Epoch 17 train batch 220/289 | loss=0.8761 | dice_ch=[1.0, 1.0, 0.5206] | lr=7.93e-06
+2026-09-29 04:20:38,322 | INFO | __main__ | Epoch 17 train batch 230/289 | loss=0.5034 | dice_ch=[0.1885, 0.1435, 0.1565] | lr=7.79e-06
+2026-09-29 04:21:34,505 | INFO | __main__ | Epoch 17 train batch 240/289 | loss=0.5901 | dice_ch=[0.1796, 0.1117, 0.1222] | lr=7.64e-06
+2026-09-29 04:22:32,427 | INFO | __main__ | Epoch 17 train batch 250/289 | loss=0.4387 | dice_ch=[0.1667, 0.0581, 0.0395] | lr=7.50e-06
+2026-09-29 04:23:29,913 | INFO | __main__ | Epoch 17 train batch 260/289 | loss=0.5474 | dice_ch=[0.241, 0.2031, 0.0503] | lr=7.36e-06
+2026-09-29 04:24:27,347 | INFO | __main__ | Epoch 17 train batch 270/289 | loss=0.5561 | dice_ch=[0.1087, 0.1626, 0.0381] | lr=7.22e-06
+2026-09-29 04:25:25,130 | INFO | __main__ | Epoch 17 train batch 280/289 | loss=0.7245 | dice_ch=[0.535, 0.5182, 0.5185] | lr=7.09e-06
+2026-09-29 04:26:16,650 | INFO | __main__ | Epoch 17 train batch 289/289 | loss=0.5181 | dice_ch=[0.2738, 0.1043, 0.075] | lr=6.97e-06
+2026-09-29 04:26:16,652 | INFO | __main__ | Epoch 17 train channel Dice losses ET/TC/WT = 0.5433 / 0.4500 / 0.3399
+2026-09-29 04:26:22,800 | INFO | __main__ | Epoch 17 val batch 1/20
+2026-09-29 04:27:20,309 | INFO | __main__ | Epoch 17 val batch 10/20
+2026-09-29 04:28:21,936 | INFO | __main__ | Epoch 17 val batch 20/20
+2026-09-29 04:28:21,942 | INFO | __main__ | Epoch 17/20 | train_loss=0.7031 | dice_ch=[0.543,0.450,0.340] | val_dice=0.6988 (ET=0.556 TC=0.727 WT=0.813) | 1776.1s | lr=6.97e-06
+2026-09-29 04:28:27,884 | INFO | __main__ | Epoch 18 train batch 1/289 | loss=0.4906 | dice_ch=[0.2268, 0.0838, 0.0521] | lr=6.95e-06
+2026-09-29 04:29:18,037 | INFO | __main__ | Epoch 18 train batch 10/289 | loss=0.7317 | dice_ch=[0.5717, 0.5335, 0.5265] | lr=6.83e-06
+2026-09-29 04:30:12,802 | INFO | __main__ | Epoch 18 train batch 20/289 | loss=0.7202 | dice_ch=[0.5565, 0.5329, 0.5177] | lr=6.70e-06
+2026-09-29 04:31:07,234 | INFO | __main__ | Epoch 18 train batch 30/289 | loss=0.6498 | dice_ch=[0.3228, 0.2009, 0.212] | lr=6.57e-06
+2026-09-29 04:31:59,633 | INFO | __main__ | Epoch 18 train batch 40/289 | loss=0.7238 | dice_ch=[0.5554, 0.5338, 0.5352] | lr=6.44e-06
+2026-09-29 04:32:52,718 | INFO | __main__ | Epoch 18 train batch 50/289 | loss=0.6291 | dice_ch=[0.4787, 0.4212, 0.0869] | lr=6.31e-06
+2026-09-29 04:33:46,532 | INFO | __main__ | Epoch 18 train batch 60/289 | loss=0.7296 | dice_ch=[0.5788, 0.5352, 0.5383] | lr=6.18e-06
+2026-09-29 04:34:40,166 | INFO | __main__ | Epoch 18 train batch 70/289 | loss=0.8427 | dice_ch=[0.8673, 0.6587, 0.5812] | lr=6.06e-06
+2026-09-29 04:35:33,983 | INFO | __main__ | Epoch 18 train batch 80/289 | loss=0.7664 | dice_ch=[0.5427, 0.5614, 0.5304] | lr=5.93e-06
+2026-09-29 04:36:27,959 | INFO | __main__ | Epoch 18 train batch 90/289 | loss=0.6223 | dice_ch=[0.5286, 0.5283, 0.0863] | lr=5.81e-06
+2026-09-29 04:37:23,226 | INFO | __main__ | Epoch 18 train batch 100/289 | loss=0.5095 | dice_ch=[0.1699, 0.1462, 0.1712] | lr=5.69e-06
+2026-09-29 04:38:18,636 | INFO | __main__ | Epoch 18 train batch 110/289 | loss=0.5287 | dice_ch=[0.2627, 0.2821, 0.1005] | lr=5.57e-06
+2026-09-29 04:39:13,471 | INFO | __main__ | Epoch 18 train batch 120/289 | loss=0.9020 | dice_ch=[0.7486, 0.5733, 0.5196] | lr=5.45e-06
+2026-09-29 04:40:08,401 | INFO | __main__ | Epoch 18 train batch 130/289 | loss=0.8723 | dice_ch=[0.992, 0.9721, 0.5267] | lr=5.34e-06
+2026-09-29 04:41:04,084 | INFO | __main__ | Epoch 18 train batch 140/289 | loss=0.4607 | dice_ch=[0.2159, 0.086, 0.0677] | lr=5.22e-06
+2026-09-29 04:41:59,950 | INFO | __main__ | Epoch 18 train batch 150/289 | loss=0.5260 | dice_ch=[0.1388, 0.0429, 0.0469] | lr=5.11e-06
+2026-09-29 04:42:57,658 | INFO | __main__ | Epoch 18 train batch 160/289 | loss=0.7657 | dice_ch=[0.5092, 0.6996, 0.2055] | lr=4.99e-06
+2026-09-29 04:43:53,825 | INFO | __main__ | Epoch 18 train batch 170/289 | loss=0.9098 | dice_ch=[0.975, 0.98, 0.5646] | lr=4.88e-06
+2026-09-29 04:44:49,817 | INFO | __main__ | Epoch 18 train batch 180/289 | loss=0.8031 | dice_ch=[0.5975, 0.6195, 0.5918] | lr=4.77e-06
+2026-09-29 04:45:45,082 | INFO | __main__ | Epoch 18 train batch 190/289 | loss=0.6034 | dice_ch=[0.091, 0.0937, 0.1826] | lr=4.67e-06
+2026-09-29 04:46:41,433 | INFO | __main__ | Epoch 18 train batch 200/289 | loss=0.7358 | dice_ch=[0.6338, 0.5569, 0.5291] | lr=4.56e-06
+2026-09-29 04:47:38,670 | INFO | __main__ | Epoch 18 train batch 210/289 | loss=0.6086 | dice_ch=[1.0, 0.1227, 0.0508] | lr=4.46e-06
+2026-09-29 04:48:34,978 | INFO | __main__ | Epoch 18 train batch 220/289 | loss=0.7557 | dice_ch=[0.6541, 0.5487, 0.5411] | lr=4.35e-06
+2026-09-29 04:49:30,928 | INFO | __main__ | Epoch 18 train batch 230/289 | loss=0.5224 | dice_ch=[0.1709, 0.1439, 0.0512] | lr=4.25e-06
+2026-09-29 04:50:27,080 | INFO | __main__ | Epoch 18 train batch 240/289 | loss=0.4701 | dice_ch=[0.2442, 0.0731, 0.0569] | lr=4.15e-06
+2026-09-29 04:51:22,931 | INFO | __main__ | Epoch 18 train batch 250/289 | loss=0.4981 | dice_ch=[0.2116, 0.1071, 0.085] | lr=4.05e-06
+2026-09-29 04:52:20,569 | INFO | __main__ | Epoch 18 train batch 260/289 | loss=0.7214 | dice_ch=[0.5499, 0.5343, 0.5245] | lr=3.96e-06
+2026-09-29 04:53:17,664 | INFO | __main__ | Epoch 18 train batch 270/289 | loss=0.7420 | dice_ch=[0.7177, 0.4171, 0.1138] | lr=3.86e-06
+2026-09-29 04:54:13,767 | INFO | __main__ | Epoch 18 train batch 280/289 | loss=0.6351 | dice_ch=[0.2681, 0.1127, 0.1437] | lr=3.77e-06
+2026-09-29 04:55:04,255 | INFO | __main__ | Epoch 18 train batch 289/289 | loss=1.0000 | dice_ch=[1.0, 1.0, 1.0] | lr=3.68e-06
+2026-09-29 04:55:04,256 | INFO | __main__ | Epoch 18 train channel Dice losses ET/TC/WT = 0.5385 / 0.4393 / 0.3319
+2026-09-29 04:55:10,246 | INFO | __main__ | Epoch 18 val batch 1/20
+2026-09-29 04:56:04,745 | INFO | __main__ | Epoch 18 val batch 10/20
+2026-09-29 04:57:04,183 | INFO | __main__ | Epoch 18 val batch 20/20
+2026-09-29 04:57:04,188 | INFO | __main__ | Epoch 18/20 | train_loss=0.6947 | dice_ch=[0.539,0.439,0.332] | val_dice=0.6924 (ET=0.559 TC=0.711 WT=0.807) | 1721.8s | lr=3.68e-06
+2026-09-29 04:57:10,055 | INFO | __main__ | Epoch 19 train batch 1/289 | loss=0.5776 | dice_ch=[0.1546, 0.0747, 0.0608] | lr=3.67e-06
+2026-09-29 04:58:01,273 | INFO | __main__ | Epoch 19 train batch 10/289 | loss=1.0000 | dice_ch=[1.0, 1.0, 1.0] | lr=3.59e-06
+2026-09-29 04:58:59,090 | INFO | __main__ | Epoch 19 train batch 20/289 | loss=0.4571 | dice_ch=[0.1974, 0.0828, 0.0651] | lr=3.50e-06
+2026-09-29 04:59:56,180 | INFO | __main__ | Epoch 19 train batch 30/289 | loss=0.7473 | dice_ch=[0.547, 0.5322, 0.5239] | lr=3.41e-06
+2026-09-29 05:00:53,433 | INFO | __main__ | Epoch 19 train batch 40/289 | loss=0.4311 | dice_ch=[0.1114, 0.0866, 0.0473] | lr=3.33e-06
+2026-09-29 05:01:51,178 | INFO | __main__ | Epoch 19 train batch 50/289 | loss=0.4529 | dice_ch=[0.1592, 0.046, 0.0347] | lr=3.24e-06
+2026-09-29 05:02:49,728 | INFO | __main__ | Epoch 19 train batch 60/289 | loss=0.7243 | dice_ch=[0.3864, 0.4138, 0.2716] | lr=3.16e-06
+2026-09-29 05:03:47,145 | INFO | __main__ | Epoch 19 train batch 70/289 | loss=0.7229 | dice_ch=[0.5307, 0.5445, 0.5205] | lr=3.08e-06
+2026-09-29 05:04:44,302 | INFO | __main__ | Epoch 19 train batch 80/289 | loss=0.6253 | dice_ch=[0.6728, 0.2622, 0.0407] | lr=3.00e-06
+2026-09-29 05:05:41,718 | INFO | __main__ | Epoch 19 train batch 90/289 | loss=0.6153 | dice_ch=[0.0937, 0.0933, 0.2001] | lr=2.92e-06
+2026-09-29 05:06:38,093 | INFO | __main__ | Epoch 19 train batch 100/289 | loss=0.6151 | dice_ch=[0.8699, 0.1167, 0.0867] | lr=2.84e-06
+2026-09-29 05:07:36,644 | INFO | __main__ | Epoch 19 train batch 110/289 | loss=0.6736 | dice_ch=[0.7486, 0.2951, 0.1597] | lr=2.76e-06
+2026-09-29 05:08:34,202 | INFO | __main__ | Epoch 19 train batch 120/289 | loss=0.8858 | dice_ch=[0.7829, 0.8799, 0.5353] | lr=2.69e-06
+2026-09-29 05:09:30,827 | INFO | __main__ | Epoch 19 train batch 130/289 | loss=0.8677 | dice_ch=[0.9144, 0.9701, 0.5233] | lr=2.62e-06
+2026-09-29 05:10:27,676 | INFO | __main__ | Epoch 19 train batch 140/289 | loss=0.7006 | dice_ch=[0.5737, 0.5638, 0.272] | lr=2.55e-06
+2026-09-29 05:11:24,091 | INFO | __main__ | Epoch 19 train batch 150/289 | loss=0.8805 | dice_ch=[0.6136, 0.6422, 0.6101] | lr=2.48e-06
+2026-09-29 05:12:22,058 | INFO | __main__ | Epoch 19 train batch 160/289 | loss=0.7531 | dice_ch=[0.5462, 0.5598, 0.5168] | lr=2.41e-06
+2026-09-29 05:13:19,656 | INFO | __main__ | Epoch 19 train batch 170/289 | loss=0.8523 | dice_ch=[0.8409, 0.8179, 0.5798] | lr=2.34e-06
+2026-09-29 05:14:16,266 | INFO | __main__ | Epoch 19 train batch 180/289 | loss=0.7886 | dice_ch=[0.9848, 0.594, 0.1828] | lr=2.28e-06
+2026-09-29 05:15:13,507 | INFO | __main__ | Epoch 19 train batch 190/289 | loss=0.4995 | dice_ch=[0.1643, 0.0676, 0.0617] | lr=2.21e-06
+2026-09-29 05:16:09,875 | INFO | __main__ | Epoch 19 train batch 200/289 | loss=0.8486 | dice_ch=[1.0, 0.7391, 0.5774] | lr=2.15e-06
+2026-09-29 05:17:07,686 | INFO | __main__ | Epoch 19 train batch 210/289 | loss=0.7878 | dice_ch=[0.5382, 0.5558, 0.5401] | lr=2.09e-06
+2026-09-29 05:18:05,251 | INFO | __main__ | Epoch 19 train batch 220/289 | loss=0.7836 | dice_ch=[0.5113, 0.4682, 0.2456] | lr=2.03e-06
+2026-09-29 05:19:02,133 | INFO | __main__ | Epoch 19 train batch 230/289 | loss=1.0000 | dice_ch=[1.0, 1.0, 0.9997] | lr=1.98e-06
+2026-09-29 05:19:58,750 | INFO | __main__ | Epoch 19 train batch 240/289 | loss=0.7943 | dice_ch=[0.552, 0.5352, 0.5404] | lr=1.92e-06
+2026-09-29 05:20:55,256 | INFO | __main__ | Epoch 19 train batch 250/289 | loss=0.4540 | dice_ch=[0.1299, 0.103, 0.0519] | lr=1.87e-06
+2026-09-29 05:21:52,926 | INFO | __main__ | Epoch 19 train batch 260/289 | loss=1.0000 | dice_ch=[1.0, 1.0, 1.0] | lr=1.82e-06
+2026-09-29 05:22:49,992 | INFO | __main__ | Epoch 19 train batch 270/289 | loss=0.7077 | dice_ch=[0.4023, 0.4327, 0.482] | lr=1.77e-06
+2026-09-29 05:23:46,448 | INFO | __main__ | Epoch 19 train batch 280/289 | loss=0.6567 | dice_ch=[0.3397, 0.3775, 0.0859] | lr=1.72e-06
+2026-09-29 05:24:37,539 | INFO | __main__ | Epoch 19 train batch 289/289 | loss=0.9002 | dice_ch=[0.8923, 0.8753, 0.6685] | lr=1.68e-06
+2026-09-29 05:24:37,540 | INFO | __main__ | Epoch 19 train channel Dice losses ET/TC/WT = 0.5301 / 0.4393 / 0.3395
+2026-09-29 05:24:43,697 | INFO | __main__ | Epoch 19 val batch 1/20
+2026-09-29 05:25:38,953 | INFO | __main__ | Epoch 19 val batch 10/20
+2026-09-29 05:26:37,491 | INFO | __main__ | Epoch 19 val batch 20/20
+2026-09-29 05:26:37,495 | INFO | __main__ | Epoch 19/20 | train_loss=0.6932 | dice_ch=[0.530,0.439,0.339] | val_dice=0.6966 (ET=0.563 TC=0.720 WT=0.807) | 1772.9s | lr=1.68e-06
+2026-09-29 05:26:43,564 | INFO | __main__ | Epoch 20 train batch 1/289 | loss=0.8095 | dice_ch=[1.0, 0.6153, 0.4961] | lr=1.67e-06
+2026-09-29 05:27:35,079 | INFO | __main__ | Epoch 20 train batch 10/289 | loss=0.6761 | dice_ch=[0.759, 0.3355, 0.1669] | lr=1.63e-06
+2026-09-29 05:28:33,842 | INFO | __main__ | Epoch 20 train batch 20/289 | loss=0.5033 | dice_ch=[0.167, 0.1219, 0.1861] | lr=1.59e-06
+2026-09-29 05:29:30,385 | INFO | __main__ | Epoch 20 train batch 30/289 | loss=0.7060 | dice_ch=[0.5377, 0.5247, 0.5205] | lr=1.54e-06
+2026-09-29 05:30:27,526 | INFO | __main__ | Epoch 20 train batch 40/289 | loss=0.7811 | dice_ch=[0.6194, 0.5767, 0.5806] | lr=1.50e-06
+2026-09-29 05:31:23,926 | INFO | __main__ | Epoch 20 train batch 50/289 | loss=0.6684 | dice_ch=[0.9986, 0.2535, 0.0702] | lr=1.46e-06
+2026-09-29 05:32:21,020 | INFO | __main__ | Epoch 20 train batch 60/289 | loss=1.0000 | dice_ch=[1.0, 1.0, 1.0] | lr=1.42e-06
+2026-09-29 05:33:18,728 | INFO | __main__ | Epoch 20 train batch 70/289 | loss=0.9545 | dice_ch=[1.0, 1.0, 0.466] | lr=1.39e-06
+2026-09-29 05:34:15,459 | INFO | __main__ | Epoch 20 train batch 80/289 | loss=0.4771 | dice_ch=[0.0816, 0.0672, 0.0428] | lr=1.35e-06
+2026-09-29 05:35:12,345 | INFO | __main__ | Epoch 20 train batch 90/289 | loss=0.4154 | dice_ch=[0.0771, 0.05, 0.0381] | lr=1.32e-06
+2026-09-29 05:36:08,220 | INFO | __main__ | Epoch 20 train batch 100/289 | loss=0.5536 | dice_ch=[0.1597, 0.0984, 0.1228] | lr=1.29e-06
+2026-09-29 05:37:05,779 | INFO | __main__ | Epoch 20 train batch 110/289 | loss=0.5759 | dice_ch=[0.0906, 0.0599, 0.0698] | lr=1.26e-06
+2026-09-29 05:38:02,775 | INFO | __main__ | Epoch 20 train batch 120/289 | loss=0.8155 | dice_ch=[0.7776, 0.668, 0.5485] | lr=1.23e-06
+2026-09-29 05:38:59,173 | INFO | __main__ | Epoch 20 train batch 130/289 | loss=0.8908 | dice_ch=[0.8628, 0.9144, 0.5764] | lr=1.20e-06
+2026-09-29 05:39:55,508 | INFO | __main__ | Epoch 20 train batch 140/289 | loss=0.8127 | dice_ch=[0.5801, 0.5231, 0.5228] | lr=1.18e-06
+2026-09-29 05:40:51,801 | INFO | __main__ | Epoch 20 train batch 150/289 | loss=0.6217 | dice_ch=[1.0, 0.2681, 0.065] | lr=1.16e-06
+2026-09-29 05:41:48,242 | INFO | __main__ | Epoch 20 train batch 160/289 | loss=0.5108 | dice_ch=[0.2412, 0.0732, 0.1352] | lr=1.13e-06
+2026-09-29 05:42:44,452 | INFO | __main__ | Epoch 20 train batch 170/289 | loss=0.7748 | dice_ch=[0.5783, 0.5521, 0.5353] | lr=1.11e-06
+2026-09-29 05:43:40,251 | INFO | __main__ | Epoch 20 train batch 180/289 | loss=0.4582 | dice_ch=[0.1382, 0.0617, 0.0526] | lr=1.10e-06
+2026-09-29 05:44:35,537 | INFO | __main__ | Epoch 20 train batch 190/289 | loss=0.9293 | dice_ch=[0.8151, 0.8206, 0.5322] | lr=1.08e-06
+2026-09-29 05:45:29,809 | INFO | __main__ | Epoch 20 train batch 200/289 | loss=0.8280 | dice_ch=[0.846, 0.6341, 0.5614] | lr=1.06e-06
+2026-09-29 05:46:23,062 | INFO | __main__ | Epoch 20 train batch 210/289 | loss=0.4886 | dice_ch=[0.1964, 0.107, 0.0896] | lr=1.05e-06
+2026-09-29 05:47:17,069 | INFO | __main__ | Epoch 20 train batch 220/289 | loss=0.7515 | dice_ch=[0.6219, 0.5622, 0.5551] | lr=1.04e-06
+2026-09-29 05:48:10,721 | INFO | __main__ | Epoch 20 train batch 230/289 | loss=0.7114 | dice_ch=[0.5369, 0.5232, 0.523] | lr=1.03e-06
+2026-09-29 05:49:04,226 | INFO | __main__ | Epoch 20 train batch 240/289 | loss=0.4884 | dice_ch=[0.1019, 0.1274, 0.0549] | lr=1.02e-06
+2026-09-29 05:49:56,382 | INFO | __main__ | Epoch 20 train batch 250/289 | loss=0.5732 | dice_ch=[0.1612, 0.1538, 0.1027] | lr=1.01e-06
+2026-09-29 05:50:48,586 | INFO | __main__ | Epoch 20 train batch 260/289 | loss=0.8012 | dice_ch=[0.4549, 0.4959, 0.4056] | lr=1.01e-06
+2026-09-29 05:51:40,500 | INFO | __main__ | Epoch 20 train batch 270/289 | loss=0.7938 | dice_ch=[0.7109, 0.5749, 0.5493] | lr=1.00e-06
+2026-09-29 05:52:32,613 | INFO | __main__ | Epoch 20 train batch 280/289 | loss=0.5153 | dice_ch=[0.1922, 0.1601, 0.0937] | lr=1.00e-06
+2026-09-29 05:53:19,546 | INFO | __main__ | Epoch 20 train batch 289/289 | loss=0.8364 | dice_ch=[1.0, 0.5659, 0.5471] | lr=1.00e-06
+2026-09-29 05:53:19,547 | INFO | __main__ | Epoch 20 train channel Dice losses ET/TC/WT = 0.5445 / 0.4369 / 0.3350
+2026-09-29 05:53:25,091 | INFO | __main__ | Epoch 20 val batch 1/20
+2026-09-29 05:54:14,608 | INFO | __main__ | Epoch 20 val batch 10/20
+2026-09-29 05:55:07,122 | INFO | __main__ | Epoch 20 val batch 20/20
+2026-09-29 05:55:07,130 | INFO | __main__ | Epoch 20/20 | train_loss=0.6960 | dice_ch=[0.545,0.437,0.335] | val_dice=0.7038 (ET=0.565 TC=0.729 WT=0.817) | 1709.1s | lr=1.00e-06

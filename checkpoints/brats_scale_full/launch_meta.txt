@@ -1,0 +1,8 @@
+python_pid=57733
+caffeinate_pid=57742
+started=2026-09-28T21:16:23
+SleepDisabled=1
+projected_sec_per_epoch=1098.2
+projected_total_hours=6.10
+projected_finish=2026-09-29T03:22:27
+command=caffeinate -d -i -m -s -- env PYTHONPATH=src PYTHONUNBUFFERED=1 python3 -u -m segmentation.train --train-list splits/scaleup/cfg_c_all_train.txt --val-list splits/scaleup/cfg_c_all_val.txt --heldout-list splits/heldout.txt --output-dir checkpoints/brats_scale_full --epochs 20 --batch-size 1 --lr 1e-4 --model segresnet --no-amp --log-every 10

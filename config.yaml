@@ -1,4 +1,8 @@
 # MRI pipeline configuration (paths relative to project root unless absolute)
+#
+# Local Mac constraints: limited compute + disk.
+# Primary model for inference/report: v3 (brats_scale_full).
+# Full-scale training / held-out eval artifacts live under checkpoints/ and results/.
 
 paths:
   # Clinical DICOM studies (real patients)
@@ -8,17 +12,24 @@ paths:
   brats_metadata: "archive/BraTS20 Training Metadata.csv"
   # Pipeline intermediates and exports
   processed: "data/processed"
-  # Cached BraTS H5→NIfTI volumes (build once via preprocessing.h5_to_nifti)
+  # Cached BraTS H5→NIfTI volumes (build via preprocessing.h5_to_nifti)
   brats_nifti: "data/processed/brats_nifti"
   # Model checkpoint directory
   checkpoints: "checkpoints"
 
 training:
   pretrain:
-    batch_size: 2
+    batch_size: 1
     learning_rate: 1.0e-4
-    epochs: 100
+    epochs: 30
+    # Subset of BraTS subjects (null = all; avoid full cohort on this Mac)
+    max_cases: 50
   finetune:
     batch_size: 1
     learning_rate: 1.0e-5
-    epochs: 50
+    epochs: 30
+
+# Default inference checkpoint for `python -m pipeline.cli run`
+inference:
+  checkpoint: "checkpoints/brats_scale_full/best_model.pt"
+  postprocess: "lcc"

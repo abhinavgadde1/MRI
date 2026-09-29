@@ -1,4 +1,4 @@
-"""Load and validate pipeline configuration from YAML via Pydantic."""
+"""Project configuration loader (YAML + Pydantic v2)."""
 
 from __future__ import annotations
 
@@ -6,35 +6,30 @@ from pathlib import Path
 from typing import Any
 
 import yaml
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import BaseModel, Field, field_validator
 
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_CONFIG_PATH = PROJECT_ROOT / "config.yaml"
 
 
-class StageHyperparameters(BaseModel):
-    """Hyperparameters for a single training stage."""
-
-    batch_size: int = Field(..., ge=1, description="Mini-batch size")
-    learning_rate: float = Field(..., gt=0.0, description="Optimizer learning rate")
-    epochs: int = Field(..., ge=1, description="Number of training epochs")
+class StageHyperparams(BaseModel):
+    batch_size: int = Field(ge=1)
+    learning_rate: float = Field(gt=0)
+    epochs: int = Field(ge=1)
+    max_cases: int | None = Field(default=None, ge=1)
 
 
 class TrainingConfig(BaseModel):
-    """Pretraining (e.g. BraTS) and fine-tuning (clinical) stages."""
-
-    pretrain: StageHyperparameters
-    finetune: StageHyperparameters
+    pretrain: StageHyperparams
+    finetune: StageHyperparams
 
 
 class PathsConfig(BaseModel):
-    """Filesystem locations for data and artifacts."""
-
     raw_dicom: Path
     brats: Path
-    brats_metadata: Path | None = None
+    brats_metadata: Path
     processed: Path
-    brats_nifti: Path | None = None
+    brats_nifti: Path
     checkpoints: Path
 
     @field_validator(
@@ -47,73 +42,37 @@ class PathsConfig(BaseModel):
         mode="before",
     )
     @classmethod
-    def _coerce_path(cls, value: Any) -> Any:
-        if value is None or value == "":
-            return None
-        return Path(value)
+    def _resolve_path(cls, value: Any) -> Path:
+        path = Path(value)
+        if not path.is_absolute():
+            path = PROJECT_ROOT / path
+        return path.resolve()
+
+
+class InferenceConfig(BaseModel):
+    checkpoint: Path = Field(default=Path("checkpoints/brats_scale_full/best_model.pt"))
+    postprocess: str = "lcc"
+
+    @field_validator("checkpoint", mode="before")
+    @classmethod
+    def _resolve_ckpt(cls, value: Any) -> Path:
+        path = Path(value)
+        if not path.is_absolute():
+            path = PROJECT_ROOT / path
+        return path.resolve()
 
 
 class AppConfig(BaseModel):
-    """Root configuration for the MRI pipeline."""
-
     paths: PathsConfig
     training: TrainingConfig
-    project_root: Path = Field(default_factory=lambda: PROJECT_ROOT)
-
-    @model_validator(mode="after")
-    def _resolve_paths(self) -> AppConfig:
-        root = self.project_root.resolve()
-        self.project_root = root
-        brats_nifti = self.paths.brats_nifti
-        if brats_nifti is None:
-            brats_nifti = self.paths.processed / "brats_nifti"
-        self.paths = PathsConfig(
-            raw_dicom=_resolve(root, self.paths.raw_dicom),
-            brats=_resolve(root, self.paths.brats),
-            brats_metadata=(
-                _resolve(root, self.paths.brats_metadata)
-                if self.paths.brats_metadata is not None
-                else None
-            ),
-            processed=_resolve(root, self.paths.processed),
-            brats_nifti=_resolve(root, brats_nifti),
-            checkpoints=_resolve(root, self.paths.checkpoints),
-        )
-        return self
+    inference: InferenceConfig = Field(default_factory=InferenceConfig)
 
 
-def _resolve(root: Path, path: Path) -> Path:
-    """Resolve a path relative to the project root; leave absolutes unchanged."""
-    return path if path.is_absolute() else (root / path).resolve()
-
-
-def load_config(config_path: str | Path | None = None) -> AppConfig:
-    """Load ``config.yaml`` and return a validated ``AppConfig``.
-
-    Parameters
-    ----------
-    config_path:
-        Optional path to a YAML file. Defaults to ``<project_root>/config.yaml``.
-
-    Returns
-    -------
-    AppConfig
-        Validated configuration with absolute paths.
-    """
-    path = Path(config_path) if config_path is not None else DEFAULT_CONFIG_PATH
-    if not path.is_file():
-        raise FileNotFoundError(f"Config file not found: {path}")
-
-    with path.open("r", encoding="utf-8") as handle:
-        raw = yaml.safe_load(handle) or {}
-
-    if not isinstance(raw, dict):
-        raise ValueError(f"Config root must be a mapping, got {type(raw).__name__}")
-
+def load_config(path: str | Path | None = None) -> AppConfig:
+    """Load and validate ``config.yaml`` (default: project root)."""
+    cfg_path = Path(path) if path is not None else DEFAULT_CONFIG_PATH
+    if not cfg_path.is_file():
+        raise FileNotFoundError(f"Config not found: {cfg_path}")
+    with cfg_path.open(encoding="utf-8") as fh:
+        raw = yaml.safe_load(fh) or {}
     return AppConfig.model_validate(raw)
-
-
-def ensure_output_dirs(config: AppConfig) -> None:
-    """Create processed and checkpoint directories if they do not exist."""
-    config.paths.processed.mkdir(parents=True, exist_ok=True)
-    config.paths.checkpoints.mkdir(parents=True, exist_ok=True)

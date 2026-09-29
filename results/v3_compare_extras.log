@@ -1,0 +1,14 @@
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/torch/jit/_script.py:1643: FutureWarning: `torch.jit.interface` is deprecated. Please use `torch.compile` instead.
+  warnings.warn(
+=== LCC zero-Dice WT (v3) ===
+          subject_id  gt_voxels   gt_ml  gt_n_cc  raw_voxels  raw_ml  raw_n_cc  lcc_voxels  lcc_ml  inter_raw  inter_lcc  dice_raw  dice_lcc  largest_cc_overlap_gt                                 failure_mode
+BraTS20_Training_259     119314 119.314        3      227081 227.081        15      127210  127.21      97731          0  0.564275       0.0                      0 largest_cc_keeps_fp_blob_discards_true_tumor
+=== v3 pred vs GT voxel volumes (LCC) ===
+region  n  n_pred_empty  mean_bias_ml  loa_lower_ml  loa_upper_ml  median_ratio  iqr_ratio_low  iqr_ratio_high  spearman_r   spearman_p  icc_2_1  bias_ci95_low  bias_ci95_high  median_ratio_ci95_low  median_ratio_ci95_high  icc_2_1_ci95_low  icc_2_1_ci95_high
+    ET 58             0      9.148793    -18.581097     36.878683      1.548909       1.207984        2.027071    0.871051 6.217358e-19 0.623840       6.021946       13.290936               1.363858                1.668027          0.361405           0.855147
+    TC 60             0      5.674233    -37.992546     49.341012      1.154663       1.051011        1.495830    0.754932 3.221098e-12 0.671751       0.532285       11.210370               1.100237                1.321039          0.455065           0.850730
+    WT 60             0     -2.603783    -36.556425     31.348858      1.015513       0.950581        1.103479    0.905474 2.958077e-23 0.928335      -7.279104        1.441820               0.983116                1.049532          0.858237           0.970622
+=== Pipeline-level (v3 LCC) ===
+                                       comparison  n  mean_bias_ml  loa_lower_ml  loa_upper_ml  median_ratio  iqr_ratio_low  iqr_ratio_high  spearman_r   spearman_p  icc_2_1  bias_ci95_low  bias_ci95_high  median_ratio_ci95_low  median_ratio_ci95_high  icc_2_1_ci95_low  icc_2_1_ci95_high
+                           pred_voxel_vs_gt_voxel 60     -2.603783    -36.556425     31.348858      1.015513       0.950581        1.103479    0.905474 2.958077e-23 0.928335      -7.279104         1.44182               0.983116                1.049532          0.858237           0.970622
+pred_ellipsoid_radiologist_abc_over_2_vs_gt_voxel 60     31.161917    -78.329182    140.653015      1.209710       1.095318        1.497143    0.843068 2.923893e-17 0.553748      19.254281        46.21519               1.157241                1.328721          0.331859           0.816700

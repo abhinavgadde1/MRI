@@ -1,0 +1,8 @@
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/torch/jit/_script.py:1643: FutureWarning: `torch.jit.interface` is deprecated. Please use `torch.compile` instead.
+  warnings.warn(
+<frozen runpy>:128: RuntimeWarning: 'segmentation.train' found in sys.modules after import of package 'segmentation', but prior to execution of 'segmentation.train'; this may result in unpredictable behaviour
+2026-09-23 20:17:13,252 | INFO | __main__ | Confirmed train/val disjoint from held-out (60 subjects)
+2026-09-23 20:17:13,253 | INFO | __main__ | Wrote train/val lists + config -> checkpoints/brats_v2_loss_fix_rerun
+2026-09-23 20:17:13,917 | INFO | __main__ | Training segresnet on mps | train=40 val=10 | amp=False | loss=DiceCELoss(bg=True)
+2026-09-23 20:17:13,917 | INFO | __main__ | Regions / channels: ['enhancing_tumor', 'tumor_core', 'whole_tumor']
+2026-09-23 20:17:17,260 | INFO | __main__ | Epoch 1 train batch 1/40 | loss=1.0141 | dice_ch=[0.982, 0.9689, 0.9451]

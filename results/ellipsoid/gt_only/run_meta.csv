@@ -1,0 +1,2 @@
+subjects_file,n_subjects,n_et,n_tc,n_wt,skipped_empty_et,skipped_empty_tc,skipped_empty_wt,pixdim
+splits/heldout.txt,60,58,60,60,2,0,0,"(1.0, 1.0, 1.0)"

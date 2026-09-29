@@ -1,0 +1,2 @@
+model,n_heldout,n_lcc_dice_zero,rate,cases,mechanism
+v3 (brats_scale_full),60,1,1/60,BraTS20_Training_259,"Largest-CC heuristic keeps a larger false-positive blob; true-tumor component is discarded (raw∩GT>0, LCC∩GT=0)."

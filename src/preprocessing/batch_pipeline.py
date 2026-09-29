@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import logging
+import shutil
 import time
 import traceback
 from dataclasses import asdict, dataclass, field
@@ -14,7 +15,11 @@ import numpy as np
 import pandas as pd
 
 from config import load_config
-from preprocessing.dicom_loader import discover_dicom_files, group_by_series, identify_modality
+from preprocessing.dicom_loader import (
+    discover_dicom_files,
+    group_by_series,
+    identify_modality,
+)
 from preprocessing.registration import (
     PatientPreprocessResult,
     run_nifti_preprocessing,
@@ -25,7 +30,6 @@ logger = logging.getLogger(__name__)
 
 DatasetName = Literal["real_patients", "brats"]
 
-# Kaggle BraTS2020 H5 convention: image[..., c] = FLAIR, T1, T1ce, T2
 BRATS_H5_CHANNELS: tuple[str, ...] = ("FLAIR", "T1", "T1c", "T2")
 
 
@@ -61,24 +65,55 @@ class BatchResult:
 
 
 def discover_patient_studies(raw_dicom_root: str | Path) -> list[Path]:
-    """List patient study directories under ``MRI DATA`` (or equivalent)."""
+    """List patient study directories under ``MRI DATA`` (or equivalent).
+
+    A directory looks like a patient study when it is a non-hidden folder
+    that either contains DICOM files or nested series folders.
+    """
     root = Path(raw_dicom_root)
     if not root.is_dir():
         raise NotADirectoryError(f"Patient DICOM root not found: {root}")
-    studies = sorted(
-        p for p in root.iterdir() if p.is_dir() and not p.name.startswith(".")
-    )
+
+    studies: list[Path] = []
+    for path in sorted(root.iterdir()):
+        if not path.is_dir() or path.name.startswith("."):
+            continue
+        if _looks_like_patient_study(path):
+            studies.append(path)
+
     logger.info("Discovered %d patient studies under %s", len(studies), root)
     return studies
+
+
+def _looks_like_patient_study(path: Path) -> bool:
+    """Heuristic: has .dcm files, DICOM-looking files, or UID-like subdirs."""
+    for child in path.iterdir():
+        if child.is_file():
+            suffix = child.suffix.lower()
+            if suffix in {".dcm", ".dicom", ".ima"} or suffix == "":
+                return True
+        elif child.is_dir() and not child.name.startswith("."):
+            # Series folders are often UIDs or numeric
+            if "." in child.name or child.name.isdigit() or child.name.startswith("1."):
+                return True
+            # Any nested file that looks like DICOM
+            for nested in child.rglob("*"):
+                if nested.is_file() and nested.suffix.lower() in {
+                    ".dcm",
+                    ".dicom",
+                    ".ima",
+                    "",
+                }:
+                    return True
+                break
+    return False
 
 
 def discover_brats_subjects(brats_root: str | Path) -> list[dict[str, object]]:
     """Discover BraTS subjects as H5 volumes and/or classic NIfTI folders.
 
-    Returns a list of dicts with keys:
-    - ``study_id`` (str)
-    - ``kind``: ``\"h5\"`` or ``\"nifti_dir\"``
-    - ``path``: volume index (int) for H5, or directory Path for NIfTI layouts
+    Returns dicts with keys ``study_id``, ``kind`` (``h5`` / ``nifti_dir``),
+    and ``path`` (volume index or directory).
     """
     root = Path(brats_root)
     if not root.is_dir():
@@ -86,7 +121,6 @@ def discover_brats_subjects(brats_root: str | Path) -> list[dict[str, object]]:
 
     subjects: list[dict[str, object]] = []
 
-    # Classic BraTS subject folders (e.g. BraTS20_Training_001/)
     nifti_dirs = sorted(
         p
         for p in root.iterdir()
@@ -97,7 +131,6 @@ def discover_brats_subjects(brats_root: str | Path) -> list[dict[str, object]]:
     for path in nifti_dirs:
         subjects.append({"study_id": path.name, "kind": "nifti_dir", "path": path})
 
-    # Kaggle-style per-slice H5 volumes
     slice0 = sorted(root.glob("volume_*_slice_0.h5"))
     if slice0:
         mapping = _load_brats_name_mapping(root)
@@ -106,7 +139,6 @@ def discover_brats_subjects(brats_root: str | Path) -> list[dict[str, object]]:
             study_id = mapping.get(vol_id, f"BraTS_volume_{vol_id:03d}")
             subjects.append({"study_id": study_id, "kind": "h5", "path": vol_id})
 
-    # De-duplicate by study_id (prefer nifti_dir if both exist)
     seen: set[str] = set()
     unique: list[dict[str, object]] = []
     for item in subjects:
@@ -117,7 +149,7 @@ def discover_brats_subjects(brats_root: str | Path) -> list[dict[str, object]]:
         unique.append(item)
 
     logger.info(
-        "Discovered %d BraTS subjects under %s (%d H5 volumes, %d NIfTI folders)",
+        "Discovered %d BraTS subjects under %s (%d H5, %d NIfTI folders)",
         len(unique),
         root,
         sum(1 for s in unique if s["kind"] == "h5"),
@@ -135,7 +167,6 @@ def _looks_like_brats_nifti_subject(path: Path) -> bool:
 
 
 def _load_brats_name_mapping(brats_root: Path) -> dict[int, str]:
-    """Map 1-based volume index → BraTS_2020_subject_ID when CSV is present."""
     csv_path = brats_root / "name_mapping.csv"
     if not csv_path.is_file():
         return {}
@@ -146,7 +177,6 @@ def _load_brats_name_mapping(brats_root: Path) -> dict[int, str]:
         return {}
     if "BraTS_2020_subject_ID" not in df.columns:
         return {}
-    # Rows are ordered volume 1..N in this Kaggle dump.
     return {
         i + 1: str(row)
         for i, row in enumerate(df["BraTS_2020_subject_ID"].tolist())
@@ -187,42 +217,47 @@ def convert_brats_h5_volume(
     *,
     spacing_mm: tuple[float, float, float] = (1.0, 1.0, 1.0),
 ) -> dict[str, Path]:
-    """Stack BraTS H5 slices into per-modality NIfTI volumes via ``h5_to_nifti``."""
-    from preprocessing.h5_to_nifti import (
-        group_slices_by_patient,
-        probe_spacing_metadata,
-        save_patient_niftis,
-        validate_slice_sequence,
+    """Stack BraTS H5 slices into per-modality NIfTI volumes."""
+    try:
+        import h5py
+    except ImportError as exc:
+        raise ImportError(
+            "h5py is required for BraTS H5 conversion. Install with: pip install h5py"
+        ) from exc
+    import SimpleITK as sitk
+
+    brats_root = Path(brats_root)
+    output_dir = Path(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    slice_paths = sorted(
+        brats_root.glob(f"volume_{volume_id}_slice_*.h5"),
+        key=lambda p: int(p.stem.split("_slice_")[1]),
     )
-
-    _ = spacing_mm
-    groups = group_slices_by_patient(brats_root)
-    if volume_id not in groups:
-        raise FileNotFoundError(f"No H5 slices for volume_{volume_id} under {brats_root}")
-    group = groups[volume_id]
-    record = validate_slice_sequence(group)
-    if record.status != "ok":
-        raise RuntimeError(
-            f"Invalid slice set for volume_{volume_id}: missing={record.missing_slices} "
-            f"duplicates={record.duplicate_slices} out_of_order={record.out_of_order}"
+    if not slice_paths:
+        raise FileNotFoundError(
+            f"No H5 slices for volume_{volume_id} under {brats_root}"
         )
-    affine, _source = probe_spacing_metadata(brats_root)
-    outputs = save_patient_niftis(group, output_dir, affine)
-    return {name: outputs[name] for name in BRATS_H5_CHANNELS}
 
+    channels: list[list[np.ndarray]] = [[] for _ in BRATS_H5_CHANNELS]
+    for path in slice_paths:
+        with h5py.File(path, "r") as handle:
+            image = np.asarray(handle["image"])
+        if image.ndim != 3 or image.shape[-1] < len(BRATS_H5_CHANNELS):
+            raise ValueError(f"Unexpected image shape {image.shape} in {path}")
+        for idx in range(len(BRATS_H5_CHANNELS)):
+            channels[idx].append(np.asarray(image[:, :, idx], dtype=np.float32))
 
-def ensure_brats_nifti_cache(
-    brats_root: str | Path,
-    cache_root: str | Path,
-    *,
-    force: bool = False,
-) -> Path:
-    """Build the BraTS NIfTI cache once; safe to call before training."""
-    from preprocessing.h5_to_nifti import convert_brats_h5_directory
+    modality_paths: dict[str, Path] = {}
+    for modality, slices in zip(BRATS_H5_CHANNELS, channels):
+        volume = np.stack(slices, axis=-1)
+        sitk_img = sitk.GetImageFromArray(np.transpose(volume, (2, 0, 1)))
+        sitk_img.SetSpacing(spacing_mm)
+        out = output_dir / f"{modality}.nii.gz"
+        sitk.WriteImage(sitk_img, str(out))
+        modality_paths[modality] = out
 
-    cache_root = Path(cache_root)
-    convert_brats_h5_directory(brats_root, cache_root, force=force)
-    return cache_root
+    return modality_paths
 
 
 def load_brats_nifti_subject(subject_dir: str | Path) -> dict[str, Path]:
@@ -269,9 +304,9 @@ def write_summary_csv(summaries: Sequence[StudySummary], csv_path: str | Path) -
     logger.info(
         "Wrote summary CSV %s (success=%d failed=%d skipped=%d)",
         csv_path,
-        int((df["status"] == "success").sum()),
-        int((df["status"] == "failed").sum()),
-        int((df["status"] == "skipped").sum()),
+        int((df["status"] == "success").sum()) if len(df) else 0,
+        int((df["status"] == "failed").sum()) if len(df) else 0,
+        int((df["status"] == "skipped").sum()) if len(df) else 0,
     )
     return csv_path
 
@@ -282,12 +317,12 @@ def run_batch_patients(
     *,
     atlas_path: str | Path | None = None,
     spacing_mm: float = 1.0,
-    prefer_hd_bet: bool = True,
+    use_hd_bet: bool = True,
     max_studies: int | None = None,
     summary_csv: str | Path | None = None,
     study_filter: Iterable[str] | None = None,
 ) -> BatchResult:
-    """Run the full preprocessing chain on all real-patient DICOM studies."""
+    """Run the full preprocessing chain on real-patient DICOM studies."""
     studies = discover_patient_studies(raw_dicom_root)
     if study_filter is not None:
         allow = set(study_filter)
@@ -320,7 +355,7 @@ def run_batch_patients(
                 study_name=study_id,
                 atlas_path=atlas_path,
                 spacing_mm=spacing_mm,
-                prefer_hd_bet=prefer_hd_bet,
+                use_hd_bet=use_hd_bet,
             )
             processed = sorted(result.registered_1mm.keys())
             batch.summaries.append(
@@ -358,7 +393,9 @@ def run_batch_patients(
                 )
             )
 
-    csv_path = Path(summary_csv) if summary_csv else output_root / "batch_summary_patients.csv"
+    csv_path = (
+        Path(summary_csv) if summary_csv else output_root / "batch_summary_patients.csv"
+    )
     batch.summary_csv = write_summary_csv(batch.summaries, csv_path)
     logger.info(
         "Patient batch done: %d success, %d failed / %d total",
@@ -375,7 +412,7 @@ def run_batch_brats(
     *,
     atlas_path: str | Path | None = None,
     spacing_mm: float = 1.0,
-    prefer_hd_bet: bool = True,
+    use_hd_bet: bool = True,
     max_studies: int | None = None,
     summary_csv: str | Path | None = None,
     study_filter: Iterable[str] | None = None,
@@ -410,15 +447,14 @@ def run_batch_brats(
                     brats_root, volume_id, nifti_stage
                 )
             elif kind == "nifti_dir":
-                modality_paths = load_brats_nifti_subject(Path(subject["path"]))  # type: ignore[arg-type]
-                # Copy/stage pointers into 01_brats_nifti for a uniform layout
+                modality_paths = load_brats_nifti_subject(
+                    Path(subject["path"])  # type: ignore[arg-type]
+                )
                 nifti_stage.mkdir(parents=True, exist_ok=True)
                 staged: dict[str, Path] = {}
                 for mod, src in modality_paths.items():
                     dest = nifti_stage / f"{mod}.nii.gz"
                     if not dest.exists():
-                        import shutil
-
                         shutil.copy2(src, dest)
                     staged[mod] = dest
                 modality_paths = staged
@@ -432,7 +468,7 @@ def run_batch_brats(
                 study_name=study_id,
                 atlas_path=atlas_path,
                 spacing_mm=spacing_mm,
-                prefer_hd_bet=prefer_hd_bet,
+                use_hd_bet=use_hd_bet,
             )
             processed = sorted(result.registered_1mm.keys())
             batch.summaries.append(
@@ -470,7 +506,9 @@ def run_batch_brats(
                 )
             )
 
-    csv_path = Path(summary_csv) if summary_csv else output_root / "batch_summary_brats.csv"
+    csv_path = (
+        Path(summary_csv) if summary_csv else output_root / "batch_summary_brats.csv"
+    )
     batch.summary_csv = write_summary_csv(batch.summaries, csv_path)
     logger.info(
         "BraTS batch done: %d success, %d failed / %d total",
@@ -487,7 +525,7 @@ def run_all_batches(
     brats_root: str | Path | None = None,
     processed_root: str | Path | None = None,
     atlas_path: str | Path | None = None,
-    prefer_hd_bet: bool = True,
+    use_hd_bet: bool = True,
     max_studies: int | None = None,
     config_path: str | Path | None = None,
 ) -> tuple[BatchResult, BatchResult]:
@@ -501,7 +539,7 @@ def run_all_batches(
         raw_dicom_root,
         processed_root / "real_patients",
         atlas_path=atlas_path,
-        prefer_hd_bet=prefer_hd_bet,
+        use_hd_bet=use_hd_bet,
         max_studies=max_studies,
         summary_csv=processed_root / "batch_summary_patients.csv",
     )
@@ -509,7 +547,7 @@ def run_all_batches(
         brats_root,
         processed_root / "brats",
         atlas_path=atlas_path,
-        prefer_hd_bet=prefer_hd_bet,
+        use_hd_bet=use_hd_bet,
         max_studies=max_studies,
         summary_csv=processed_root / "batch_summary_brats.csv",
     )
@@ -538,7 +576,9 @@ def main(argv: Sequence[str] | None = None) -> int:
         help="Which dataset batch to run",
     )
     parser.add_argument("--config", type=Path, default=None, help="Path to config.yaml")
-    parser.add_argument("--max-studies", type=int, default=None, help="Limit studies (debug)")
+    parser.add_argument(
+        "--max-studies", type=int, default=None, help="Limit studies (debug)"
+    )
     parser.add_argument("--atlas", type=Path, default=None, help="Optional atlas NIfTI")
     parser.add_argument(
         "--no-hd-bet",
@@ -550,14 +590,14 @@ def main(argv: Sequence[str] | None = None) -> int:
     _configure_logging(verbose=not args.quiet)
 
     cfg = load_config(args.config)
-    prefer_hd_bet = not args.no_hd_bet
+    use_hd_bet = not args.no_hd_bet
 
     if args.dataset in {"patients", "all"}:
         run_batch_patients(
             cfg.paths.raw_dicom,
             cfg.paths.processed / "real_patients",
             atlas_path=args.atlas,
-            prefer_hd_bet=prefer_hd_bet,
+            use_hd_bet=use_hd_bet,
             max_studies=args.max_studies,
             summary_csv=cfg.paths.processed / "batch_summary_patients.csv",
         )
@@ -566,31 +606,17 @@ def main(argv: Sequence[str] | None = None) -> int:
             cfg.paths.brats,
             cfg.paths.processed / "brats",
             atlas_path=args.atlas,
-            prefer_hd_bet=prefer_hd_bet,
+            use_hd_bet=use_hd_bet,
             max_studies=args.max_studies,
             summary_csv=cfg.paths.processed / "batch_summary_brats.csv",
         )
     if args.dataset == "all":
-        # Refresh combined CSV from both files if present.
         rows: list[StudySummary] = []
         for name in ("batch_summary_patients.csv", "batch_summary_brats.csv"):
             path = cfg.paths.processed / name
             if path.is_file():
-                for record in pd.read_csv(path).fillna("").to_dict(orient="records"):
-                    rows.append(
-                        StudySummary(
-                            dataset=record["dataset"],
-                            study_id=str(record["study_id"]),
-                            status=record["status"],
-                            modalities_found=str(record.get("modalities_found", "")),
-                            modalities_processed=str(
-                                record.get("modalities_processed", "")
-                            ),
-                            output_dir=str(record.get("output_dir", "")),
-                            duration_sec=float(record.get("duration_sec") or 0.0),
-                            error=str(record.get("error", "")),
-                        )
-                    )
+                for record in pd.read_csv(path).to_dict(orient="records"):
+                    rows.append(StudySummary(**record))
         if rows:
             write_summary_csv(rows, cfg.paths.processed / "batch_summary_all.csv")
     return 0

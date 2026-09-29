@@ -1,0 +1,45 @@
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/torch/jit/_script.py:1643: FutureWarning: `torch.jit.interface` is deprecated. Please use `torch.compile` instead.
+  warnings.warn(
+<frozen runpy>:128: RuntimeWarning: 'segmentation.train' found in sys.modules after import of package 'segmentation', but prior to execution of 'segmentation.train'; this may result in unpredictable behaviour
+2026-09-23 23:27:53,467 | INFO | __main__ | Confirmed train/val disjoint from held-out (60 subjects)
+2026-09-23 23:27:53,470 | INFO | __main__ | Wrote train/val lists + config -> checkpoints/brats_scale_bench_150
+2026-09-23 23:27:53,472 | INFO | __main__ | Using lazy Dataset (cache_rate=0) — safest for laptop RAM
+2026-09-23 23:27:54,158 | INFO | __main__ | LR schedule: linear warmup 15 steps (5%) then cosine 285 steps (eta_min=1.0e-06); total_steps=300
+2026-09-23 23:27:54,158 | INFO | __main__ | Training segresnet on mps | train=150 val=20 | amp=False | loss=DiceCELoss(bg=True) | sched=cosine_warmup | grad_clip=1.0 | cache_rate=0.00
+2026-09-23 23:27:54,159 | INFO | __main__ | Regions / channels: ['enhancing_tumor', 'tumor_core', 'whole_tumor']
+2026-09-23 23:27:57,882 | INFO | __main__ | Epoch 1 train batch 1/150 | loss=1.0082 | dice_ch=[0.9728, 0.9765, 0.9145] | lr=7.60e-06
+2026-09-23 23:30:30,526 | INFO | __main__ | Epoch 1 train batch 50/150 | loss=1.0003 | dice_ch=[0.9991, 0.9986, 0.9992] | lr=9.64e-05
+2026-09-23 23:33:18,085 | INFO | __main__ | Epoch 1 train batch 100/150 | loss=0.9977 | dice_ch=[0.9629, 0.9511, 0.9499] | lr=7.98e-05
+2026-09-23 23:36:14,013 | INFO | __main__ | Epoch 1 train batch 150/150 | loss=0.9899 | dice_ch=[0.9215, 0.911, 0.8634] | lr=5.46e-05
+2026-09-23 23:36:14,014 | INFO | __main__ | Epoch 1 train channel Dice losses ET/TC/WT = 0.9274 / 0.8770 / 0.8244
+2026-09-23 23:36:17,651 | INFO | __main__ | Epoch 1 val batch 1/20
+2026-09-23 23:37:24,526 | INFO | __main__ | Epoch 1 val batch 20/20
+2026-09-23 23:37:24,558 | INFO | __main__ | Epoch 1/2 | train_loss=1.0086 | dice_ch=[0.927,0.877,0.824] | val_dice=0.0804 (ET=0.071 TC=0.148 WT=0.022) | 570.4s | lr=5.46e-05
+2026-09-23 23:37:25,082 | INFO | __main__ | New best mean val Dice 0.0804 -> checkpoints/brats_scale_bench_150/best_model.pt
+2026-09-23 23:37:28,647 | INFO | __main__ | Epoch 2 train batch 1/150 | loss=0.9968 | dice_ch=[0.83, 0.6836, 0.5623] | lr=5.40e-05
+2026-09-24 00:30:10,081 | INFO | __main__ | Epoch 2 train batch 50/150 | loss=1.0169 | dice_ch=[0.7851, 0.7608, 0.7604] | lr=2.81e-05
+2026-09-24 02:13:40,194 | INFO | __main__ | Epoch 2 train batch 100/150 | loss=0.9793 | dice_ch=[0.9861, 0.9412, 0.8801] | lr=8.33e-06
+2026-09-24 04:09:05,369 | INFO | __main__ | Epoch 2 train batch 150/150 | loss=0.9992 | dice_ch=[0.9927, 0.9917, 0.9893] | lr=1.00e-06
+2026-09-24 04:09:05,372 | INFO | __main__ | Epoch 2 train channel Dice losses ET/TC/WT = 0.9027 / 0.8315 / 0.7801
+2026-09-24 04:09:13,625 | INFO | __main__ | Epoch 2 val batch 1/20
+2026-09-24 04:58:57,819 | INFO | __main__ | Epoch 2 val batch 20/20
+2026-09-24 04:58:57,836 | INFO | __main__ | Epoch 2/2 | train_loss=0.9894 | dice_ch=[0.903,0.831,0.780] | val_dice=0.0928 (ET=0.097 TC=0.143 WT=0.039) | 1169.9s | lr=1.00e-06
+2026-09-24 04:58:58,830 | INFO | __main__ | New best mean val Dice 0.0928 -> checkpoints/brats_scale_bench_150/best_model.pt
+    19869.84 real       281.85 user        24.89 sys
+          1937063936  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+             2472117  page reclaims
+               10054  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                   0  messages sent
+                   0  messages received
+                   0  signals received
+                7376  voluntary context switches
+              476074  involuntary context switches
+       3532503763206  instructions retired
+        793143072187  cycles elapsed
+          6013209768  peak memory footprint

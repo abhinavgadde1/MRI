@@ -1,4 +1,4 @@
-"""Tests for rigid registration and isotropic resampling."""
+"""Unit-level tests for registration helpers and REGISTERED_NAMES."""
 
 from pathlib import Path
 
@@ -6,10 +6,18 @@ import numpy as np
 import SimpleITK as sitk
 
 from preprocessing.registration import (
+    REGISTERED_NAMES,
     register_modalities_to_reference,
     resample_isotropic,
     rigid_register,
 )
+
+
+def test_registered_names_mapping():
+    assert REGISTERED_NAMES["FLAIR"] == "FLAIR_registered_1mm.nii.gz"
+    assert REGISTERED_NAMES["T1"] == "T1_1mm.nii.gz"
+    assert REGISTERED_NAMES["T1c"] == "T1c_registered_1mm.nii.gz"
+    assert REGISTERED_NAMES["T2"] == "T2_registered_1mm.nii.gz"
 
 
 def _blob(path: Path, *, spacing=(1.5, 1.5, 3.0), shift=(0.0, 0.0, 0.0)) -> Path:
@@ -45,12 +53,13 @@ def test_rigid_register_and_modality_bundle(tmp_path: Path):
         out,
         spacing_mm=1.0,
     )
-    assert "T1" in results and "T2" in results and "FLAIR" in results
+    assert results["T1"].name == REGISTERED_NAMES["T1"]
+    assert results["T2"].name == REGISTERED_NAMES["T2"]
+    assert results["FLAIR"].name == REGISTERED_NAMES["FLAIR"]
     for path in results.values():
         img = sitk.ReadImage(str(path))
         assert np.allclose(img.GetSpacing(), (1.0, 1.0, 1.0))
         assert path.is_file()
 
-    # Direct rigid API still works
     registered, _tfm = rigid_register(t2, t1, tmp_path / "t2_on_t1.nii.gz")
     assert registered.is_file()

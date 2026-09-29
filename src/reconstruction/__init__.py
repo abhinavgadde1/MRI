@@ -1,15 +1,13 @@
-"""3D surface reconstruction and volume metrics."""
+"""3D surface reconstruction, volume metrics, and morphometrics."""
 
-from reconstruction.measurements import TumorMeasurements, measure_from_mask, measure_from_mesh, measure_tumor
+from reconstruction.measurements import TumorMeasurements, measure_tumor
 from reconstruction.mesh import mask_to_mesh
 from reconstruction.volume import compute_mask_volume_ml, compute_mesh_volume_ml
 
 __all__ = [
-    "mask_to_mesh",
+    "TumorMeasurements",
     "compute_mask_volume_ml",
     "compute_mesh_volume_ml",
-    "TumorMeasurements",
-    "measure_from_mask",
-    "measure_from_mesh",
+    "mask_to_mesh",
     "measure_tumor",
 ]

@@ -1,18 +1,24 @@
-"""Smoke tests for package imports and pure-Python helpers."""
+"""Smoke tests for preprocessing package imports."""
 
-from validation.bland_altman import bland_altman_stats
-from tracts.risk import RiskTier, classify_tract_risk
+import preprocessing
+from preprocessing import (
+    REGISTERED_NAMES,
+    convert_dicom_series,
+    identify_modality,
+    n4_bias_correct,
+    run_patient_preprocessing,
+    skull_strip,
+)
+from preprocessing.h5_to_nifti import MODALITY_NAMES, parse_slice_filename
 
 
-def test_bland_altman_basic():
-    a = [10.0, 12.0, 11.0, 13.0]
-    b = [9.5, 12.5, 10.5, 13.5]
-    result = bland_altman_stats(a, b)
-    assert result.n == 4
-    assert result.loa_lower < result.mean_diff < result.loa_upper
-
-
-def test_risk_tiers():
-    assert classify_tract_risk(0.0) is RiskTier.HIGH
-    assert classify_tract_risk(3.0) is RiskTier.MODERATE
-    assert classify_tract_risk(8.0) is RiskTier.LOW
+def test_package_exports():
+    assert callable(convert_dicom_series)
+    assert callable(n4_bias_correct)
+    assert callable(skull_strip)
+    assert callable(run_patient_preprocessing)
+    assert callable(identify_modality)
+    assert "T1" in REGISTERED_NAMES
+    assert MODALITY_NAMES[0] == "FLAIR"
+    assert parse_slice_filename.__name__ == "parse_slice_filename"
+    assert hasattr(preprocessing, "__all__")

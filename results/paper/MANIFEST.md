@@ -1,0 +1,48 @@
+# results/paper manifest
+
+Primary model: **v3** (`brats_scale_full`). Ablation: v1 → v2 → v3.
+
+- `LIMITATIONS.md`
+- `MANIFEST.md`
+- `NEEDS_RERUN.md`
+- `environment.txt`
+- `figures/fig_ba_et_radiologist_abc_over_2_pct.png`
+- `figures/fig_ba_radiologist_abc_over_2_logratio_ET_TC_WT.png`
+- `figures/fig_ba_tc_radiologist_abc_over_2_pct.png`
+- `figures/fig_ba_wt_radiologist_abc_over_2_pct.png`
+- `figures/fig_case257_seg_vs_ellipsoid.png`
+- `figures/fig_lcc_failure_limitation.png`
+- `figures/fig_lcc_failure_v3_259.png`
+- `figures/fig_seg_wt_best_BraTS20_Training_231.png`
+- `figures/fig_seg_wt_case257_BraTS20_Training_257.png`
+- `figures/fig_seg_wt_median_BraTS20_Training_103.png`
+- `figures/fig_seg_wt_worst_BraTS20_Training_259.png`
+- `figures/fig_sphericity_vs_volume_gt.png`
+- `tables/fig_a_wt_extremes_case_ids.csv`
+- `tables/ref_pipeline_level_v1.csv`
+- `tables/ref_pipeline_level_v2.csv`
+- `tables/ref_pipeline_level_v3.csv`
+- `tables/ref_v1_vs_v2_paired_dice.csv`
+- `tables/ref_v3_paired_dice.csv`
+- `tables/table1_dataset_preprocessing.csv`
+- `tables/table1_dataset_preprocessing.md`
+- `tables/table2_paired_delta_dice.csv`
+- `tables/table2_paired_delta_dice_v3_vs_v1.csv`
+- `tables/table2_paired_delta_dice_v3_vs_v2.csv`
+- `tables/table2_segmentation_raw.csv`
+- `tables/table2_segmentation_v1_v2_v3.csv`
+- `tables/table2_segmentation_v1_v2_v3.md`
+- `tables/table2_segmentation_v1_vs_v2.csv`
+- `tables/table2_segmentation_v1_vs_v2.md`
+- `tables/table3_ellipsoid_agreement_full.csv`
+- `tables/table3_ellipsoid_gt_radiologist.csv`
+- `tables/table3_ellipsoid_gt_radiologist.md`
+- `tables/table3_ellipsoid_gt_radiologist_raw.csv`
+- `tables/table3_pipeline_v3.csv`
+- `tables/table3_pipeline_v3_raw.csv`
+- `tables/table4_lcc_failure_cases.csv`
+- `tables/table4_lcc_failure_rate.csv`
+- `tables/table4_lcc_failure_rate.md`
+- `tables/table5_case257_example.csv`
+- `tables/table5_seg_vs_formula_error.csv`
+- `tables/table5_seg_vs_formula_error.md`

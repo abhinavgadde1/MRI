@@ -53,24 +53,6 @@ def skull_strip(
     back to SimpleITK Otsu thresholding plus morphological clean-up. The method
     used is logged for each call.
 
-    Parameters
-    ----------
-    input_path:
-        Input brain MRI NIfTI.
-    output_path:
-        Destination for the skull-stripped volume.
-    mask_path:
-        Optional brain-mask destination. Defaults to ``*_brainmask.nii.gz``
-        next to ``output_path``.
-    prefer_hd_bet:
-        When True (default), try HD-BET first.
-    device:
-        HD-BET device string (``\"cpu\"`` or ``\"cuda\"`` / GPU index).
-    mode:
-        HD-BET mode (``\"accurate\"`` or ``\"fast\"``).
-    closing_radius:
-        Morphological closing radius (voxels) for the SimpleITK fallback.
-
     Returns
     -------
     SkullStripResult
@@ -81,7 +63,9 @@ def skull_strip(
     if not input_path.is_file():
         raise FileNotFoundError(f"Input NIfTI not found: {input_path}")
 
-    mask_path = Path(mask_path) if mask_path is not None else _default_mask_path(output_path)
+    mask_path = (
+        Path(mask_path) if mask_path is not None else _default_mask_path(output_path)
+    )
     output_path.parent.mkdir(parents=True, exist_ok=True)
     mask_path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -97,7 +81,7 @@ def skull_strip(
             return SkullStripResult(
                 stripped_path=output_path, mask_path=mask_path, method="hd-bet"
             )
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             logger.warning(
                 "HD-BET failed for %s (%s); falling back to SimpleITK Otsu",
                 input_path,
@@ -146,7 +130,6 @@ def _run_hd_bet(
     mode: str,
 ) -> None:
     """Run HD-BET via Python API, then CLI if needed."""
-    # Newer HD-BET exposes run_hd_bet; older builds differ slightly.
     try:
         from HD_BET.run import run_hd_bet
 
@@ -163,7 +146,6 @@ def _run_hd_bet(
     except ImportError:
         pass
     except TypeError:
-        # Signature mismatch across HD-BET versions — try positional-only form.
         try:
             from HD_BET.run import run_hd_bet
 
@@ -187,7 +169,6 @@ def _run_hd_bet(
         produced = tmp_out if tmp_out.is_file() else None
         if produced is None:
             candidates = sorted(Path(tmp).glob("*.nii*"))
-            # Prefer non-mask volumes.
             non_mask = [p for p in candidates if "mask" not in p.name.lower()]
             produced = (non_mask or candidates)[0] if candidates else None
         if produced is None:
@@ -201,9 +182,9 @@ def _run_hd_bet(
             _mask_from_stripped(input_path, output_path, mask_path)
 
 
-def _ensure_mask_alongside(input_path: Path, output_path: Path, mask_path: Path) -> None:
-    """Locate an HD-BET mask or derive one from the stripped volume."""
-    # HD-BET commonly writes <stem>_mask.nii.gz next to the stripped output.
+def _ensure_mask_alongside(
+    input_path: Path, output_path: Path, mask_path: Path
+) -> None:
     stem = output_path.name
     if stem.endswith(".nii.gz"):
         base = stem[: -len(".nii.gz")]
@@ -215,7 +196,6 @@ def _ensure_mask_alongside(input_path: Path, output_path: Path, mask_path: Path)
     candidates = [
         output_path.with_name(f"{base}_mask.nii.gz"),
         output_path.with_name(f"{base}_mask.nii"),
-        output_path.parent / f"{base}_mask.nii.gz",
     ]
     for candidate in candidates:
         if candidate.is_file():
@@ -226,8 +206,9 @@ def _ensure_mask_alongside(input_path: Path, output_path: Path, mask_path: Path)
     _mask_from_stripped(input_path, output_path, mask_path)
 
 
-def _mask_from_stripped(input_path: Path, stripped_path: Path, mask_path: Path) -> None:
-    """Build a binary mask where the stripped volume is non-zero."""
+def _mask_from_stripped(
+    input_path: Path, stripped_path: Path, mask_path: Path
+) -> None:
     stripped = sitk.ReadImage(str(stripped_path))
     mask = sitk.Cast(stripped != 0, sitk.sitkUInt8)
     original = sitk.ReadImage(str(input_path))
@@ -252,14 +233,12 @@ def _run_simpleitk_otsu(
     mask = sitk.BinaryMorphologicalClosing(mask, radius)
     mask = sitk.BinaryFillhole(mask)
 
-    # Keep the largest foreground component (brain).
     components = sitk.ConnectedComponent(mask)
     sorted_labels = sitk.RelabelComponent(components, sortByObjectSize=True)
     mask = sitk.Equal(sorted_labels, 1)
     mask = sitk.Cast(mask, sitk.sitkUInt8)
     mask.CopyInformation(original)
 
-    # Light opening to trim thin skull fragments, then dilate slightly.
     open_radius = [max(1, closing_radius - 1)] * image.GetDimension()
     mask = sitk.BinaryMorphologicalOpening(mask, open_radius)
     mask = sitk.BinaryDilate(mask, [1] * image.GetDimension())

@@ -1,0 +1,4 @@
+rank,subject_id,dice_wt,model,overlay_available
+worst,BraTS20_Training_259,0.0,v3-lcc,True
+median,BraTS20_Training_103,0.9183948040008544,v3-lcc,True
+best,BraTS20_Training_231,0.9651309847831726,v3-lcc,True

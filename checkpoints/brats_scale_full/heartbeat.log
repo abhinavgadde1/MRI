@@ -1,0 +1,145 @@
+2026-09-28 21:16:23 | heartbeat watcher started
+2026-09-28 21:16:23 epoch=1 | epoch 1/20 START
+2026-09-28 21:21:23 epoch=1 | alive (interval=300s)
+2026-09-28 21:26:23 epoch=1 | alive (interval=300s)
+2026-09-28 21:31:23 epoch=1 | alive (interval=300s)
+2026-09-28 21:34:22 epoch=1 | epoch 1/20 END val_dice=0.1873 lr=1.00e-04 sec=1078.9
+2026-09-28 21:34:23 epoch=2 | epoch 2/20 START
+2026-09-28 21:36:23 epoch=2 | alive (interval=300s)
+2026-09-28 21:41:23 epoch=2 | alive (interval=300s)
+2026-09-28 21:46:23 epoch=2 | alive (interval=300s)
+2026-09-28 21:51:23 epoch=2 | alive (interval=300s)
+2026-09-28 21:53:53 epoch=2 | epoch 2/20 END val_dice=0.2616 lr=9.93e-05 sec=1170.7
+2026-09-28 21:53:54 epoch=3 | epoch 3/20 START
+2026-09-28 21:56:23 epoch=3 | alive (interval=300s)
+2026-09-28 22:01:23 epoch=3 | alive (interval=300s)
+2026-09-28 22:06:23 epoch=3 | alive (interval=300s)
+2026-09-28 22:11:23 epoch=3 | alive (interval=300s)
+2026-09-28 22:14:06 epoch=3 | epoch 3/20 END val_dice=0.2064 lr=9.73e-05 sec=1212.3
+2026-09-28 22:14:06 epoch=4 | epoch 4/20 START
+2026-09-28 22:16:23 epoch=4 | alive (interval=300s)
+2026-09-28 22:21:23 epoch=4 | alive (interval=300s)
+2026-09-28 22:26:23 epoch=4 | alive (interval=300s)
+2026-09-28 22:31:23 epoch=4 | alive (interval=300s)
+2026-09-28 22:34:35 epoch=4 | epoch 4/20 END val_dice=0.3182 lr=9.40e-05 sec=1228.6
+2026-09-28 22:34:35 epoch=5 | epoch 5/20 START
+2026-09-28 22:36:23 epoch=5 | alive (interval=300s)
+2026-09-28 22:41:23 epoch=5 | alive (interval=300s)
+2026-09-28 22:46:23 epoch=5 | alive (interval=300s)
+2026-09-28 22:51:23 epoch=5 | alive (interval=300s)
+2026-09-28 22:54:53 epoch=5 | epoch 5/20 END val_dice=0.3796 lr=8.96e-05 sec=1218.0
+2026-09-28 22:54:54 epoch=6 | epoch 6/20 START
+2026-09-28 22:56:23 epoch=6 | alive (interval=300s)
+2026-09-28 23:01:23 epoch=6 | alive (interval=300s)
+2026-09-28 23:06:23 epoch=6 | alive (interval=300s)
+2026-09-28 23:11:23 epoch=6 | alive (interval=300s)
+2026-09-28 23:16:23 epoch=6 | alive (interval=300s)
+2026-09-28 23:16:45 epoch=6 | epoch 6/20 END val_dice=0.4063 lr=8.40e-05 sec=1311.6
+2026-09-28 23:16:46 epoch=7 | epoch 7/20 START
+2026-09-28 23:21:23 epoch=7 | alive (interval=300s)
+2026-09-28 23:26:23 epoch=7 | alive (interval=300s)
+2026-09-28 23:31:23 epoch=7 | alive (interval=300s)
+2026-09-28 23:36:23 epoch=7 | alive (interval=300s)
+2026-09-28 23:41:23 epoch=7 | alive (interval=300s)
+2026-09-28 23:42:31 epoch=7 | epoch 7/20 END val_dice=0.4044 lr=7.76e-05 sec=1545.3
+2026-09-28 23:42:31 epoch=8 | epoch 8/20 START
+2026-09-28 23:46:23 epoch=8 | alive (interval=300s)
+2026-09-28 23:51:23 epoch=8 | alive (interval=300s)
+2026-09-28 23:56:23 epoch=8 | alive (interval=300s)
+2026-09-29 00:01:23 epoch=8 | alive (interval=300s)
+2026-09-29 00:03:45 epoch=8 | epoch 8/20 END val_dice=0.4737 lr=7.04e-05 sec=1273.4
+2026-09-29 00:03:45 epoch=9 | epoch 9/20 START
+2026-09-29 00:06:23 epoch=9 | alive (interval=300s)
+2026-09-29 00:11:23 epoch=9 | alive (interval=300s)
+2026-09-29 00:16:23 epoch=9 | alive (interval=300s)
+2026-09-29 00:21:23 epoch=9 | alive (interval=300s)
+2026-09-29 00:24:47 epoch=9 | epoch 9/20 END val_dice=0.5095 lr=6.27e-05 sec=1262.3
+2026-09-29 00:24:48 epoch=10 | epoch 10/20 START
+2026-09-29 00:26:23 epoch=10 | alive (interval=300s)
+2026-09-29 00:31:23 epoch=10 | alive (interval=300s)
+2026-09-29 00:36:23 epoch=10 | alive (interval=300s)
+2026-09-29 00:41:24 epoch=10 | alive (interval=300s)
+2026-09-29 00:46:24 epoch=10 | alive (interval=300s)
+2026-09-29 00:51:00 epoch=10 | epoch 10/20 END val_dice=0.5750 lr=5.46e-05 sec=1572.3
+2026-09-29 00:51:01 epoch=11 | epoch 11/20 START
+2026-09-29 00:51:24 epoch=11 | alive (interval=300s)
+2026-09-29 00:56:23 epoch=11 | alive (interval=300s)
+2026-09-29 01:01:23 epoch=11 | alive (interval=300s)
+2026-09-29 01:06:23 epoch=11 | alive (interval=300s)
+2026-09-29 01:11:24 epoch=11 | alive (interval=300s)
+2026-09-29 01:16:24 epoch=11 | alive (interval=300s)
+2026-09-29 01:20:58 epoch=11 | epoch 11/20 END val_dice=0.6205 lr=4.64e-05 sec=1797.3
+2026-09-29 01:20:58 epoch=12 | epoch 12/20 START
+2026-09-29 01:21:24 epoch=12 | alive (interval=300s)
+2026-09-29 01:26:24 epoch=12 | alive (interval=300s)
+2026-09-29 01:31:24 epoch=12 | alive (interval=300s)
+2026-09-29 01:36:24 epoch=12 | alive (interval=300s)
+2026-09-29 01:41:24 epoch=12 | alive (interval=300s)
+2026-09-29 01:46:24 epoch=12 | alive (interval=300s)
+2026-09-29 01:51:24 epoch=12 | alive (interval=300s)
+2026-09-29 01:53:47 epoch=12 | epoch 12/20 END val_dice=0.6260 lr=3.83e-05 sec=1968.6
+2026-09-29 01:53:48 epoch=13 | epoch 13/20 START
+2026-09-29 01:56:24 epoch=13 | alive (interval=300s)
+2026-09-29 02:01:24 epoch=13 | alive (interval=300s)
+2026-09-29 02:06:24 epoch=13 | alive (interval=300s)
+2026-09-29 02:11:24 epoch=13 | alive (interval=300s)
+2026-09-29 02:16:24 epoch=13 | alive (interval=300s)
+2026-09-29 02:21:24 epoch=13 | alive (interval=300s)
+2026-09-29 02:26:24 epoch=13 | alive (interval=300s)
+2026-09-29 02:26:35 epoch=13 | epoch 13/20 END val_dice=0.6503 lr=3.06e-05 sec=1966.8
+2026-09-29 02:26:35 epoch=14 | epoch 14/20 START
+2026-09-29 02:31:24 epoch=14 | alive (interval=300s)
+2026-09-29 02:36:24 epoch=14 | alive (interval=300s)
+2026-09-29 02:41:24 epoch=14 | alive (interval=300s)
+2026-09-29 02:46:24 epoch=14 | alive (interval=300s)
+2026-09-29 02:51:24 epoch=14 | alive (interval=300s)
+2026-09-29 02:56:24 epoch=14 | alive (interval=300s)
+2026-09-29 02:58:49 epoch=14 | epoch 14/20 END val_dice=0.6463 lr=2.34e-05 sec=1934.0
+2026-09-29 02:58:50 epoch=15 | epoch 15/20 START
+2026-09-29 03:01:24 epoch=15 | alive (interval=300s)
+2026-09-29 03:06:24 epoch=15 | alive (interval=300s)
+2026-09-29 03:11:24 epoch=15 | alive (interval=300s)
+2026-09-29 03:16:24 epoch=15 | alive (interval=300s)
+2026-09-29 03:21:24 epoch=15 | alive (interval=300s)
+2026-09-29 03:26:24 epoch=15 | alive (interval=300s)
+2026-09-29 03:28:49 epoch=15 | epoch 15/20 END val_dice=0.7109 lr=1.70e-05 sec=1799.1
+2026-09-29 03:28:49 epoch=16 | epoch 16/20 START
+2026-09-29 03:31:24 epoch=16 | alive (interval=300s)
+2026-09-29 03:36:24 epoch=16 | alive (interval=300s)
+2026-09-29 03:41:24 epoch=16 | alive (interval=300s)
+2026-09-29 03:46:24 epoch=16 | alive (interval=300s)
+2026-09-29 03:51:24 epoch=16 | alive (interval=300s)
+2026-09-29 03:56:24 epoch=16 | alive (interval=300s)
+2026-09-29 03:58:45 epoch=16 | epoch 16/20 END val_dice=0.7000 lr=1.14e-05 sec=1795.6
+2026-09-29 03:58:45 epoch=17 | epoch 17/20 START
+2026-09-29 04:01:24 epoch=17 | alive (interval=300s)
+2026-09-29 04:06:24 epoch=17 | alive (interval=300s)
+2026-09-29 04:11:24 epoch=17 | alive (interval=300s)
+2026-09-29 04:16:24 epoch=17 | alive (interval=300s)
+2026-09-29 04:21:24 epoch=17 | alive (interval=300s)
+2026-09-29 04:26:24 epoch=17 | alive (interval=300s)
+2026-09-29 04:28:21 epoch=17 | epoch 17/20 END val_dice=0.6988 lr=6.97e-06 sec=1776.1
+2026-09-29 04:28:22 epoch=18 | epoch 18/20 START
+2026-09-29 04:31:24 epoch=18 | alive (interval=300s)
+2026-09-29 04:36:24 epoch=18 | alive (interval=300s)
+2026-09-29 04:41:24 epoch=18 | alive (interval=300s)
+2026-09-29 04:46:24 epoch=18 | alive (interval=300s)
+2026-09-29 04:51:24 epoch=18 | alive (interval=300s)
+2026-09-29 04:56:24 epoch=18 | alive (interval=300s)
+2026-09-29 04:57:04 epoch=18 | epoch 18/20 END val_dice=0.6924 lr=3.68e-06 sec=1721.8
+2026-09-29 04:57:04 epoch=19 | epoch 19/20 START
+2026-09-29 05:01:24 epoch=19 | alive (interval=300s)
+2026-09-29 05:06:24 epoch=19 | alive (interval=300s)
+2026-09-29 05:11:24 epoch=19 | alive (interval=300s)
+2026-09-29 05:16:24 epoch=19 | alive (interval=300s)
+2026-09-29 05:21:24 epoch=19 | alive (interval=300s)
+2026-09-29 05:26:24 epoch=19 | alive (interval=300s)
+2026-09-29 05:26:37 epoch=19 | epoch 19/20 END val_dice=0.6966 lr=1.68e-06 sec=1772.9
+2026-09-29 05:26:37 epoch=20 | epoch 20/20 START
+2026-09-29 05:31:24 epoch=20 | alive (interval=300s)
+2026-09-29 05:36:24 epoch=20 | alive (interval=300s)
+2026-09-29 05:41:24 epoch=20 | alive (interval=300s)
+2026-09-29 05:46:24 epoch=20 | alive (interval=300s)
+2026-09-29 05:51:24 epoch=20 | alive (interval=300s)
+2026-09-29 05:55:07 epoch=20 | epoch 20/20 END val_dice=0.7038 lr=1.00e-06 sec=1709.1
+2026-09-29 05:55:07 epoch=20 | training loop exited

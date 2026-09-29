@@ -12,7 +12,6 @@ from typing import Any, Sequence
 
 import torch
 from monai.data import DataLoader, Dataset
-from monai.losses import DiceLoss
 from monai.metrics import DiceMetric
 from torch.utils.tensorboard import SummaryWriter
 
@@ -24,7 +23,10 @@ from segmentation.pseudo_label import REGISTERED_NAMES
 from segmentation.train import (
     _train_epoch,
     _validate_epoch,
+    build_brats_loss,
+    build_channel_dice_loss,
     post_transforms,
+    update_best_dice,
 )
 
 logger = logging.getLogger(__name__)
@@ -302,7 +304,9 @@ def finetune_model(
         num_workers=config.num_workers,
     )
 
-    loss_fn = DiceLoss(include_background=False, sigmoid=True, squared_pred=True)
+    # Multi-label [ET, TC, WT]: DiceCE over all channels (False would skip ET).
+    loss_fn = build_brats_loss()
+    channel_dice_loss = build_channel_dice_loss()
     optimizer = torch.optim.Adam(
         filter(lambda p: p.requires_grad, model.parameters()),
         lr=config.learning_rate,
@@ -314,7 +318,7 @@ def finetune_model(
         factor=config.scheduler_factor,
         patience=config.scheduler_patience,
     )
-    dice_metric = DiceMetric(include_background=False, reduction="mean")
+    dice_metric = DiceMetric(include_background=True, reduction="none")
     post_pred, post_label = post_transforms()
 
     writer = SummaryWriter(log_dir=str(log_dir))
@@ -334,16 +338,17 @@ def finetune_model(
 
     try:
         for epoch in range(config.max_epochs):
-            train_loss = _train_epoch(
+            train_loss, _ch = _train_epoch(
                 model,
                 train_loader,
                 optimizer,
                 loss_fn,
+                channel_dice_loss,
                 device_t,
                 scaler,
                 use_amp,
             )
-            val_dice = _validate_epoch(
+            val_dice, _ = _validate_epoch(
                 model,
                 val_loader,
                 dice_metric,
@@ -353,7 +358,7 @@ def finetune_model(
                 config.roi_size,
                 use_amp,
             )
-            test_dice = _validate_epoch(
+            test_dice, _ = _validate_epoch(
                 model,
                 test_loader,
                 dice_metric,
@@ -382,7 +387,8 @@ def finetune_model(
             )
 
             checkpoint = {
-                "epoch": epoch,
+                "epoch": epoch + 1,
+                "epoch_1based": True,
                 "model_state": model.state_dict(),
                 "optimizer_state": optimizer.state_dict(),
                 "scheduler_state": scheduler.state_dict(),
@@ -394,11 +400,10 @@ def finetune_model(
                 "finetune_config": asdict(config),
                 "finetune_split": split_manifest,
             }
+            best_dice, is_best = update_best_dice(val_dice, best_dice)
+            checkpoint["best_val_dice"] = best_dice
             torch.save(checkpoint, last_path)
-
-            if val_dice > best_dice:
-                best_dice = val_dice
-                checkpoint["best_val_dice"] = best_dice
+            if is_best:
                 torch.save(checkpoint, best_path)
                 logger.info("New best val Dice %.4f -> %s", best_dice, best_path)
     finally:

@@ -1,0 +1,331 @@
+python: 3.14.3 (v3.14.3:323c59a5e34, Feb  3 2026, 11:41:37) [Clang 16.0.0 (clang-1600.0.26.6)]
+platform: macOS-26.5.1-arm64-arm-64bit-Mach-O
+executable: /Library/Frameworks/Python.framework/Versions/3.14/bin/python3
+torch: 2.14.0
+device: mps
+
+=== seeds ===
+production_default: 42
+confirmed:
+  - splits / TrainConfig.seed = 42 (train.py, splits.py)
+  - checkpoints/brats_v2_loss_fix/train_config.json seed = 42
+  - checkpoints/brats_scale_full/train_config.json seed = 42
+  - brats_pretrain best_model.pt train_config.seed = 42
+  - bootstrap CIs (report_metrics, compare_v1_v2/v3, ellipsoid_batch) seed = 42
+  - preprocessing.registration ITK sampling seed = 42
+  - EvaluateConfig / FinetuneConfig / DomainGapReportConfig defaults = 42
+exceptions_or_non_production:
+  - tests/test_finetune.py uses seed=0 for a unit-test split only
+  - tests/test_measurements.py and tests/test_postprocess.py use np.random.default_rng(0)
+  - no other production script was found using a non-42 seed
+
+=== training configs ===
+primary_model: v3 (checkpoints/brats_scale_full/best_model.pt)
+ablation: v1 (brats_pretrain) → v2 (brats_v2_loss_fix) → v3 (brats_scale_full)
+
+v1 (brats_pretrain):
+  train/val: 40 / 10 (max_cases subset, seed 42)
+  epochs: 100 (best by mean val Dice; see metrics.csv)
+  loss: DiceCELoss (pre-fix history had ET channel skip; see paper ablation)
+  schedule: ReduceLROnPlateau (legacy)
+
+v2 (brats_v2_loss_fix):
+  train/val: 40 / 10 (same subset scale as v1)
+  epochs: 100 budget; DiceCELoss(include_background=True) over ET/TC/WT
+  schedule: ReduceLROnPlateau (inherited)
+  recorded: seed=42 lr=0.0001 batch=1 model=segresnet
+
+v3 (brats_scale_full) — PRIMARY:
+  train/val: 289 / 20 (splits/scaleup/cfg_c_all_*; held-out 60 excluded)
+  epochs: 20
+  model: SegResNet; batch_size=1; lr=1e-4; amp=False
+  schedule: cosine_warmup (warmup_frac=0.05) + CosineAnnealing; eta_min=1e-6
+  grad_clip_max_norm: 1.0
+  best_epoch (val): 15 (val_dice_mean≈0.711)
+  recorded: seed=42 scheduler_type=cosine_warmup warmup_frac=0.05 grad_clip=1.0 max_epochs=20
+  lists: train_cases=289 val_cases=20
+
+=== pip freeze ===
+absl-py==2.5.0
+ag-ui-protocol==0.1.11
+aiohappyeyeballs==2.6.1
+aiohttp==3.13.3
+aiosignal==1.4.0
+annotated-doc==0.0.4
+annotated-types==0.7.0
+anthropic==0.79.0
+anyio==4.12.1
+appnope==1.0.0
+argcomplete==3.6.3
+argon2-cffi==25.1.0
+argon2-cffi-bindings==26.1.0
+arrow==1.4.0
+asttokens==3.0.2
+async-lru==2.3.0
+attrs==25.4.0
+Authlib==1.6.7
+babel==2.18.0
+beartype==0.22.9
+beautifulsoup4==4.15.0
+bleach==6.4.0
+boto3==1.42.48
+botocore==1.42.48
+cachebox==5.2.3
+cachetools==7.0.1
+certifi==2026.1.4
+cffi==2.0.0
+charset-normalizer==3.4.4
+click==8.3.1
+cloudpickle==3.1.2
+cohere==5.20.5
+colorama==0.4.6
+comm==0.2.3
+contourpy==1.3.3
+croniter==6.0.0
+cryptography==46.0.5
+cycler==0.12.1
+cyclopts==4.5.2
+debugpy==1.8.21
+deepdiff==9.1.0
+defusedxml==0.7.1
+dicom2nifti==2.6.2
+dipy==1.12.1
+diskcache==5.6.3
+distro==1.9.0
+dnspython==2.8.0
+docstring_parser==0.17.0
+docutils==0.22.4
+email-validator==2.3.0
+eval_type_backport==0.3.1
+exceptiongroup==1.3.1
+executing==2.2.1
+fakeredis==2.33.0
+fastapi==0.129.0
+fastavro==1.12.1
+fastjsonschema==2.22.2
+fastmcp==2.14.5
+filelock==3.21.2
+fonttools==4.63.0
+fqdn==1.5.1
+freetype-py==2.5.1
+frozenlist==1.8.0
+fsspec==2026.2.0
+fury==2.0.0
+future==1.0.0
+genai-prices==0.0.53
+glfw==2.10.2
+google-auth==2.48.0
+google-genai==1.63.0
+googleapis-common-protos==1.72.0
+griffe==2.0.0
+griffecli==2.0.0
+griffelib==2.0.0
+groq==1.0.0
+grpcio==1.78.0
+h11==0.16.0
+h5py==3.16.0
+hf-xet==1.2.0
+hsluv==5.0.4
+httpcore==1.0.9
+httpx==0.28.1
+httpx-sse==0.4.3
+huggingface_hub==0.36.2
+idna==3.11
+ImageIO==2.37.4
+importlib_metadata==8.7.1
+iniconfig==2.3.0
+invoke==2.2.1
+ipykernel==7.3.0
+ipython==9.17.1
+ipython_pygments_lexers==1.1.1
+ipywidgets==8.1.9
+isoduration==20.11.0
+jaraco.classes==3.4.0
+jaraco.context==6.1.0
+jaraco.functools==4.4.0
+jedi==0.20.0
+Jinja2==3.1.6
+jiter==0.13.0
+jmespath==1.1.0
+joblib==1.6.0
+json5==0.15.0
+jsonpointer==3.1.1
+jsonref==1.1.0
+jsonschema==4.26.0
+jsonschema-path==0.3.4
+jsonschema-specifications==2025.9.1
+jupyter==1.1.1
+jupyter-console==6.6.3
+jupyter-events==0.12.1
+jupyter-lsp==2.3.1
+jupyter_builder==1.2.3
+jupyter_client==8.10.0
+jupyter_core==5.9.1
+jupyter_server==2.21.0
+jupyter_server_terminals==0.5.4
+jupyterlab==4.6.3
+jupyterlab_pygments==0.3.0
+jupyterlab_server==2.28.0
+jupyterlab_widgets==3.0.17
+keyring==25.7.0
+kiwisolver==1.5.0
+lark==1.3.1
+lazy-loader==0.5
+logfire==4.23.0
+logfire-api==4.23.0
+lupa==2.6
+Markdown==3.10.3
+markdown-it-py==4.0.0
+MarkupSafe==3.0.3
+matplotlib==3.11.1
+matplotlib-inline==0.2.2
+mcp==1.26.0
+mdurl==0.1.2
+mistralai==1.9.11
+mistune==3.3.4
+monai==1.6.0
+more-itertools==10.8.0
+mpmath==1.3.0
+-e git+https://github.com/abhinavgadde1/MRI.git@3a9e91f13de9ea5d39570dc2deb79f6879043e7f#egg=mri_pipeline
+multidict==6.7.1
+narwhals==2.26.0
+nbclient==0.11.0
+nbconvert==7.17.1
+nbformat==5.11.1
+nest-asyncio2==1.7.2
+networkx==3.6.1
+nexus-rpc==1.2.0
+nibabel==5.4.2
+notebook==7.6.2
+notebook_shim==0.2.4
+numpy==2.5.1
+openai==2.20.0
+openapi-pydantic==0.5.1
+opentelemetry-api==1.39.1
+opentelemetry-exporter-otlp-proto-common==1.39.1
+opentelemetry-exporter-otlp-proto-http==1.39.1
+opentelemetry-instrumentation==0.60b1
+opentelemetry-instrumentation-httpx==0.60b1
+opentelemetry-proto==1.39.1
+opentelemetry-sdk==1.39.1
+opentelemetry-semantic-conventions==0.60b1
+opentelemetry-util-http==0.60b1
+orderly-set==5.5.0
+packaging==25.0
+pandas==3.0.5
+pandocfilters==1.5.1
+parso==0.8.7
+pathable==0.4.4
+pathvalidate==3.3.1
+pexpect==4.9.0
+pillow==12.3.0
+platformdirs==4.7.0
+plotly==7.0.0
+pluggy==1.6.0
+polyxios==0.4.1
+prometheus_client==0.24.1
+prompt_toolkit==3.0.52
+propcache==0.4.1
+protobuf==6.33.5
+psutil==7.2.2
+ptyprocess==0.7.0
+pure_eval==0.2.4
+py-key-value-aio==0.3.0
+py-key-value-shared==0.3.0
+pyasn1==0.6.2
+pyasn1_modules==0.4.2
+pycparser==3.0
+pydantic==2.12.5
+pydantic-ai==1.58.0
+pydantic-ai-slim==1.58.0
+pydantic-evals==1.58.0
+pydantic-graph==1.58.0
+pydantic-settings==2.12.0
+pydantic_core==2.41.5
+pydicom==3.0.2
+pydocket==0.17.7
+pygfx==0.17.0
+Pygments==2.19.2
+PyJWT==2.11.0
+pylinalg==0.6.8
+pyparsing==3.3.2
+pyperclip==1.11.0
+pytest==9.1.1
+python-dateutil==2.9.0.post0
+python-dotenv==1.2.1
+python-gdcm==3.2.6
+python-json-logger==4.0.0
+python-multipart==0.0.22
+pytz==2025.2
+PyYAML==6.0.3
+pyzmq==27.2.0
+redis==7.1.1
+referencing==0.36.2
+regex==2026.1.15
+rendercanvas==2.7.2
+requests==2.32.5
+rfc3339-validator==0.1.4
+rfc3986-validator==0.1.1
+rfc3987-syntax==1.1.0
+rich==14.3.2
+rich-rst==1.3.2
+rpds-py==0.30.0
+rsa==4.9.1
+rubicon-objc==0.5.6
+s3transfer==0.16.0
+scikit-image==0.26.0
+scikit-learn==1.9.1
+scipy==1.18.1
+seaborn==0.13.2
+Send2Trash==2.1.0
+setuptools==84.0.0
+shellingham==1.5.4
+simpleitk==2.5.6
+six==1.17.0
+sniffio==1.3.1
+sortedcontainers==2.4.0
+soupsieve==2.9.2
+sse-starlette==3.2.0
+stack-data==0.6.3
+starlette==0.52.1
+sympy==1.14.0
+temporalio==1.20.0
+tenacity==9.1.4
+tensorboard==2.21.0
+tensorboard-data-server==0.7.2
+terminado==0.18.1
+threadpoolctl==3.6.0
+tifffile==2026.9.9
+tiktoken==0.12.0
+tinycss2==1.5.1
+tokenizers==0.22.2
+torch==2.14.0
+tornado==6.5.9
+tqdm==4.67.3
+TractSeg==2.10
+traitlets==5.16.1
+trimesh==5.1.0
+trx-python==0.5.0
+typer==0.23.0
+types-protobuf==6.32.1.20251210
+types-requests==2.32.4.20260107
+typing-inspection==0.4.2
+typing_extensions==4.15.0
+tzdata==2026.4
+uharfbuzz==0.56.1
+uri-template==1.3.0
+urllib3==2.6.3
+uvicorn==0.40.0
+wcwidth==0.6.0
+webcolors==25.10.0
+webencodings==0.6.1
+websocket-client==1.9.2
+websockets==15.0.1
+Werkzeug==3.1.8
+wgpu==0.32.0
+widgetsnbextension==4.0.16
+wrapt==1.17.3
+xai-sdk==1.6.1
+xvfbwrapper==0.2.33
+yarl==1.22.0
+zipp==3.23.0

@@ -2,7 +2,6 @@
 
 import numpy as np
 import pytest
-import torch
 
 from segmentation.sanity_check import (
     assert_dice_agreement,
@@ -51,3 +50,12 @@ def test_dice_empty_union():
     assert dice_numpy(empty, empty) == 1.0
     manual, monai = assert_dice_agreement(empty, empty)
     assert manual == 1.0 and monai == 1.0
+
+
+def test_dice_monai_nonzero():
+    pred = np.zeros((8, 8, 8), dtype=bool)
+    gt = np.zeros((8, 8, 8), dtype=bool)
+    pred[2:6, 2:6, 2:6] = True
+    gt[2:6, 2:6, 2:6] = True
+    assert dice_monai(pred, gt) == pytest.approx(1.0)
+    assert dice_numpy(pred, gt) == pytest.approx(1.0)

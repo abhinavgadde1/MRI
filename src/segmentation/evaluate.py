@@ -6,18 +6,28 @@ import argparse
 import logging
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, Sequence
 
 import pandas as pd
+import numpy as np
 import torch
 from monai.data import DataLoader, Dataset, decollate_batch
 from monai.inferers import sliding_window_inference
 from monai.metrics import DiceMetric, HausdorffDistanceMetric
 
 from config import load_config
-from segmentation.dataset import get_val_transforms
+from device import get_device
+from segmentation.dataset import get_val_transforms, subject_to_datadict
 from segmentation.model import BRATS_REGIONS, build_brats_model
 from segmentation.model import brats_label_to_regions
+from segmentation.postprocess import (
+    DEFAULT_LCC_MIN_FRAC,
+    DEFAULT_LCC_MIN_ML,
+    POSTPROCESS_MODES,
+    PostprocessMode,
+    apply_channel_postprocess,
+)
+from segmentation.splits import read_id_list
 from segmentation.train import split_brats_cases, post_transforms
 
 logger = logging.getLogger(__name__)
@@ -33,6 +43,10 @@ class EvalConfig:
     pixdim: tuple[float, float, float] = (1.0, 1.0, 1.0)
     amp: bool = True
     max_cases: int | None = None
+    float32: bool = False
+    postprocess: PostprocessMode = "raw"
+    lcc_min_frac: float = DEFAULT_LCC_MIN_FRAC
+    lcc_min_ml: float = DEFAULT_LCC_MIN_ML
 
 
 def load_model_from_checkpoint(
@@ -44,7 +58,7 @@ def load_model_from_checkpoint(
     if not checkpoint_path.is_file():
         raise FileNotFoundError(f"Checkpoint not found: {checkpoint_path}")
 
-    ckpt = torch.load(checkpoint_path, map_location=device)
+    ckpt = torch.load(checkpoint_path, map_location=device, weights_only=False)
     model_name = ckpt.get("model_name", "segresnet") if isinstance(ckpt, dict) else "segresnet"
     model = build_brats_model(model_name).to(device)
     model.load_state_dict(ckpt["model_state"])
@@ -72,9 +86,14 @@ def _evaluate_case(
     use_amp: bool,
     post_pred,
     post_label,
+    *,
+    postprocess: PostprocessMode = "raw",
+    lcc_min_frac: float = DEFAULT_LCC_MIN_FRAC,
+    lcc_min_ml: float = DEFAULT_LCC_MIN_ML,
+    pixdim: tuple[float, float, float] = (1.0, 1.0, 1.0),
 ) -> dict[str, float]:
     """Run inference on one case and return per-region Dice / HD95."""
-    inputs = batch["image"].to(device)
+    inputs = batch["image"].to(device=device, dtype=torch.float32)
     labels = brats_label_to_regions(batch["label"].to(device))
 
     with torch.autocast(device_type=device.type, enabled=use_amp):
@@ -87,10 +106,23 @@ def _evaluate_case(
 
     pred = post_pred(decollate_batch(outputs)[0])
     label = post_label(decollate_batch(labels)[0])
+    # MONAI HD95 uses float64 distance transforms — not supported on MPS.
+    pred = pred.detach().float().cpu()
+    label = label.detach().float().cpu()
 
-    dice_metric = DiceMetric(include_background=False, reduction="none")
+    if postprocess != "raw":
+        cleaned = apply_channel_postprocess(
+            pred.numpy(),
+            mode=postprocess,
+            min_frac_of_largest=lcc_min_frac,
+            min_volume_ml=lcc_min_ml,
+            spacing_mm=pixdim,
+        )
+        pred = torch.from_numpy(cleaned.astype(np.float32))
+
+    dice_metric = DiceMetric(include_background=True, reduction="none")
     hd_metric = HausdorffDistanceMetric(
-        include_background=False,
+        include_background=True,
         percentile=95,
         reduction="none",
     )
@@ -102,6 +134,11 @@ def _evaluate_case(
 
     metrics: dict[str, float] = {}
     for idx, region in enumerate(BRATS_REGIONS):
+        # Exclude empty-GT regions from Dice/HD95 (undefined when no foreground).
+        if float(label[idx].sum().item()) <= 0.0:
+            metrics[f"dice_{region}"] = float("nan")
+            metrics[f"hd95_{region}"] = float("nan")
+            continue
         metrics[f"dice_{region}"] = _metric_value(dice_scores, idx)
         metrics[f"hd95_{region}"] = _metric_value(hd_scores, idx)
 
@@ -112,6 +149,98 @@ def _evaluate_case(
     return metrics
 
 
+def _records_from_subject_ids(
+    brats_nifti_root: str | Path,
+    subject_ids: Sequence[str],
+) -> list[dict[str, Any]]:
+    root = Path(brats_nifti_root)
+    records: list[dict[str, Any]] = []
+    for sid in subject_ids:
+        subject_dir = root / sid
+        if not subject_dir.is_dir():
+            raise FileNotFoundError(f"Subject directory not found: {subject_dir}")
+        records.append(subject_to_datadict(subject_dir))
+    return records
+
+
+def evaluate_subject_list(
+    checkpoint_path: str | Path,
+    subject_ids: Sequence[str],
+    output_csv: str | Path,
+    *,
+    brats_nifti_root: str | Path | None = None,
+    config: EvalConfig | None = None,
+    device: str | None = None,
+) -> pd.DataFrame:
+    """Inference-only evaluation on an explicit subject list (float32 by default)."""
+    config = config or EvalConfig(float32=True, amp=False)
+    if brats_nifti_root is None:
+        brats_nifti_root = load_config().paths.brats_nifti
+    output_csv = Path(output_csv)
+    output_csv.parent.mkdir(parents=True, exist_ok=True)
+
+    device_t = get_device(device)
+    use_amp = (not config.float32) and config.amp and device_t.type == "cuda"
+    model = load_model_from_checkpoint(checkpoint_path, device_t)
+    model.float()
+    post_pred, post_label = post_transforms()
+
+    records = _records_from_subject_ids(brats_nifti_root, subject_ids)
+    loader = DataLoader(
+        Dataset(data=records, transform=get_val_transforms(pixdim=config.pixdim)),
+        batch_size=1,
+        shuffle=False,
+        num_workers=0,
+    )
+
+    rows: list[dict[str, Any]] = []
+    for batch in loader:
+        subject_id = batch.get("subject_id", ["unknown"])[0]
+        logger.info("Evaluating %s on %s", subject_id, device_t)
+        case_metrics = _evaluate_case(
+            model,
+            batch,
+            device_t,
+            config.roi_size,
+            use_amp,
+            post_pred,
+            post_label,
+            postprocess=config.postprocess,
+            lcc_min_frac=config.lcc_min_frac,
+            lcc_min_ml=config.lcc_min_ml,
+            pixdim=config.pixdim,
+        )
+        rows.append({"subject_id": subject_id, **case_metrics})
+
+    df = pd.DataFrame(rows)
+    column_order = (
+        ["subject_id"]
+        + [f"dice_{r}" for r in BRATS_REGIONS]
+        + [f"hd95_{r}" for r in BRATS_REGIONS]
+        + ["dice_mean", "hd95_mean"]
+    )
+    df = df.reindex(columns=column_order)
+    df.to_csv(output_csv, index=False)
+    logger.info(
+        "Saved held-out metrics -> %s (%d cases, postprocess=%s)",
+        output_csv,
+        len(df),
+        config.postprocess,
+    )
+    for region in BRATS_REGIONS:
+        n_region = int(df[f"dice_{region}"].notna().sum())
+        mean_dice = float(df[f"dice_{region}"].mean(skipna=True))
+        mean_hd = float(df[f"hd95_{region}"].mean(skipna=True))
+        logger.info(
+            "%s (n=%d) | Dice=%.4f | HD95=%.2f mm",
+            region,
+            n_region,
+            mean_dice,
+            mean_hd,
+        )
+    return df
+
+
 def evaluate_validation_set(
     checkpoint_path: str | Path,
     output_csv: str | Path,
@@ -120,19 +249,16 @@ def evaluate_validation_set(
     config: EvalConfig | None = None,
     device: str | None = None,
 ) -> pd.DataFrame:
-    """Load a checkpoint, infer on the BraTS validation split, and save metrics.
-
-    Reports per-class Dice and 95th-percentile Hausdorff distance (HD95) for
-    enhancing tumor, tumor core, and whole tumor. Writes one CSV row per case
-    plus logs dataset-level means.
-    """
+    """Load a checkpoint, infer on the BraTS validation split, and save metrics."""
     config = config or EvalConfig()
     output_csv = Path(output_csv)
     output_csv.parent.mkdir(parents=True, exist_ok=True)
 
-    device_t = torch.device(device or ("cuda" if torch.cuda.is_available() else "cpu"))
-    use_amp = config.amp and device_t.type == "cuda"
+    device_t = get_device(device)
+    use_amp = (not config.float32) and config.amp and device_t.type == "cuda"
     model = load_model_from_checkpoint(checkpoint_path, device_t)
+    if config.float32:
+        model.float()
     post_pred, post_label = post_transforms()
 
     _, val_files = split_brats_cases(
@@ -161,6 +287,10 @@ def evaluate_validation_set(
             use_amp,
             post_pred,
             post_label,
+            postprocess=config.postprocess,
+            lcc_min_frac=config.lcc_min_frac,
+            lcc_min_ml=config.lcc_min_ml,
+            pixdim=config.pixdim,
         )
         rows.append({"subject_id": subject_id, **case_metrics})
 
@@ -183,9 +313,11 @@ def evaluate_validation_set(
 
     logger.info("Saved per-case metrics -> %s", output_csv)
     for region in BRATS_REGIONS:
+        n_region = int(df[f"dice_{region}"].notna().sum())
         logger.info(
-            "%s | Dice=%.4f | HD95=%.2f mm",
+            "%s (n=%d) | Dice=%.4f | HD95=%.2f mm",
             region,
+            n_region,
             summary[f"mean_dice_{region}"],
             summary[f"mean_hd95_{region}"],
         )
@@ -203,7 +335,33 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--output-csv", type=Path, default=None)
     parser.add_argument("--config", type=Path, default=None, help="Project config.yaml")
     parser.add_argument("--max-cases", type=int, default=None, help="Limit cases (debug)")
+    parser.add_argument(
+        "--subjects-file",
+        type=Path,
+        default=None,
+        help="Text file of subject IDs (one per line) for held-out evaluation",
+    )
+    parser.add_argument("--float32", action="store_true", help="Force float32, disable AMP")
+    parser.add_argument("--device", type=str, default=None)
     parser.add_argument("--no-amp", action="store_true")
+    parser.add_argument(
+        "--postprocess",
+        choices=POSTPROCESS_MODES,
+        default="raw",
+        help="raw | lcc | lcc_min (largest + CCs >= max(5%% of LCC, 1 mL), then fill holes)",
+    )
+    parser.add_argument(
+        "--lcc-min-frac",
+        type=float,
+        default=DEFAULT_LCC_MIN_FRAC,
+        help="For lcc_min: keep secondary CCs ≥ this fraction of the largest",
+    )
+    parser.add_argument(
+        "--lcc-min-ml",
+        type=float,
+        default=DEFAULT_LCC_MIN_ML,
+        help="For lcc_min: absolute minimum secondary CC volume (mL)",
+    )
     parser.add_argument("-q", "--quiet", action="store_true")
     args = parser.parse_args(argv)
 
@@ -213,13 +371,50 @@ def main(argv: list[str] | None = None) -> int:
     )
 
     app_cfg = load_config(args.config)
-    output_csv = args.output_csv or (app_cfg.paths.checkpoints / "brats_eval_metrics.csv")
-    evaluate_validation_set(
-        args.checkpoint,
-        output_csv,
-        brats_nifti_root=app_cfg.paths.brats_nifti,
-        config=EvalConfig(max_cases=args.max_cases, amp=not args.no_amp),
+    if args.output_csv is not None:
+        output_csv = args.output_csv
+    elif args.subjects_file is not None:
+        output_csv = (
+            app_cfg.paths.checkpoints
+            / "brats_eval_heldout"
+            / args.postprocess
+            / "metrics.csv"
+        )
+    else:
+        output_csv = (
+            app_cfg.paths.checkpoints
+            / "brats_eval"
+            / args.postprocess
+            / "metrics.csv"
+        )
+
+    eval_cfg = EvalConfig(
+        max_cases=args.max_cases,
+        amp=not args.no_amp and not args.float32,
+        float32=args.float32 or bool(args.subjects_file),
+        postprocess=args.postprocess,
+        lcc_min_frac=args.lcc_min_frac,
+        lcc_min_ml=args.lcc_min_ml,
     )
+
+    if args.subjects_file is not None:
+        ids = read_id_list(args.subjects_file)
+        evaluate_subject_list(
+            args.checkpoint,
+            ids,
+            output_csv,
+            brats_nifti_root=app_cfg.paths.brats_nifti,
+            config=eval_cfg,
+            device=args.device,
+        )
+    else:
+        evaluate_validation_set(
+            args.checkpoint,
+            output_csv,
+            brats_nifti_root=app_cfg.paths.brats_nifti,
+            config=eval_cfg,
+            device=args.device,
+        )
     return 0
 
 

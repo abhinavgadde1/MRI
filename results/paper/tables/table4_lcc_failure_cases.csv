@@ -1,0 +1,6 @@
+subject_id,dice_raw,dice_lcc,delta_dice,n_components_raw,gt_n_components,model,hd95_whole_tumor,raw_n_cc,raw_voxels,lcc_voxels,inter_raw,inter_lcc,failure_mode
+BraTS20_Training_146,0.2874785959720611,0.0,-0.2874785959720611,25.0,1.0,v1,,,,,,,
+BraTS20_Training_147,0.4313100576400757,0.0,-0.4313100576400757,31.0,3.0,v1,,,,,,,
+BraTS20_Training_288,0.3102392848610825,0.0,,,,v2,87.5388412475586,42.0,412750.0,283987.0,75970.0,0.0,
+BraTS20_Training_271,0.3169947508596126,0.0,,,,v2,74.49160766601562,54.0,271356.0,112599.0,51120.0,0.0,
+BraTS20_Training_259,0.5642749071121216,0.0,,,,v3,103.28237915039062,15.0,227081.0,127210.0,97731.0,0.0,largest_cc_keeps_fp_blob_discards_true_tumor

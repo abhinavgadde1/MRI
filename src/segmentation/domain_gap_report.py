@@ -145,7 +145,7 @@ def evaluate_clinical_case(
     pred_regions = _tensor_region_to_numpy(post_pred(decollate_batch(outputs)[0]))
     gt_regions = _tensor_region_to_numpy(post_label(decollate_batch(labels)[0]))
 
-    dice_metric = DiceMetric(include_background=False, reduction="none")
+    dice_metric = DiceMetric(include_background=True, reduction="none")
     pred_t = torch.as_tensor(pred_regions).unsqueeze(0)
     label_t = torch.as_tensor(gt_regions).unsqueeze(0)
     dice_metric(y_pred=[pred_t], y=[label_t])

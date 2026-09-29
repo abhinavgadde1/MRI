@@ -3,13 +3,19 @@
 from pathlib import Path
 
 import numpy as np
-import pytest
 
+from preprocessing.registration import REGISTERED_NAMES as REG_FROM_PREPROC
 from segmentation.pseudo_label import (
     REGISTERED_NAMES,
     regions_to_label_map,
     registered_dir_to_datadict,
 )
+
+
+def test_registered_names_come_from_registration():
+    assert REGISTERED_NAMES is REG_FROM_PREPROC
+    assert REGISTERED_NAMES["T1"] == "T1_1mm.nii.gz"
+    assert REGISTERED_NAMES["FLAIR"] == "FLAIR_registered_1mm.nii.gz"
 
 
 def test_regions_to_label_map():

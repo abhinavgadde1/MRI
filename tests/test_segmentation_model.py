@@ -46,3 +46,4 @@ def test_model_io_shapes():
 def test_region_names():
     assert BRATS_REGIONS == ("enhancing_tumor", "tumor_core", "whole_tumor")
     assert OUT_CHANNELS == 3
+    assert IN_CHANNELS == 4

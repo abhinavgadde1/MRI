@@ -1,0 +1,2 @@
+checkpoint,checkpoint_tag,subjects_file,n_subjects,n_gt_rows,n_pred_rows,skipped_empty_gt,skipped_empty_pred,region,mesh_voxel_tolerance,postprocess
+/Users/cherrygadde/MRI/checkpoints/brats_pretrain/best_model.pt,brats_pretrain,/Users/cherrygadde/MRI/splits/heldout.txt,60,60,60,0,0,whole_tumor,0.02,lcc

@@ -1,0 +1,2 @@
+subject_id,gt_voxels,gt_ml,gt_n_cc,raw_voxels,raw_ml,raw_n_cc,lcc_voxels,lcc_ml,inter_raw,inter_lcc,dice_raw,dice_lcc,largest_cc_overlap_gt,failure_mode
+BraTS20_Training_259,119314,119.31400000000001,3,227081,227.08100000000002,15,127210,127.21000000000001,97731,0,0.5642749071121216,0.0,0,largest_cc_keeps_fp_blob_discards_true_tumor

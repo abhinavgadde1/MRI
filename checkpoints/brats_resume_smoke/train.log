@@ -1,0 +1,57 @@
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/torch/jit/_script.py:1643: FutureWarning: `torch.jit.interface` is deprecated. Please use `torch.compile` instead.
+  warnings.warn(
+<frozen runpy>:128: RuntimeWarning: 'segmentation.train' found in sys.modules after import of package 'segmentation', but prior to execution of 'segmentation.train'; this may result in unpredictable behaviour
+2026-09-24 21:24:10,997 | INFO | __main__ | Confirmed train/val disjoint from held-out (60 subjects)
+2026-09-24 21:24:10,997 | INFO | __main__ | Wrote train/val lists + config -> checkpoints/brats_resume_smoke
+2026-09-24 21:24:10,999 | INFO | __main__ | Using lazy Dataset (cache_rate=0) — safest for laptop RAM
+2026-09-24 21:24:11,462 | INFO | __main__ | LR schedule: linear warmup 1 steps (5%) then cosine 7 steps (eta_min=1.0e-06); total_steps=8
+2026-09-24 21:24:11,463 | INFO | __main__ | Training segresnet on mps | train=4 val=2 | amp=False | loss=DiceCELoss(bg=True) | sched=cosine_warmup | grad_clip=1.0 | cache_rate=0.00
+2026-09-24 21:24:11,463 | INFO | __main__ | Regions / channels: ['enhancing_tumor', 'tumor_core', 'whole_tumor']
+2026-09-24 21:24:14,921 | INFO | __main__ | Epoch 1 train batch 1/4 | loss=1.0058 | dice_ch=[0.9972, 0.9972, 0.9224] | lr=1.00e-04
+2026-09-24 21:24:18,153 | INFO | __main__ | Epoch 1 train batch 2/4 | loss=1.0160 | dice_ch=[0.9752, 0.9677, 0.9611] | lr=9.51e-05
+2026-09-24 21:24:21,244 | INFO | __main__ | Epoch 1 train batch 3/4 | loss=1.0086 | dice_ch=[0.9862, 0.9822, 0.9152] | lr=8.14e-05
+2026-09-24 21:24:24,324 | INFO | __main__ | Epoch 1 train batch 4/4 | loss=1.0000 | dice_ch=[1.0, 1.0, 0.9998] | lr=6.15e-05
+2026-09-24 21:24:24,325 | INFO | __main__ | Epoch 1 train channel Dice losses ET/TC/WT = 0.9896 / 0.9868 / 0.9497
+2026-09-24 21:24:27,002 | INFO | __main__ | Epoch 1 val batch 1/2
+2026-09-24 21:24:29,721 | INFO | __main__ | Epoch 1 val batch 2/2
+2026-09-24 21:24:29,727 | INFO | __main__ | Epoch 1/2 | train_loss=1.0076 | dice_ch=[0.990,0.987,0.950] | val_dice=0.0334 (ET=0.000 TC=0.000 WT=0.100) | 18.3s | lr=6.15e-05
+2026-09-24 21:24:30,135 | INFO | __main__ | New best mean val Dice 0.0334 -> checkpoints/brats_resume_smoke/best_model.pt
+2026-09-24 21:24:33,238 | INFO | __main__ | Epoch 2 train batch 1/4 | loss=1.0006 | dice_ch=[0.9944, 0.9957, 0.944] | lr=3.95e-05
+2026-09-24 21:24:36,312 | INFO | __main__ | Epoch 2 train batch 2/4 | loss=0.9940 | dice_ch=[0.997, 0.9977, 0.9068] | lr=1.96e-05
+2026-09-24 21:24:39,401 | INFO | __main__ | Epoch 2 train batch 3/4 | loss=1.0062 | dice_ch=[0.9741, 0.9688, 0.7901] | lr=5.90e-06
+2026-09-24 21:24:42,477 | INFO | __main__ | Epoch 2 train batch 4/4 | loss=1.0249 | dice_ch=[0.95, 0.9501, 0.8716] | lr=1.00e-06
+2026-09-24 21:24:42,478 | INFO | __main__ | Epoch 2 train channel Dice losses ET/TC/WT = 0.9789 / 0.9781 / 0.8781
+2026-09-24 21:24:45,177 | INFO | __main__ | Epoch 2 val batch 1/2
+======== RESUME ========
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/torch/jit/_script.py:1643: FutureWarning: `torch.jit.interface` is deprecated. Please use `torch.compile` instead.
+  warnings.warn(
+<frozen runpy>:128: RuntimeWarning: 'segmentation.train' found in sys.modules after import of package 'segmentation', but prior to execution of 'segmentation.train'; this may result in unpredictable behaviour
+2026-09-24 21:25:08,118 | INFO | __main__ | Confirmed train/val disjoint from held-out (60 subjects)
+2026-09-24 21:25:08,118 | INFO | __main__ | Wrote train/val lists + config -> checkpoints/brats_resume_smoke
+2026-09-24 21:25:08,120 | INFO | __main__ | Using lazy Dataset (cache_rate=0) — safest for laptop RAM
+2026-09-24 21:25:08,727 | INFO | __main__ | LR schedule: linear warmup 1 steps (5%) then cosine 7 steps (eta_min=1.0e-06); total_steps=8
+2026-09-24 21:25:08,861 | INFO | __main__ | Resumed from checkpoints/brats_resume_smoke/latest.pt at epoch 2 (best_val_dice=0.0334)
+2026-09-24 21:25:08,861 | INFO | __main__ | Training segresnet on mps | train=4 val=2 | amp=False | loss=DiceCELoss(bg=True) | sched=cosine_warmup | grad_clip=1.0 | cache_rate=0.00
+2026-09-24 21:25:08,861 | INFO | __main__ | Regions / channels: ['enhancing_tumor', 'tumor_core', 'whole_tumor']
+2026-09-24 21:25:12,157 | INFO | __main__ | Epoch 2 train batch 1/4 | loss=1.0261 | dice_ch=[0.9466, 0.9493, 0.8944] | lr=3.95e-05
+2026-09-24 21:25:15,296 | INFO | __main__ | Epoch 2 train batch 2/4 | loss=1.0041 | dice_ch=[0.9843, 0.9849, 0.9004] | lr=1.96e-05
+======== RESUME2 ========
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/torch/jit/_script.py:1643: FutureWarning: `torch.jit.interface` is deprecated. Please use `torch.compile` instead.
+  warnings.warn(
+<frozen runpy>:128: RuntimeWarning: 'segmentation.train' found in sys.modules after import of package 'segmentation', but prior to execution of 'segmentation.train'; this may result in unpredictable behaviour
+2026-09-24 21:28:47,444 | INFO | __main__ | Confirmed train/val disjoint from held-out (60 subjects)
+2026-09-24 21:28:47,444 | INFO | __main__ | Wrote train/val lists + config -> checkpoints/brats_resume_smoke
+2026-09-24 21:28:47,446 | INFO | __main__ | Using lazy Dataset (cache_rate=0) — safest for laptop RAM
+2026-09-24 21:28:48,037 | INFO | __main__ | LR schedule: linear warmup 1 steps (5%) then cosine 7 steps (eta_min=1.0e-06); total_steps=8
+2026-09-24 21:28:48,168 | INFO | __main__ | Resumed from checkpoints/brats_resume_smoke/latest.pt at epoch 2 (best_val_dice=0.0334)
+2026-09-24 21:28:48,169 | INFO | __main__ | Training segresnet on mps | train=4 val=2 | amp=False | loss=DiceCELoss(bg=True) | sched=cosine_warmup | grad_clip=1.0 | cache_rate=0.00
+2026-09-24 21:28:48,169 | INFO | __main__ | Regions / channels: ['enhancing_tumor', 'tumor_core', 'whole_tumor']
+2026-09-24 21:28:51,648 | INFO | __main__ | Epoch 2 train batch 1/4 | loss=1.0009 | dice_ch=[0.9914, 0.9904, 0.9386] | lr=3.95e-05
+2026-09-24 21:28:54,961 | INFO | __main__ | Epoch 2 train batch 2/4 | loss=1.0038 | dice_ch=[0.9912, 0.9874, 0.9604] | lr=1.96e-05
+2026-09-24 21:28:58,178 | INFO | __main__ | Epoch 2 train batch 3/4 | loss=0.9922 | dice_ch=[0.9974, 0.9979, 0.9083] | lr=5.90e-06
+2026-09-24 21:29:01,342 | INFO | __main__ | Epoch 2 train batch 4/4 | loss=1.0121 | dice_ch=[0.9769, 0.968, 0.9436] | lr=1.00e-06
+2026-09-24 21:29:01,342 | INFO | __main__ | Epoch 2 train channel Dice losses ET/TC/WT = 0.9892 / 0.9859 / 0.9377
+2026-09-24 21:29:04,130 | INFO | __main__ | Epoch 2 val batch 1/2
+2026-09-24 21:29:06,828 | INFO | __main__ | Epoch 2 val batch 2/2
+2026-09-24 21:29:06,833 | INFO | __main__ | Epoch 2/2 | train_loss=1.0023 | dice_ch=[0.989,0.986,0.938] | val_dice=0.0360 (ET=0.000 TC=0.001 WT=0.107) | 18.7s | lr=1.00e-06
+2026-09-24 21:29:07,258 | INFO | __main__ | New best mean val Dice 0.0360 -> checkpoints/brats_resume_smoke/best_model.pt

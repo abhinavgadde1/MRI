@@ -55,7 +55,7 @@ def dice_numpy(pred: np.ndarray, gt: np.ndarray) -> float:
 
 def dice_monai(pred: np.ndarray, gt: np.ndarray) -> float:
     """Dice via MONAI ``DiceMetric`` for one binary region."""
-    metric = DiceMetric(include_background=False, reduction="mean")
+    metric = DiceMetric(include_background=True, reduction="mean")
     pred_t = torch.as_tensor(pred.astype(np.float32)).unsqueeze(0).unsqueeze(0)
     gt_t = torch.as_tensor(gt.astype(np.float32)).unsqueeze(0).unsqueeze(0)
     metric(y_pred=[pred_t], y=[gt_t])
@@ -389,7 +389,7 @@ def main(argv: list[str] | None = None) -> int:
         run_case_sanity_check(
             args.subject_id,
             args.checkpoint,
-            Path(output_dir) / f"sanity_{subject_id}_{args.region}.png",
+            Path(output_dir) / f"sanity_{args.subject_id}_{args.region}.png",
             brats_nifti_root=app_cfg.paths.brats_nifti,
             region=args.region,
         )

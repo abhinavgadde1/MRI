@@ -1,0 +1,71 @@
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/torch/jit/_script.py:1643: FutureWarning: `torch.jit.interface` is deprecated. Please use `torch.compile` instead.
+  warnings.warn(
+<frozen runpy>:128: RuntimeWarning: 'segmentation.evaluate' found in sys.modules after import of package 'segmentation', but prior to execution of 'segmentation.evaluate'; this may result in unpredictable behaviour
+2026-09-29 11:49:39,143 | INFO | __main__ | Evaluating BraTS20_Training_313 on mps
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/monai/utils/deprecate_utils.py:220: FutureWarning: monai.metrics.utils get_mask_edges:always_return_as_numpy: Argument `always_return_as_numpy` has been deprecated since version 1.5.0. It will be removed in version 1.7.0. The option is removed and the return type will always be equal to the input type.
+  warn_deprecated(argname, msg, warning_category)
+2026-09-29 11:49:43,450 | INFO | __main__ | Evaluating BraTS20_Training_161 on mps
+2026-09-29 11:49:47,606 | INFO | __main__ | Evaluating BraTS20_Training_078 on mps
+2026-09-29 11:49:51,289 | INFO | __main__ | Evaluating BraTS20_Training_146 on mps
+2026-09-29 11:49:55,199 | INFO | __main__ | Evaluating BraTS20_Training_327 on mps
+2026-09-29 11:49:58,471 | INFO | __main__ | Evaluating BraTS20_Training_154 on mps
+2026-09-29 11:50:02,370 | INFO | __main__ | Evaluating BraTS20_Training_038 on mps
+2026-09-29 11:50:07,147 | INFO | __main__ | Evaluating BraTS20_Training_169 on mps
+2026-09-29 11:50:11,098 | INFO | __main__ | Evaluating BraTS20_Training_285 on mps
+2026-09-29 11:50:14,887 | INFO | __main__ | Evaluating BraTS20_Training_058 on mps
+2026-09-29 11:50:18,766 | INFO | __main__ | Evaluating BraTS20_Training_106 on mps
+2026-09-29 11:50:22,905 | INFO | __main__ | Evaluating BraTS20_Training_363 on mps
+2026-09-29 11:50:26,323 | INFO | __main__ | Evaluating BraTS20_Training_360 on mps
+2026-09-29 11:50:30,098 | INFO | __main__ | Evaluating BraTS20_Training_366 on mps
+2026-09-29 11:50:34,235 | INFO | __main__ | Evaluating BraTS20_Training_236 on mps
+2026-09-29 11:50:37,882 | INFO | __main__ | Evaluating BraTS20_Training_043 on mps
+2026-09-29 11:50:41,847 | INFO | __main__ | Evaluating BraTS20_Training_022 on mps
+2026-09-29 11:50:45,876 | INFO | __main__ | Evaluating BraTS20_Training_096 on mps
+2026-09-29 11:50:50,057 | INFO | __main__ | Evaluating BraTS20_Training_147 on mps
+2026-09-29 11:50:53,511 | INFO | __main__ | Evaluating BraTS20_Training_002 on mps
+2026-09-29 11:50:57,369 | INFO | __main__ | Evaluating BraTS20_Training_297 on mps
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/monai/metrics/utils.py:342: UserWarning: the ground truth of class 0 is all 0, this may result in nan/inf distance.
+  warnings.warn(
+2026-09-29 11:51:01,158 | INFO | __main__ | Evaluating BraTS20_Training_103 on mps
+2026-09-29 11:51:04,944 | INFO | __main__ | Evaluating BraTS20_Training_292 on mps
+2026-09-29 11:51:09,244 | INFO | __main__ | Evaluating BraTS20_Training_131 on mps
+2026-09-29 11:51:13,476 | INFO | __main__ | Evaluating BraTS20_Training_051 on mps
+2026-09-29 11:51:17,828 | INFO | __main__ | Evaluating BraTS20_Training_288 on mps
+2026-09-29 11:51:21,821 | INFO | __main__ | Evaluating BraTS20_Training_291 on mps
+2026-09-29 11:51:25,528 | INFO | __main__ | Evaluating BraTS20_Training_133 on mps
+2026-09-29 11:51:29,249 | INFO | __main__ | Evaluating BraTS20_Training_186 on mps
+2026-09-29 11:51:32,620 | INFO | __main__ | Evaluating BraTS20_Training_231 on mps
+2026-09-29 11:51:37,163 | INFO | __main__ | Evaluating BraTS20_Training_320 on mps
+2026-09-29 11:51:40,753 | INFO | __main__ | Evaluating BraTS20_Training_227 on mps
+2026-09-29 11:51:44,499 | INFO | __main__ | Evaluating BraTS20_Training_283 on mps
+2026-09-29 11:51:48,158 | INFO | __main__ | Evaluating BraTS20_Training_080 on mps
+2026-09-29 11:51:51,838 | INFO | __main__ | Evaluating BraTS20_Training_095 on mps
+2026-09-29 11:51:55,399 | INFO | __main__ | Evaluating BraTS20_Training_042 on mps
+2026-09-29 11:51:59,342 | INFO | __main__ | Evaluating BraTS20_Training_053 on mps
+2026-09-29 11:52:03,463 | INFO | __main__ | Evaluating BraTS20_Training_197 on mps
+2026-09-29 11:52:07,608 | INFO | __main__ | Evaluating BraTS20_Training_083 on mps
+2026-09-29 11:52:11,504 | INFO | __main__ | Evaluating BraTS20_Training_171 on mps
+2026-09-29 11:52:15,000 | INFO | __main__ | Evaluating BraTS20_Training_028 on mps
+2026-09-29 11:52:18,953 | INFO | __main__ | Evaluating BraTS20_Training_187 on mps
+2026-09-29 11:52:23,412 | INFO | __main__ | Evaluating BraTS20_Training_101 on mps
+2026-09-29 11:52:27,327 | INFO | __main__ | Evaluating BraTS20_Training_218 on mps
+2026-09-29 11:52:31,231 | INFO | __main__ | Evaluating BraTS20_Training_029 on mps
+2026-09-29 11:52:35,626 | INFO | __main__ | Evaluating BraTS20_Training_013 on mps
+2026-09-29 11:52:39,939 | INFO | __main__ | Evaluating BraTS20_Training_257 on mps
+2026-09-29 11:52:44,241 | INFO | __main__ | Evaluating BraTS20_Training_006 on mps
+2026-09-29 11:52:48,865 | INFO | __main__ | Evaluating BraTS20_Training_112 on mps
+2026-09-29 11:52:53,353 | INFO | __main__ | Evaluating BraTS20_Training_039 on mps
+2026-09-29 11:52:57,644 | INFO | __main__ | Evaluating BraTS20_Training_166 on mps
+2026-09-29 11:53:02,056 | INFO | __main__ | Evaluating BraTS20_Training_339 on mps
+2026-09-29 11:53:05,912 | INFO | __main__ | Evaluating BraTS20_Training_093 on mps
+2026-09-29 11:53:10,913 | INFO | __main__ | Evaluating BraTS20_Training_100 on mps
+2026-09-29 11:53:15,829 | INFO | __main__ | Evaluating BraTS20_Training_259 on mps
+2026-09-29 11:53:21,366 | INFO | __main__ | Evaluating BraTS20_Training_113 on mps
+2026-09-29 11:53:26,670 | INFO | __main__ | Evaluating BraTS20_Training_200 on mps
+2026-09-29 11:53:31,988 | INFO | __main__ | Evaluating BraTS20_Training_266 on mps
+2026-09-29 11:53:36,746 | INFO | __main__ | Evaluating BraTS20_Training_271 on mps
+2026-09-29 11:53:41,142 | INFO | __main__ | Evaluating BraTS20_Training_107 on mps
+2026-09-29 11:53:45,731 | INFO | __main__ | Saved held-out metrics -> checkpoints/brats_eval_heldout_v3/raw/metrics.csv (60 cases, postprocess=raw)
+2026-09-29 11:53:45,731 | INFO | __main__ | enhancing_tumor (n=58) | Dice=0.6480 | HD95=39.81 mm
+2026-09-29 11:53:45,731 | INFO | __main__ | tumor_core (n=60) | Dice=0.7206 | HD95=39.46 mm
+2026-09-29 11:53:45,731 | INFO | __main__ | whole_tumor (n=60) | Dice=0.8507 | HD95=49.37 mm

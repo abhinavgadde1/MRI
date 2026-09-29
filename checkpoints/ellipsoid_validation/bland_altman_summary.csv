@@ -1,0 +1,9 @@
+,0
+n,50.0
+mean_diff_mask_minus_ellipsoid_ml,-86.74638157708574
+std_diff_ml,47.60044028790854
+loa_lower_ml,-180.04324454138649
+loa_upper_ml,6.550481387215001
+mean_mask_ml,81.6507
+mean_ellipsoid_ml,168.39708157708574
+mean_ratio_mask_over_ellipsoid,0.47487191137624846
