@@ -26,6 +26,7 @@ Primary model: **v3** (`brats_scale_full`). Ablation: v1 → v2 → v3.
 - `tables/ref_v3_paired_dice.csv`
 - `tables/table1_dataset_preprocessing.csv`
 - `tables/table1_dataset_preprocessing.md`
+- `tables/table1_real_patient_study_ids.csv`
 - `tables/table2_paired_delta_dice.csv`
 - `tables/table2_paired_delta_dice_v3_vs_v1.csv`
 - `tables/table2_paired_delta_dice_v3_vs_v2.csv`

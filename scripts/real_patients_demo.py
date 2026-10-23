@@ -17,13 +17,11 @@ import matplotlib.pyplot as plt
 import nibabel as nib
 import numpy as np
 import pandas as pd
-import plotly.graph_objects as go
 import torch
 import trimesh
 from monai.data import DataLoader, Dataset, decollate_batch
 from monai.inferers import sliding_window_inference
 from scipy import ndimage as ndi
-from skimage.measure import marching_cubes
 
 from config import PROJECT_ROOT, load_config
 from preprocessing.registration import REGISTERED_NAMES
@@ -31,24 +29,30 @@ from reconstruction.measurements import measure_from_mask
 from segmentation.dataset import get_val_transforms, subject_to_datadict
 from segmentation.evaluate import load_model_from_checkpoint
 from segmentation.model import BRATS_REGIONS
-from segmentation.postprocess import apply_channel_postprocess, lcc_then_fill
+from segmentation.postprocess import apply_channel_postprocess, enforce_brats_nesting
 from segmentation.pseudo_label import (
     get_patient_inference_transforms,
     registered_dir_to_datadict,
     regions_to_label_map,
 )
 from segmentation.train import post_transforms
-from visualization.plotly_3d import mesh3d_from_trimesh
+from visualization.plotly_3d import (
+    MESH_COLORS,
+    binary_mask_to_trimesh,
+    brain_surface_mesh,
+    write_labeled_mesh_html,
+)
 
 ROOT = PROJECT_ROOT
 OUT = ROOT / "outputs" / "real_patients_demo"
 PAPER_FIG = ROOT / "results" / "paper" / "figures"
 CKPT = ROOT / "checkpoints" / "brats_scale_full" / "best_model.pt"
+CKPT_LABEL = "checkpoints/brats_scale_full/best_model.pt (v3)"
 SPACING = (1.0, 1.0, 1.0)
 REGION_COLORS = {
-    "enhancing_tumor": "#C44E52",
-    "tumor_core": "#4C72B0",
-    "whole_tumor": "#55A868",
+    "enhancing_tumor": MESH_COLORS["enhancing_tumor"],
+    "tumor_core": MESH_COLORS["tumor_core"],
+    "whole_tumor": MESH_COLORS["whole_tumor"],
 }
 REGION_SHORT = {
     "enhancing_tumor": "ET",
@@ -126,16 +130,7 @@ def binary_to_mesh(binary: np.ndarray, spacing: tuple[float, float, float]) -> t
     step = 1
     if binary.sum() > 250_000:
         step = 2
-    try:
-        verts, faces, normals, _ = marching_cubes(
-            binary.astype(np.float32),
-            level=0.5,
-            spacing=spacing,
-            step_size=step,
-        )
-    except (ValueError, RuntimeError):
-        return None
-    return trimesh.Trimesh(vertices=verts, faces=faces, vertex_normals=normals, process=False)
+    return binary_mask_to_trimesh(binary, spacing, step_size=step)
 
 
 def save_slice_overlay(
@@ -227,28 +222,6 @@ def save_brats_gt_pred_overlay(
     return out_path
 
 
-def plotly_regions_figure(meshes: dict[str, trimesh.Trimesh]) -> go.Figure:
-    fig = go.Figure()
-    for region, mesh in meshes.items():
-        if mesh is None or len(mesh.vertices) == 0:
-            continue
-        fig.add_trace(
-            mesh3d_from_trimesh(
-                mesh,
-                name=REGION_SHORT[region],
-                color=REGION_COLORS[region],
-                opacity=0.55 if region == "whole_tumor" else 0.85,
-            )
-        )
-    fig.update_layout(
-        scene=dict(aspectmode="data", xaxis_title="x (mm)", yaxis_title="y (mm)", zaxis_title="z (mm)"),
-        margin=dict(l=0, r=0, t=30, b=0),
-        legend=dict(orientation="h"),
-        height=520,
-    )
-    return fig
-
-
 def mesh_static_png(mesh: trimesh.Trimesh, out_path: Path, title: str) -> Path:
     """Matplotlib 3D render for paper (no kaleido required)."""
     v = mesh.vertices
@@ -306,6 +279,7 @@ def infer_patient(
     post_pred, _ = post_transforms()
     pred = post_pred(decollate_batch(logits)[0]).detach().cpu().numpy()
     pred = apply_channel_postprocess(pred.astype(np.float32), mode="lcc")
+    pred = enforce_brats_nesting(pred)
     regions = {r: pred[i].astype(bool) for i, r in enumerate(BRATS_REGIONS)}
     # FLAIR channel for display if available else T1 (channel order FLAIR,T1,T1c,T2)
     flair = data["image"][0].detach().cpu().numpy()
@@ -314,12 +288,13 @@ def infer_patient(
 
 
 @torch.no_grad()
-def infer_brats_wt(
+def infer_brats_regions(
     model: torch.nn.Module,
     device: torch.device,
     subject_id: str,
     brats_root: Path,
-) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, float]:
+) -> tuple[np.ndarray, dict[str, np.ndarray], np.ndarray, float]:
+    """Return FLAIR, predicted regions (lcc), GT-WT, and WT Dice."""
     rec = subject_to_datadict(brats_root / subject_id)
     batch = next(
         iter(DataLoader(Dataset([rec], transform=get_val_transforms()), batch_size=1))
@@ -329,17 +304,80 @@ def infer_brats_wt(
     logits = sliding_window_inference(
         img, roi_size=(96, 96, 96), sw_batch_size=1, predictor=model
     )
-    pred = (torch.sigmoid(logits) > 0.5).squeeze(0).detach().cpu().numpy()
-    pred_raw = pred[2].astype(bool)
-    pred_lcc = lcc_then_fill(pred_raw)
-    inter = int((pred_lcc & gt_wt).sum())
+    pred = (torch.sigmoid(logits) > 0.5).squeeze(0).detach().cpu().numpy().astype(np.float32)
+    pred = apply_channel_postprocess(pred, mode="lcc")
+    regions = {r: pred[i].astype(bool) for i, r in enumerate(BRATS_REGIONS)}
+    pred_lcc_wt = regions["whole_tumor"]
+    inter = int((pred_lcc_wt & gt_wt).sum())
     dice = (
-        2.0 * inter / (pred_lcc.sum() + gt_wt.sum())
-        if (pred_lcc.sum() + gt_wt.sum())
+        2.0 * inter / (pred_lcc_wt.sum() + gt_wt.sum())
+        if (pred_lcc_wt.sum() + gt_wt.sum())
         else 0.0
     )
     flair = batch["image"][0, 0].detach().cpu().numpy()
-    return flair, gt_wt, pred_raw, pred_lcc, float(dice)
+    return flair, regions, gt_wt, float(dice)
+
+
+@torch.no_grad()
+def infer_brats_wt(
+    model: torch.nn.Module,
+    device: torch.device,
+    subject_id: str,
+    brats_root: Path,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, float]:
+    flair, regions, gt_wt, dice = infer_brats_regions(
+        model, device, subject_id, brats_root
+    )
+    # raw WT without re-running: approximate via re-inference path for overlay delta
+    rec = subject_to_datadict(brats_root / subject_id)
+    batch = next(
+        iter(DataLoader(Dataset([rec], transform=get_val_transforms()), batch_size=1))
+    )
+    img = batch["image"].to(device, dtype=torch.float32)
+    logits = sliding_window_inference(
+        img, roi_size=(96, 96, 96), sw_batch_size=1, predictor=model
+    )
+    pred = (torch.sigmoid(logits) > 0.5).squeeze(0).detach().cpu().numpy()
+    pred_raw = pred[2].astype(bool)
+    pred_lcc = regions["whole_tumor"]
+    return flair, gt_wt, pred_raw, pred_lcc, dice
+
+
+def write_brats_mesh_html(
+    *,
+    flair: np.ndarray,
+    regions: dict[str, np.ndarray],
+    subject_id: str,
+    out_html: Path,
+    dice: float | None = None,
+) -> Path:
+    tumor = {k: v for k, v in regions.items() if v is not None and np.any(v)}
+    # Prefer T1 anatomy for the brain shell when the caller passes flair-only;
+    # flair is still a fine fallback (BraTS paper path).
+    meshes: dict[str, trimesh.Trimesh | None] = {
+        "brain": brain_surface_mesh(flair, SPACING, include_masks=tumor),
+    }
+    volumes_ml: dict[str, float] = {}
+    for region in BRATS_REGIONS:
+        binary = regions[region]
+        if not np.any(binary):
+            continue
+        mesh = binary_to_mesh(binary, SPACING)
+        meshes[region] = mesh
+        volumes_ml[REGION_SHORT[region]] = float(binary.sum()) / 1000.0  # 1mm³ voxels
+    title = (
+        f"{subject_id} · predicted meshes (lcc) · checkpoint: {CKPT_LABEL}"
+        + (f" · WT Dice={dice:.3f}" if dice is not None else "")
+    )
+    return write_labeled_mesh_html(
+        out_html,
+        meshes,
+        subject_id=subject_id,
+        checkpoint=CKPT_LABEL,
+        postprocess="lcc",
+        volumes_ml=volumes_ml,
+        title=title,
+    )
 
 
 def process_patient_case(
@@ -402,17 +440,32 @@ def process_patient_case(
     metrics.to_csv(case_dir / "morphometrics.csv", index=False)
 
     slice_path = case_dir / "slice_overlay.png"
+    display_vol = flair if flair.std() > 0 else t1
     save_slice_overlay(
-        flair if flair.std() > 0 else t1,
+        display_vol,
         regions,
         slice_path,
         title=f"{sid} · v3-lcc · {pick['t1c_status']}",
     )
 
-    fig3d = plotly_regions_figure(meshes)
-    fig3d.update_layout(title=f"{sid} · predicted meshes (v3-lcc)")
+    brain = brain_surface_mesh(
+        t1 if t1.std() > 0 else display_vol,
+        SPACING,
+        include_masks={k: v for k, v in regions.items() if np.any(v)},
+    )
+    mesh_dict: dict[str, trimesh.Trimesh | None] = {"brain": brain, **meshes}
+    volumes_ml = {
+        row["region"]: float(row["volume_ml"]) for row in metrics_rows if row["volume_ml"]
+    }
     html3d = case_dir / "mesh_3d.html"
-    fig3d.write_html(str(html3d), include_plotlyjs="cdn", full_html=True)
+    write_labeled_mesh_html(
+        html3d,
+        mesh_dict,
+        subject_id=sid,
+        checkpoint=CKPT_LABEL,
+        postprocess="lcc",
+        volumes_ml=volumes_ml,
+    )
 
     meta = {
         **pick,
@@ -555,13 +608,30 @@ def main() -> int:
         print(f"Processing patient {pick['study_id']} ...")
         case_metas.append(process_patient_case(model, device, pick, patients_root))
 
-    # BraTS median + best overlays + mesh for paper
+    # BraTS median + best overlays + multi-region mesh for paper (best case)
     paper_mesh_case = best_id
     for sid, tag in ((median_id, "median"), (best_id, "best")):
         print(f"BraTS overlay {tag} {sid} ...")
-        flair, gt_wt, pred_raw, pred_lcc, dice = infer_brats_wt(
+        flair, regions, gt_wt, dice = infer_brats_regions(
             model, device, sid, brats_root
         )
+        # raw WT for overlay comparison
+        rec = subject_to_datadict(brats_root / sid)
+        batch = next(
+            iter(
+                DataLoader(
+                    Dataset([rec], transform=get_val_transforms()), batch_size=1
+                )
+            )
+        )
+        img = batch["image"].to(device, dtype=torch.float32)
+        logits = sliding_window_inference(
+            img, roi_size=(96, 96, 96), sw_batch_size=1, predictor=model
+        )
+        pred_raw = (torch.sigmoid(logits) > 0.5).squeeze(0).detach().cpu().numpy()[
+            2
+        ].astype(bool)
+        pred_lcc = regions["whole_tumor"]
         out_png = PAPER_FIG / f"fig_seg_wt_{tag}_{sid}.png"
         save_brats_gt_pred_overlay(
             flair, gt_wt, pred_lcc, pred_raw, out_png, subject_id=sid, dice=dice
@@ -576,26 +646,15 @@ def main() -> int:
                     mesh_png,
                     title=f"WT mesh · {sid} · v3-lcc (best held-out Dice)",
                 )
-                # Also keep interactive HTML next to paper figs
-                fig = go.Figure(
-                    data=[
-                        mesh3d_from_trimesh(
-                            mesh, name="WT", color="#55A868", opacity=0.85
-                        )
-                    ]
+                html_path = PAPER_FIG / f"fig_mesh_wt_{sid}.html"
+                write_brats_mesh_html(
+                    flair=flair,
+                    regions=regions,
+                    subject_id=sid,
+                    out_html=html_path,
+                    dice=dice,
                 )
-                fig.update_layout(
-                    title=f"WT mesh {sid} (v3-lcc)",
-                    scene=dict(aspectmode="data"),
-                    height=500,
-                    margin=dict(l=0, r=0, t=40, b=0),
-                )
-                fig.write_html(
-                    str(PAPER_FIG / f"fig_mesh_wt_{sid}.html"),
-                    include_plotlyjs="cdn",
-                    full_html=True,
-                )
-                print(f"  wrote mesh {mesh_png}")
+                print(f"  wrote mesh {mesh_png} + {html_path}")
 
     # Update extremes CSV overlay flags
     extremes = extremes.copy()

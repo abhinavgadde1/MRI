@@ -24,6 +24,7 @@ from monai.transforms import (
 )
 
 from config import load_config
+from device import get_device
 from preprocessing.h5_to_nifti import MODALITY_NAMES
 from preprocessing.registration import REGISTERED_NAMES
 from segmentation.evaluate import load_model_from_checkpoint
@@ -140,6 +141,7 @@ def pseudo_label_study(
     roi_size: tuple[int, int, int] = (96, 96, 96),
     device: str | None = None,
     overwrite: bool = False,
+    model: torch.nn.Module | None = None,
 ) -> PseudoLabelResult:
     """Run BraTS-pretrained inference on one preprocessed study."""
     study_dir = Path(study_dir)
@@ -162,12 +164,17 @@ def pseudo_label_study(
         record = registered_dir_to_datadict(reg_dir, study_id)
         data = get_patient_inference_transforms()(record)
 
-        device_t = torch.device(device or ("cuda" if torch.cuda.is_available() else "cpu"))
-        model = load_model_from_checkpoint(checkpoint_path, device_t)
+        device_t = get_device(device)
+        if model is None:
+            model = load_model_from_checkpoint(checkpoint_path, device_t)
+            model.float().eval()
         post_pred, _ = post_transforms()
 
-        image = data["image"].unsqueeze(0).to(device_t)
-        with torch.autocast(device_type=device_t.type, enabled=device_t.type == "cuda"):
+        image = data["image"].unsqueeze(0).to(device_t, dtype=torch.float32)
+        with torch.autocast(
+            device_type=device_t.type,
+            enabled=device_t.type == "cuda",
+        ):
             outputs = sliding_window_inference(
                 image,
                 roi_size=roi_size,

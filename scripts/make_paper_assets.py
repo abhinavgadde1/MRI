@@ -133,8 +133,47 @@ def table1_dataset_preprocessing() -> Path:
     df = pd.DataFrame(rows)
     out = TAB / "table1_dataset_preprocessing.csv"
     df.to_csv(out, index=False)
+
+    # Full real-patient study-id roster for the dataset report.
+    roster = batch[
+        ["study_id", "status", "modalities_found", "modalities_processed", "error"]
+    ].copy()
+    roster = roster.sort_values(["status", "study_id"], ascending=[False, True])
+    roster.insert(0, "index", range(1, len(roster) + 1))
+    roster_csv = TAB / "table1_real_patient_study_ids.csv"
+    roster.to_csv(roster_csv, index=False)
+
+    success_ids = sorted(ok["study_id"].astype(str).tolist())
+    failed_ids = sorted(failed["study_id"].astype(str).tolist())
+    success_rows = [
+        {"#": i, "study_id": sid, "status": "success"}
+        for i, sid in enumerate(success_ids, start=1)
+    ]
+    failed_rows = [
+        {"#": i, "study_id": sid, "status": "failed"}
+        for i, sid in enumerate(failed_ids, start=1)
+    ]
+
+    md_parts = [
+        "## Table 1 — Dataset & preprocessing",
+        "",
+        _df_to_md(df),
+        "",
+        f"### Real-patient MRI study IDs (n={len(roster)})",
+        "",
+        f"Full machine-readable list: `{roster_csv.name}`.",
+        "",
+        f"#### Successful (n={len(success_ids)})",
+        "",
+        _df_to_md(pd.DataFrame(success_rows)) if success_rows else "_none_",
+        "",
+        f"#### Failed (n={len(failed_ids)})",
+        "",
+        _df_to_md(pd.DataFrame(failed_rows)) if failed_rows else "_none_",
+        "",
+    ]
     (TAB / "table1_dataset_preprocessing.md").write_text(
-        _df_to_md(df) + "\n",
+        "\n".join(md_parts),
         encoding="utf-8",
     )
     return out

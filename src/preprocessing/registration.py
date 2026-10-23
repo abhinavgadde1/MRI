@@ -45,6 +45,7 @@ class PatientPreprocessResult:
     dicom_nifti: dict[str, Path] = field(default_factory=dict)
     bias_corrected: dict[str, Path] = field(default_factory=dict)
     skull_stripped: dict[str, Path] = field(default_factory=dict)
+    skull_strip_methods: dict[str, str] = field(default_factory=dict)
     registered_1mm: dict[str, Path] = field(default_factory=dict)
     transforms: dict[str, Path] = field(default_factory=dict)
     reference: str | None = None
@@ -314,12 +315,24 @@ def run_nifti_preprocessing(
     atlas_path: str | Path | None = None,
     spacing_mm: float = 1.0,
     use_hd_bet: bool = True,
+    skip_skull_strip: bool = False,
     existing: PatientPreprocessResult | None = None,
 ) -> PatientPreprocessResult:
-    """Bias-correct → skull-strip → rigid-register → 1 mm resample from NIfTIs."""
+    """Bias-correct → skull-strip → rigid-register → 1 mm resample from NIfTIs.
+
+    Set ``skip_skull_strip=True`` for datasets that are already brain-extracted
+    (e.g. BraTS NIfTI) — re-running HD-BET/Otsu on them often harms the mesh.
+    """
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     study_name = study_name or output_dir.name
+    # BraTS challenge volumes ship pre–skull-stripped.
+    if not skip_skull_strip and str(study_name).upper().startswith("BRATS"):
+        skip_skull_strip = True
+        logger.info(
+            "Detected BraTS study %s — skipping skull-strip (already extracted)",
+            study_name,
+        )
 
     result = existing or PatientPreprocessResult(
         study_name=study_name,
@@ -347,10 +360,24 @@ def run_nifti_preprocessing(
     for modality, nifti in result.bias_corrected.items():
         out = strip_dir / f"{modality}.nii.gz"
         mask = strip_dir / f"{modality}_brainmask.nii.gz"
+        if skip_skull_strip:
+            import shutil
+
+            shutil.copy2(nifti, out)
+            # Mask = nonzero support of the already-stripped volume.
+            img = sitk.ReadImage(str(out))
+            m = sitk.Cast(img != 0, sitk.sitkUInt8)
+            m.CopyInformation(img)
+            sitk.WriteImage(m, str(mask))
+            result.skull_stripped[modality] = out
+            result.skull_strip_methods[modality] = "pre_stripped"
+            logger.info("Skull strip %s skipped (pre-stripped copy)", modality)
+            continue
         strip_result = skull_strip(
             nifti, out, mask_path=mask, prefer_hd_bet=use_hd_bet
         )
         result.skull_stripped[modality] = strip_result.stripped_path
+        result.skull_strip_methods[modality] = strip_result.method
         logger.info("Skull strip %s via %s", modality, strip_result.method)
 
     reg_dir = output_dir / "04_registered_1mm"

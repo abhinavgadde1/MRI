@@ -3,11 +3,14 @@
 from __future__ import annotations
 
 import argparse
+import json
 import logging
 import shutil
 from pathlib import Path
 
 from config import load_config
+from device import get_device
+from segmentation.evaluate import load_model_from_checkpoint
 from preprocessing.registration import REGISTERED_NAMES
 from segmentation.pseudo_label import (
     PSEUDO_LABEL_FILENAME,
@@ -94,7 +97,15 @@ def stage_corrected_cases(
             if src.is_file():
                 shutil.copy2(src, dest_reg / name)
 
-        shutil.copy2(pseudo, dest_reg / CORRECTED_LABEL_NAME)
+        dest_label = dest_reg / CORRECTED_LABEL_NAME
+        if dest_label.is_file() and dest_label.read_bytes() != Path(pseudo).read_bytes():
+            logger.warning(
+                "Keeping existing edited %s for %s (differs from pseudo-label)",
+                CORRECTED_LABEL_NAME,
+                study.name,
+            )
+        else:
+            shutil.copy2(pseudo, dest_label)
         # Keep original pseudo for reference
         shutil.copy2(pseudo, dest_reg / PSEUDO_LABEL_FILENAME)
         (dest_study / README_NAME).write_text(README_TEXT, encoding="utf-8")
@@ -129,18 +140,47 @@ def prepare_correction_set(
             "Check data/processed/real_patients/*/04_registered_1mm/"
         )
 
+    device_t = get_device(device)
+    model = load_model_from_checkpoint(checkpoint, device_t)
+    model.float().eval()
+    results = []
     for study in studies:
-        result = pseudo_label_study(study, checkpoint, device=device)
+        result = pseudo_label_study(
+            study,
+            checkpoint,
+            device=str(device_t),
+            model=model,
+        )
+        results.append(result)
         logger.info("Pseudo-label %s: %s", result.study_id, result.status)
         if result.status == "failed":
             logger.error("Failed %s: %s", result.study_id, result.error)
 
-    return stage_corrected_cases(
+    ok_ids = [r.study_id for r in results if r.status in {"success", "cached"}]
+    staged = stage_corrected_cases(
         patients_root,
         corrected_root,
-        study_ids=[s.name for s in studies],
+        study_ids=ok_ids,
         n_cases=n_cases,
     )
+    manifest = {
+        "checkpoint": str(checkpoint),
+        "n_requested": n_cases,
+        "n_staged": len(staged),
+        "study_ids": [p.name for p in staged],
+        "t1c_policy": "T1 copied to T1c when native contrast is absent",
+        "label_status": "pseudo-label starters — EDIT in ITK-SNAP/Slicer before fine-tune",
+        "next_step": (
+            "Correct 04_registered_1mm/corrected_tumor_label.nii.gz "
+            "(0/1/2/3 BraTS labels), then: python -m segmentation.finetune"
+        ),
+    }
+    corrected_root = Path(corrected_root)
+    (corrected_root / "MANIFEST.json").write_text(
+        json.dumps(manifest, indent=2) + "\n", encoding="utf-8"
+    )
+    (corrected_root / README_NAME).write_text(README_TEXT, encoding="utf-8")
+    return staged
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -152,6 +192,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--patients-root", type=Path, default=None)
     parser.add_argument("--corrected-root", type=Path, default=None)
     parser.add_argument("--n-cases", type=int, default=10)
+    parser.add_argument("--device", type=str, default=None)
     parser.add_argument("-q", "--quiet", action="store_true")
     args = parser.parse_args(argv)
 
@@ -162,7 +203,7 @@ def main(argv: list[str] | None = None) -> int:
 
     app_cfg = load_config(args.config)
     checkpoint = args.checkpoint or (
-        app_cfg.paths.checkpoints / "brats_pretrain" / "best_model.pt"
+        app_cfg.paths.checkpoints / "brats_scale_full" / "best_model.pt"
     )
     patients_root = args.patients_root or (app_cfg.paths.processed / "real_patients")
     corrected_root = args.corrected_root or (patients_root / "corrected")
@@ -172,6 +213,7 @@ def main(argv: list[str] | None = None) -> int:
         patients_root,
         corrected_root,
         n_cases=args.n_cases,
+        device=args.device,
     )
     print(f"Staged {len(staged)} cases under {corrected_root}")
     print("Open each CORRECTION_README.txt and edit corrected_tumor_label.nii.gz in ITK-SNAP/Slicer.")

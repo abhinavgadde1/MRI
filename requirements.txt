@@ -64,6 +64,13 @@ setuptools==84.0.0
 # Dev / tests
 pytest==9.1.1
 
+# Web API / UI
+fastapi==0.142.2
+uvicorn==0.54.0
+python-multipart==0.0.32
+httpx==0.28.1
+fast_simplification==0.2.0
+
 # Optional (DICOM conversion path; soft-imported — install if you ingest raw DICOM):
 # dicom2nifti
 # Optional tractography extras (not required for demo / paper tables):

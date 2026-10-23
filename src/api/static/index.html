@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>MRI pipeline — analyze</title>
+  <style>
+    :root {
+      --bg: #f4f6f8;
+      --card: #fff;
+      --ink: #1a1f26;
+      --muted: #5b6570;
+      --accent: #1f6feb;
+      --err: #b42318;
+      --ok: #067647;
+      --border: #d8dee6;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+      background: linear-gradient(165deg, #e8eef5 0%, var(--bg) 40%, #f7f3ea 100%);
+      color: var(--ink);
+      min-height: 100vh;
+    }
+    header {
+      padding: 1.75rem 1.5rem 0.5rem;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    header h1 {
+      margin: 0 0 0.35rem;
+      font-size: 1.65rem;
+      letter-spacing: -0.02em;
+    }
+    header p { margin: 0; color: var(--muted); max-width: 42rem; line-height: 1.45; }
+    main { max-width: 1100px; margin: 0 auto; padding: 1rem 1.5rem 3rem; }
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.1rem 1.25rem;
+      margin-bottom: 1rem;
+      box-shadow: 0 1px 2px rgba(20,30,40,0.04);
+    }
+    label { display: block; font-weight: 600; margin-bottom: 0.4rem; }
+    input[type=file] { width: 100%; }
+    .row { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: end; margin-top: 0.9rem; }
+    .row > div { flex: 1; min-width: 140px; }
+    select, button {
+      font: inherit;
+      padding: 0.55rem 0.85rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+    button {
+      background: var(--accent);
+      color: #fff;
+      border-color: #1558c0;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    button:disabled { opacity: 0.55; cursor: wait; }
+    #status {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 0.92rem;
+      color: var(--muted);
+      margin-top: 0.75rem;
+    }
+    #status.error { color: var(--err); white-space: pre-wrap; }
+    #status.done { color: var(--ok); }
+    #errorBox {
+      display: none;
+      background: #fef3f2;
+      border: 1px solid #fecdca;
+      color: var(--err);
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.92rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.4rem 0.55rem;
+      text-align: left;
+    }
+    th { background: #f0f3f7; }
+    iframe {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: #fff;
+    }
+    .iframe-report { height: 520px; }
+    .iframe-mesh { height: 580px; }
+    h2 { margin: 0 0 0.75rem; font-size: 1.15rem; }
+    #results { display: none; }
+    .hint { font-size: 0.85rem; color: var(--muted); margin-top: 0.5rem; }
+    .banner {
+      display: none;
+      background: #fff8e6;
+      border: 1px solid #e6d5a8;
+      color: #5c4813;
+      padding: 0.85rem 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      line-height: 1.45;
+    }
+    tr.untrusted { color: #8a1f11; background: #fde2e1; }
+    tr.untrusted td:first-child::after {
+      content: " (untrusted)";
+      font-weight: 600;
+      font-size: 0.85em;
+    }
+    .check-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.55rem;
+      margin-top: 0.95rem;
+      font-weight: 500;
+    }
+    .check-row input { margin-top: 0.2rem; }
+    .check-row label { font-weight: 600; margin: 0; }
+    .limit-note {
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin: 0.35rem 0 0 1.6rem;
+      line-height: 1.4;
+      max-width: 40rem;
+    }
+    #anatNote {
+      display: none;
+      background: #f4f7fb;
+      border: 1px solid #d3dde8;
+      color: #3d4a58;
+      padding: 0.7rem 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      line-height: 1.45;
+    }
+    #meshLegend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem 0.85rem;
+      margin: 0 0 0.75rem;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+    #meshLegend .swatch {
+      display: inline-block;
+      width: 0.7rem;
+      height: 0.7rem;
+      border-radius: 2px;
+      margin-right: 0.3rem;
+      vertical-align: -1px;
+      border: 1px solid rgba(0,0,0,0.12);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>MRI tumor pipeline</h1>
+    <p>
+      Upload a ZIP of DICOM slices or registered NIfTIs. The server runs the same
+      path as <code>python -m pipeline.cli run</code> (v3 · LCC by default) and
+      shows the report, labeled 3D mesh, and volumes here.
+      BraTS-pretrained weights are in-domain on challenge data; hospital scans
+      without contrast T1c are qualitative only.
+    </p>
+  </header>
+  <main>
+    <div id="errorBox"></div>
+    <div id="standinBanner" class="banner" role="status">
+      <b>T1c stand-in.</b> This study has no native contrast T1c (T1 was copied
+      into that channel). Enhancing tumor (ET) is hidden on the 3D mesh and marked
+      untrusted in the table. There is no clinical ground truth — do not treat
+      volumes as measurements.
+    </div>
+    <div id="anatNote" role="status">
+      Anatomical labeling unavailable for this scan — showing tumor regions only.
+    </div>
+    <section class="panel">
+      <form id="uploadForm">
+        <label for="file">Scan upload (.zip)</label>
+        <input id="file" name="file" type="file" accept=".zip,.nii,.nii.gz,application/zip" required/>
+        <div class="row">
+          <div>
+            <label for="postprocess">Post-process</label>
+            <select id="postprocess" name="postprocess">
+              <option value="lcc" selected>lcc</option>
+              <option value="raw">raw</option>
+              <option value="lcc_min">lcc_min</option>
+            </select>
+          </div>
+          <div>
+            <label for="checkpoint">Checkpoint (optional)</label>
+            <input id="checkpoint" type="text" placeholder="default: v3 best_model.pt"
+                   style="width:100%;padding:0.55rem 0.7rem;border:1px solid var(--border);border-radius:8px;"/>
+          </div>
+          <div style="flex:0;">
+            <button type="submit" id="submitBtn">Analyze</button>
+          </div>
+        </div>
+        <div class="check-row">
+          <input id="anatomy" type="checkbox"/>
+          <label for="anatomy">Show brain anatomy (adds ~15–25s, experimental)</label>
+        </div>
+        <p class="limit-note" title="Anatomical labels may be incomplete or inaccurate for fine subcortical structures (ventricles, small nuclei), especially near the tumor region.">
+          Anatomical labels may be incomplete or inaccurate for fine subcortical
+          structures (ventricles, small nuclei), especially near the tumor region.
+          Requires the isolated <code>.venv-synthseg</code> environment; if it is
+          missing the job still finishes with tumor regions only.
+        </p>
+        <p class="hint">
+          Smoke ZIP: <code>python scripts/make_synthetic_case.py</code>
+          → <code>outputs/synthetic_case.zip</code>
+        </p>
+      </form>
+      <div id="status"></div>
+    </section>
+
+    <div id="results">
+      <section class="panel">
+        <h2>Volumes &amp; morphometrics</h2>
+        <div id="volumes"></div>
+      </section>
+      <section class="panel">
+        <h2>Report</h2>
+        <iframe id="reportFrame" class="iframe-report" title="Pipeline report"></iframe>
+      </section>
+      <section class="panel">
+        <h2>Labeled 3D mesh</h2>
+        <div id="meshLegend"></div>
+        <iframe id="meshFrame" class="iframe-mesh" title="3D mesh"></iframe>
+      </section>
+    </div>
+  </main>
+  <script>
+    const form = document.getElementById("uploadForm");
+    const statusEl = document.getElementById("status");
+    const errorBox = document.getElementById("errorBox");
+    const results = document.getElementById("results");
+    const submitBtn = document.getElementById("submitBtn");
+    let pollTimer = null;
+    let wantAnatomy = false;
+
+    const TUMOR_LEGEND = [
+      ["#C9B8A6", "Brain surface"],
+      ["#55A868", "Whole Tumor (WT)"],
+      ["#4C72B0", "Tumor Core (TC)"],
+      ["#C44E52", "Enhancing Tumor (ET)"],
+    ];
+    const ANAT_LEGEND = [
+      ["#E89AB8", "Left cerebral cortex"],
+      ["#9B59B6", "Right cerebral cortex"],
+      ["#F6E7C1", "Left cerebral white matter"],
+      ["#C4A882", "Right cerebral white matter"],
+      ["#7A8450", "Cerebellum"],
+      ["#6B4C9A", "Brainstem"],
+    ];
+
+    function renderMeshLegend(includeAnatomy) {
+      const items = includeAnatomy ? TUMOR_LEGEND.concat(ANAT_LEGEND) : TUMOR_LEGEND;
+      document.getElementById("meshLegend").innerHTML = items.map(([color, label]) =>
+        `<span><i class="swatch" style="background:${color}"></i>${label}</span>`
+      ).join("");
+    }
+
+    function showError(msg) {
+      errorBox.style.display = "block";
+      errorBox.textContent = msg;
+      statusEl.className = "error";
+    }
+    function clearError() {
+      errorBox.style.display = "none";
+      errorBox.textContent = "";
+      statusEl.className = "";
+    }
+
+    function renderVolumes(data) {
+      const standin = !!(data.meta && data.meta.t1c_is_standin);
+      const banner = document.getElementById("standinBanner");
+      banner.style.display = standin ? "block" : "none";
+      const rows = (data.regions || []).map(r => {
+        const sph = (r.sphericity != null && !Number.isNaN(Number(r.sphericity)))
+          ? Number(r.sphericity).toFixed(3) : "—";
+        const vol = Number(r.volume_ml).toFixed(2);
+        const faces = r.mesh_faces != null ? r.mesh_faces : "—";
+        const untrusted = r.trusted === false || r.trusted === "False"
+          || (standin && String(r.region).toUpperCase() === "ET");
+        const cls = untrusted ? ' class="untrusted"' : "";
+        return `<tr${cls}><td>${r.region}</td><td>${vol}</td><td>${sph}</td><td>${faces}</td></tr>`;
+      }).join("");
+      const ell = data.ellipsoid_wt || {};
+      const ellHtml = Object.keys(ell).length
+        ? `<p><b>WT ellipsoid:</b> voxel ${ell.voxel_volume_ml != null ? Number(ell.voxel_volume_ml).toFixed(2) + " mL" : "—"};
+           ABC/2 ${ell.abc_over_2_ml != null ? Number(ell.abc_over_2_ml).toFixed(2) + " mL" : "—"}</p>`
+        : "";
+      document.getElementById("volumes").innerHTML = `
+        ${ellHtml}
+        <table>
+          <thead><tr><th>Region</th><th>Volume (mL)</th><th>Sphericity</th><th>Mesh faces</th></tr></thead>
+          <tbody>${rows || "<tr><td colspan=4>No regions</td></tr>"}</tbody>
+        </table>`;
+    }
+
+    async function pollJob(jobId) {
+      try {
+        const res = await fetch(`/api/jobs/${jobId}`);
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || data.error || res.statusText);
+        let waiting = `Job ${jobId}: ${data.status}`;
+        if (wantAnatomy && (data.status === "queued" || data.status === "running")) {
+          waiting = `Job ${jobId}: ${data.status} — Processing with anatomical labeling — this takes longer…`;
+        }
+        statusEl.textContent = waiting + (data.error ? ` — ${data.error}` : "");
+        if (data.status === "queued" || data.status === "running") {
+          statusEl.className = "";
+          return;
+        }
+        clearInterval(pollTimer);
+        pollTimer = null;
+        submitBtn.disabled = false;
+        if (data.status === "error") {
+          const detail = data.error || "Pipeline failed";
+          const tb = data.error_traceback
+            ? "\n\n--- traceback ---\n" + data.error_traceback
+            : "";
+          showError(detail + tb);
+          return;
+        }
+        statusEl.className = "done";
+        const anat = data.anatomy_status || "skipped";
+        statusEl.textContent = `Job ${jobId}: done` +
+          (wantAnatomy ? ` (anatomy: ${anat})` : "");
+        const anatNote = document.getElementById("anatNote");
+        if (wantAnatomy && anat === "unavailable") {
+          anatNote.style.display = "block";
+          anatNote.textContent =
+            "Anatomical labeling unavailable for this scan — showing tumor regions only.";
+        } else {
+          anatNote.style.display = "none";
+        }
+        renderMeshLegend(wantAnatomy && anat === "ok");
+        document.getElementById("reportFrame").src = `/api/jobs/${jobId}/report`;
+        document.getElementById("meshFrame").src = `/api/jobs/${jobId}/mesh`;
+        const volRes = await fetch(`/api/jobs/${jobId}/volumes`);
+        const volData = await volRes.json();
+        if (!volRes.ok) throw new Error(volData.detail || "volumes failed");
+        renderVolumes(volData);
+        results.style.display = "block";
+      } catch (err) {
+        clearInterval(pollTimer);
+        pollTimer = null;
+        submitBtn.disabled = false;
+        showError(String(err.message || err));
+      }
+    }
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      clearError();
+      results.style.display = "none";
+      document.getElementById("standinBanner").style.display = "none";
+      document.getElementById("anatNote").style.display = "none";
+      if (pollTimer) clearInterval(pollTimer);
+
+      const fileInput = document.getElementById("file");
+      if (!fileInput.files.length) {
+        showError("Choose a file to upload.");
+        return;
+      }
+      const fd = new FormData();
+      fd.append("file", fileInput.files[0]);
+
+      const postprocess = document.getElementById("postprocess").value;
+      const checkpoint = document.getElementById("checkpoint").value.trim();
+      wantAnatomy = document.getElementById("anatomy").checked;
+      let url = `/api/analyze?postprocess=${encodeURIComponent(postprocess)}`;
+      if (checkpoint) url += `&checkpoint=${encodeURIComponent(checkpoint)}`;
+      if (wantAnatomy) url += `&anatomy=true`;
+
+      submitBtn.disabled = true;
+      statusEl.className = "";
+      statusEl.textContent = "Uploading…";
+
+      try {
+        const res = await fetch(url, { method: "POST", body: fd });
+        const data = await res.json();
+        if (!res.ok) {
+          showError(data.error || data.detail || "Upload failed");
+          submitBtn.disabled = false;
+          return;
+        }
+        const jobId = data.job_id;
+        statusEl.textContent = wantAnatomy
+          ? `Job ${jobId}: queued — Processing with anatomical labeling — this takes longer…`
+          : `Job ${jobId}: queued — Processing…`;
+        pollTimer = setInterval(() => pollJob(jobId), 2000);
+        pollJob(jobId);
+      } catch (err) {
+        showError(String(err.message || err));
+        submitBtn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>

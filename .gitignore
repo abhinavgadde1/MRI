@@ -8,6 +8,7 @@ __pycache__/
 # Virtual environments
 .venv/
 .venv_smoke/
+.venv-synthseg/
 venv/
 env/
 

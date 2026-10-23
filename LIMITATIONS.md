@@ -15,5 +15,9 @@ Short summary for reuse:
 4. **LCC post-process** can drop the true tumor if a larger false-positive component
    exists (v3: 1/60 held-out, case 259).
 5. **Ellipsoid-formula error dominates** once segmentation is strong (Table 5).
+6. **Opt-in SynthSeg anatomy** (web UI checkbox / `?anatomy=true`) is experimental.
+   Fine subcortical labels (ventricles, small nuclei) are often incomplete,
+   especially near tumor; missing `.venv-synthseg` disables the overlay without
+   failing the job.
 
 Read the full list before interpreting clinical or paper numbers.

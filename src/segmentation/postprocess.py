@@ -129,6 +129,48 @@ def apply_binary_postprocess(
     raise ValueError(f"Unknown postprocess mode {mode!r}; expected raw|lcc|lcc_min")
 
 
+def enforce_brats_nesting(pred: np.ndarray) -> np.ndarray:
+    """Force BraTS region nesting ``ET ⊆ TC ⊆ WT`` on a (C, *spatial) mask.
+
+    Independent sigmoid channels + per-channel LCC can leave a tumor-core
+    island outside whole tumor. Repair:
+
+    1. Expand: ``WT ← WT ∪ TC ∪ ET``, ``TC ← TC ∪ ET``
+    2. Keep the largest WT component (one tumor)
+    3. Restrict: ``TC ← TC ∩ WT``, ``ET ← ET ∩ TC``
+
+    Channel order is ``[ET, TC, WT]``. Does not change held-out eval unless
+    the caller applies it there.
+    """
+    arr = np.asarray(pred)
+    squeeze_batch = False
+    if arr.ndim == 5 and arr.shape[0] == 1:
+        arr = arr[0]
+        squeeze_batch = True
+    if arr.ndim != 4 or arr.shape[0] < 3:
+        raise ValueError(f"Expected (3+, H, W, D) regions, got shape {arr.shape}")
+
+    et = np.asarray(arr[0] > 0.5 if arr.dtype != bool else arr[0], dtype=bool)
+    tc = np.asarray(arr[1] > 0.5 if arr.dtype != bool else arr[1], dtype=bool)
+    wt = np.asarray(arr[2] > 0.5 if arr.dtype != bool else arr[2], dtype=bool)
+
+    wt = wt | tc | et
+    tc = tc | et
+    wt = lcc_then_fill(wt)
+    tc = tc & wt
+    et = et & tc
+
+    out = np.empty_like(arr, dtype=arr.dtype)
+    out[0] = et.astype(arr.dtype)
+    out[1] = tc.astype(arr.dtype)
+    out[2] = wt.astype(arr.dtype)
+    if arr.shape[0] > 3:
+        out[3:] = arr[3:]
+    if squeeze_batch:
+        return out[np.newaxis, ...]
+    return out
+
+
 def apply_channel_postprocess(
     pred: np.ndarray,
     mode: PostprocessMode = "raw",

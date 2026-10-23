@@ -18,6 +18,7 @@ dependencies = [
     "nibabel",
     "scikit-image",
     "trimesh",
+    "fast-simplification",
     "plotly",
     "numpy",
     "scipy",
@@ -28,11 +29,15 @@ dependencies = [
     "tensorboard",
     "matplotlib",
     "torch",
+    "fastapi",
+    "uvicorn",
+    "python-multipart",
 ]
 
 [project.optional-dependencies]
 dev = [
     "pytest>=7.0",
+    "httpx",
     "ipykernel",
     "jupyter",
 ]

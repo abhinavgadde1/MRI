@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+import filecmp
 import json
 import logging
+import shutil
 from pathlib import Path
 from typing import Any
 
@@ -18,10 +20,11 @@ from scipy import ndimage as ndi
 
 from config import PROJECT_ROOT
 from preprocessing.registration import REGISTERED_NAMES, run_nifti_preprocessing, run_patient_preprocessing
+from preprocessing.skull_strip import hd_bet_available
 from reconstruction.measurements import measure_from_mask
 from segmentation.evaluate import load_model_from_checkpoint
 from segmentation.model import BRATS_REGIONS, build_brats_model
-from segmentation.postprocess import apply_channel_postprocess
+from segmentation.postprocess import apply_channel_postprocess, enforce_brats_nesting
 from segmentation.pseudo_label import (
     get_patient_inference_transforms,
     registered_dir_to_datadict,
@@ -29,6 +32,11 @@ from segmentation.pseudo_label import (
 )
 from segmentation.train import post_transforms
 from validation.ellipsoid import diameters_from_binary, ellipsoid_volume_cm3, voxel_volume_ml_from_binary
+from visualization.plotly_3d import (
+    binary_mask_to_trimesh,
+    brain_surface_mesh,
+    write_labeled_mesh_html,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -39,6 +47,62 @@ REGION_SHORT = {
     "tumor_core": "TC",
     "whole_tumor": "WT",
 }
+
+T1C_STANDIN_NOTE = (
+    "No native contrast T1c — T1 was copied into the T1c channel (stand-in). "
+    "Enhancing tumor (ET) is not trustworthy; 3D ET mesh is hidden. "
+    "Treat this as a qualitative demo (no clinical ground truth)."
+)
+
+
+def t1c_is_standin(reg_dir: Path) -> bool:
+    """True when T1c is missing or byte-identical to T1 (clinical stand-in)."""
+    reg_dir = Path(reg_dir)
+    t1 = reg_dir / REGISTERED_NAMES["T1"]
+    t1c = reg_dir / REGISTERED_NAMES["T1c"]
+    if not t1.is_file():
+        return False
+    if not t1c.is_file():
+        return True
+    try:
+        return filecmp.cmp(t1, t1c, shallow=False)
+    except OSError:
+        return False
+
+
+def ensure_t1c_standin(reg_dir: Path) -> list[str]:
+    """Copy T1 → T1c when contrast T1c is absent (same policy as clinical batch).
+
+    Returns human-readable notes. Raises ``FileNotFoundError`` if required
+    modalities are still missing after the stand-in. Also notes when an
+    existing T1c file is bit-identical to T1 (already-filled clinical studies).
+    """
+    reg_dir = Path(reg_dir)
+    notes: list[str] = []
+    t1 = reg_dir / REGISTERED_NAMES["T1"]
+    t1c = reg_dir / REGISTERED_NAMES["T1c"]
+    if t1.is_file() and not t1c.is_file():
+        shutil.copy2(t1, t1c)
+        notes.append(
+            "No native T1c series — filled T1c_registered_1mm.nii.gz from T1 "
+            "(stand-in; same policy as prepare_correction_set.fill_missing_t1c_from_t1)."
+        )
+        logger.warning("%s", notes[-1])
+    missing = [
+        f"{modality} ({fname})"
+        for modality, fname in REGISTERED_NAMES.items()
+        if not (reg_dir / fname).is_file()
+    ]
+    if missing:
+        raise FileNotFoundError(
+            f"Registered folder is missing required modalities: {', '.join(missing)}. "
+            f"Expected files under {reg_dir}: {', '.join(REGISTERED_NAMES.values())}."
+        )
+    if t1c_is_standin(reg_dir) and T1C_STANDIN_NOTE not in notes:
+        notes.append(T1C_STANDIN_NOTE)
+        logger.warning("%s", T1C_STANDIN_NOTE)
+    return notes
+
 
 
 def _device(name: str | None = None) -> torch.device:
@@ -132,23 +196,15 @@ def _segment_registered(
     pred = post_pred(decollate_batch(logits)[0]).detach().cpu().numpy()
     if postprocess != "raw":
         pred = apply_channel_postprocess(pred.astype(np.float32), mode=postprocess)  # type: ignore[arg-type]
+    # Independent channels can place TC outside WT; nest before meshing.
+    pred = enforce_brats_nesting(pred.astype(np.float32))
     regions = {r: pred[i].astype(bool) for i, r in enumerate(BRATS_REGIONS)}
     display = data["image"][0].detach().cpu().numpy()
     return regions, display
 
 
 def _binary_to_mesh(binary: np.ndarray, spacing: tuple[float, float, float]) -> trimesh.Trimesh | None:
-    from skimage.measure import marching_cubes
-
-    if not np.any(binary):
-        return None
-    try:
-        verts, faces, *_ = marching_cubes(
-            binary.astype(np.float32), level=0.5, spacing=spacing
-        )
-    except (ValueError, RuntimeError):
-        return None
-    return trimesh.Trimesh(vertices=verts, faces=faces, process=False)
+    return binary_mask_to_trimesh(binary, spacing, step_size=1, smooth=True)
 
 
 def _save_overlay(
@@ -156,6 +212,8 @@ def _save_overlay(
     regions: dict[str, np.ndarray],
     out_path: Path,
     title: str,
+    *,
+    hide_et: bool = False,
 ) -> None:
     wt = regions.get("whole_tumor")
     if wt is not None and np.any(wt):
@@ -190,11 +248,15 @@ def _save_overlay(
     ):
         base = _norm(_plane(image_3d, axis, idx))
         rgb = np.stack([base, base, base], axis=-1)
-        for region, color in (
+        overlay_regions = [
             ("whole_tumor", np.array([0.1, 0.75, 0.3])),
             ("tumor_core", np.array([0.15, 0.45, 0.95])),
-            ("enhancing_tumor", np.array([0.95, 0.2, 0.2])),
-        ):
+        ]
+        if not hide_et:
+            overlay_regions.append(
+                ("enhancing_tumor", np.array([0.95, 0.2, 0.2])),
+            )
+        for region, color in overlay_regions:
             m = regions.get(region)
             if m is None or not np.any(m):
                 continue
@@ -203,7 +265,10 @@ def _save_overlay(
         ax.imshow(np.rot90(rgb), origin="lower")
         ax.set_title(f"{ttl} @{idx}")
         ax.axis("off")
-    fig.suptitle(title + "\ngreen=WT  blue=TC  red=ET")
+    legend = "green=WT  blue=TC" + ("" if hide_et else "  red=ET")
+    if hide_et:
+        legend += "  (ET hidden: T1c stand-in)"
+    fig.suptitle(title + "\n" + legend)
     fig.tight_layout()
     out_path.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_path, dpi=150)
@@ -219,13 +284,31 @@ def _write_report(
     metrics: pd.DataFrame,
     ellipsoid: dict[str, Any],
     notes: list[str],
+    t1c_is_standin: bool = False,
 ) -> Path:
-    rows = "".join(
-        f"<tr><td>{r.region}</td><td>{r.volume_ml:.2f}</td>"
-        f"<td>{r.sphericity:.3f}</td><td>{int(r.mesh_faces)}</td></tr>"
-        for r in metrics.itertuples()
-    )
+    rows = []
+    for r in metrics.itertuples():
+        cls = ' class="untrusted"' if getattr(r, "trusted", True) is False or (
+            t1c_is_standin and r.region == "ET"
+        ) else ""
+        sph = r.sphericity
+        sph_txt = f"{sph:.3f}" if sph == sph else "—"
+        note = " untrusted (no T1c)" if (t1c_is_standin and r.region == "ET") else ""
+        rows.append(
+            f"<tr{cls}><td>{r.region}{note}</td><td>{r.volume_ml:.2f}</td>"
+            f"<td>{sph_txt}</td><td>{int(r.mesh_faces)}</td></tr>"
+        )
+    rows_html = "".join(rows)
     note_html = "".join(f"<li>{n}</li>" for n in notes)
+    banner = ""
+    if t1c_is_standin:
+        banner = f"""
+<div class="warn" id="t1c-standin-banner">
+  <b>T1c stand-in — 3D ET is hidden.</b>
+  {T1C_STANDIN_NOTE}
+  There is no clinical ground truth on this case. Whole-tumor (green) is FLAIR-driven
+  and still a BraTS-pretrained guess, not a radiologist mask.
+</div>"""
     html = f"""<!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8"/>
 <title>Pipeline report — {case_id}</title>
@@ -236,17 +319,22 @@ def _write_report(
  th, td {{ border: 1px solid #ccc; padding: 0.35rem 0.5rem; text-align: left; }}
  th {{ background: #f4f4f4; }}
  .meta {{ background: #f7f9fc; padding: 1rem; border-radius: 8px; }}
+ .warn {{ background: #fff8e6; border: 1px solid #e6d5a8; padding: 1rem 1.25rem;
+          border-radius: 8px; margin: 1rem 0; }}
+ tr.untrusted {{ color: #8a1f11; background: #fde2e1; }}
  img {{ max-width: 100%; }}
 </style></head><body>
 <h1>Single-case pipeline report</h1>
+{banner}
 <div class="meta">
   <p><b>Case:</b> {case_id}</p>
   <p><b>Checkpoint:</b> <code>{checkpoint}</code></p>
   <p><b>Postprocess:</b> {postprocess}</p>
+  <p><b>T1c:</b> {"T1 stand-in (ET untrusted)" if t1c_is_standin else "native / distinct from T1"}</p>
 </div>
 <h2>Morphometrics (predicted, LCC)</h2>
 <table><tr><th>Region</th><th>Volume (mL)</th><th>Sphericity</th><th>Mesh faces</th></tr>
-{rows}</table>
+{rows_html}</table>
 <h2>Ellipsoid validation (WT)</h2>
 <pre>{json.dumps(ellipsoid, indent=2)}</pre>
 <h2>Slice overlay</h2>
@@ -290,12 +378,23 @@ def run_case(
         if reg is None and _looks_like_dicom_dir(input_dir):
             logger.info("Ingesting DICOM study %s", input_dir)
             prep_out = output_dir / "preprocess"
+            use_hd = hd_bet_available()
+            logger.info(
+                "Skull-strip prefer_hd_bet=%s for %s", use_hd, case_id
+            )
             result = run_patient_preprocessing(
                 input_dir,
                 prep_out,
                 study_name=case_id,
-                use_hd_bet=False,
+                use_hd_bet=use_hd,
             )
+            if getattr(result, "skull_strip_methods", None):
+                notes.append(
+                    "Skull-strip methods: "
+                    + ", ".join(
+                        f"{k}={v}" for k, v in result.skull_strip_methods.items()
+                    )
+                )
             reg = _find_registered_dir(prep_out)
             if reg is None and result.registered_1mm:
                 # Symlink/copy into expected layout if needed
@@ -317,18 +416,35 @@ def run_case(
                 )
             logger.info("Running NIfTI preprocessing on %s", input_dir)
             prep_out = output_dir / "preprocess"
-            run_nifti_preprocessing(
+            use_hd = hd_bet_available()
+            logger.info(
+                "Skull-strip prefer_hd_bet=%s for %s", use_hd, case_id
+            )
+            nifti_result = run_nifti_preprocessing(
                 modality_paths,
                 prep_out,
                 study_name=case_id,
-                use_hd_bet=False,
+                use_hd_bet=use_hd,
             )
+            if getattr(nifti_result, "skull_strip_methods", None):
+                notes.append(
+                    "Skull-strip methods: "
+                    + ", ".join(
+                        f"{k}={v}"
+                        for k, v in nifti_result.skull_strip_methods.items()
+                    )
+                )
             reg = _find_registered_dir(prep_out)
             if reg is None:
                 raise RuntimeError(f"NIfTI preprocessing failed to write registered volumes in {prep_out}")
             notes.append(f"Preprocessed NIfTI folder {input_dir}.")
         else:
             notes.append(f"Using existing registered NIfTIs at {reg}.")
+
+    # Clinical studies often lack native T1c; fill from T1 before MONAI LoadImaged.
+    notes.extend(ensure_t1c_standin(reg))
+    standin = t1c_is_standin(reg)
+    hide_et = standin
 
     model = _load_or_init_model(
         Path(checkpoint), device_t, allow_random_weights=allow_random_weights
@@ -352,6 +468,7 @@ def run_case(
 
     # Reconstruct + morphometrics
     rows: list[dict[str, Any]] = []
+    meshes: dict[str, trimesh.Trimesh | None] = {}
     for region in BRATS_REGIONS:
         binary = regions[region]
         short = REGION_SHORT[region]
@@ -362,6 +479,7 @@ def run_case(
                     "volume_ml": 0.0,
                     "sphericity": float("nan"),
                     "mesh_faces": 0,
+                    "trusted": not (hide_et and short == "ET"),
                 }
             )
             continue
@@ -369,16 +487,71 @@ def run_case(
         mesh = _binary_to_mesh(binary, SPACING)
         if mesh is not None:
             mesh.export(str(output_dir / f"{short}.obj"))
+            if not (hide_et and region == "enhancing_tumor"):
+                meshes[region] = mesh
         rows.append(
             {
                 "region": short,
                 "volume_ml": float(meas.volume_cm3),
                 "sphericity": float(meas.sphericity),
                 "mesh_faces": int(len(mesh.faces)) if mesh is not None else 0,
+                "trusted": not (hide_et and short == "ET"),
             }
         )
     metrics = pd.DataFrame(rows)
     metrics.to_csv(output_dir / "morphometrics.csv", index=False)
+
+    # Brain surface (semi-transparent) + labeled Plotly HTML.
+    # Union tumor masks into the brain shell and share the same index*spacing
+    # frame as WT/TC/ET so tumor cannot poke outside from FOV-edge MC inset.
+    from visualization.plotly_3d import (
+        brain_mask_from_volume,
+        mesh_index_affine,
+        validate_tumor_inside_brain,
+    )
+
+    tumor_for_brain = {
+        k: v for k, v in regions.items() if v is not None and np.any(v)
+    }
+    # Prefer T1 for the brain shell — better cortical anatomy than FLAIR/display.
+    t1_path = Path(reg) / REGISTERED_NAMES["T1"]
+    if t1_path.is_file():
+        brain_vol = nib.load(str(t1_path)).get_fdata(dtype=np.float32)
+    else:
+        brain_vol = display
+    brain_mask = brain_mask_from_volume(brain_vol, include_masks=tumor_for_brain)
+    aff = mesh_index_affine(SPACING)
+    logger.info(
+        "Mesh index→mm affine (shared by brain/WT/TC/ET):\n%s",
+        np.array2string(aff, precision=6),
+    )
+    outside = validate_tumor_inside_brain(brain_mask, tumor_for_brain)
+    if outside:
+        logger.info(
+            "Tumor-outside-brain fractions after union/dilate: %s",
+            {k: f"{100*v:.3f}%" for k, v in outside.items()},
+        )
+    brain = brain_surface_mesh(
+        brain_vol, SPACING, include_masks=tumor_for_brain
+    )
+    meshes_for_fig = {"brain": brain, **meshes}
+    volumes_ml = {r["region"]: float(r["volume_ml"]) for r in rows if r["volume_ml"]}
+    ckpt_label = Path(checkpoint).name
+    mesh_title = None
+    if hide_et:
+        mesh_title = (
+            f"{case_id} · predicted meshes ({postprocess}) · {ckpt_label} "
+            "· T1c stand-in, ET hidden"
+        )
+    write_labeled_mesh_html(
+        output_dir / "mesh_3d.html",
+        meshes_for_fig,
+        subject_id=case_id,
+        checkpoint=ckpt_label,
+        postprocess=postprocess,
+        volumes_ml=volumes_ml,
+        title=mesh_title,
+    )
 
     # Ellipsoid validate WT
     wt = regions["whole_tumor"]
@@ -405,6 +578,7 @@ def run_case(
         regions,
         output_dir / "slice_overlay.png",
         title=f"{case_id} · {postprocess}",
+        hide_et=hide_et,
     )
 
     meta = {
@@ -414,6 +588,9 @@ def run_case(
         "registered_dir": str(reg),
         "device": str(device_t),
         "notes": notes,
+        "t1c_is_standin": standin,
+        "et_hidden": hide_et,
+        "qualitative_only": standin,
     }
     (output_dir / "meta.json").write_text(json.dumps(meta, indent=2), encoding="utf-8")
 
@@ -425,6 +602,7 @@ def run_case(
         metrics=metrics,
         ellipsoid=ellipsoid,
         notes=notes,
+        t1c_is_standin=standin,
     )
     logger.info("Wrote report %s", report)
     return report

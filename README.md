@@ -82,13 +82,58 @@ make patients-demo
 
 Open: [`outputs/real_patients_demo/report.html`](outputs/real_patients_demo/report.html)
 
+## Web UI (local)
+
+```bash
+make serve
+# → http://127.0.0.1:8000  (binds 0.0.0.0:8000)
+```
+
+Upload a ZIP of DICOM slices or the four registered 1 mm NIfTIs
+(`T1_1mm.nii.gz`, `T1c_registered_1mm.nii.gz`, `T2_registered_1mm.nii.gz`,
+`FLAIR_registered_1mm.nii.gz`). The UI calls `POST /api/analyze` and polls
+`/api/jobs/{id}` until the same `run_case` path used by the CLI finishes.
+
+Smoke ZIP (no BraTS): `make synthetic-case` → `outputs/synthetic_case.zip`.
+
+### Opt-in anatomical overlay (`?anatomy=true`)
+
+Default is **off**. Normal uploads skip SynthSeg and stay as fast as before.
+
+- **UI:** checkbox “Show brain anatomy (adds ~15–25s, experimental)”.
+- **API:** `POST /api/analyze?anatomy=true` (boolean query param, default `false`).
+- After the normal pipeline succeeds, the server shells out to the isolated
+  interpreter `.venv-synthseg/bin/python` running
+  `experiments/feasibility_parcellation/run_synthseg_fullbrain.py` (60 s timeout).
+  DIPY / SynthSeg are **not** imported into the main `.venv`.
+- On success the job’s `mesh_3d.html` is replaced with tumor meshes plus selected
+  SynthSeg structures (left/right cortex, left/right WM, cerebellum, brainstem)
+  with a hole cut out for whole tumor.
+- On any failure (missing venv, crash, timeout, empty labels) the job still
+  completes: tumor-only mesh is kept, and job status includes
+  `"anatomy_status": "unavailable"` plus a short `anatomy_reason`.
+
+**`.venv-synthseg` is required for this feature.** It is a separate Python 3.11
+environment (DIPY’s PyTorch SynthSeg port) and is not created by `./setup.sh`.
+A fresh clone that only ran `./setup.sh` will run uploads as usual; ticking the
+anatomy checkbox (or passing `anatomy=true`) yields `anatomy_status: unavailable`
+with a reason that the isolated env is missing — the rest of the job is unchanged.
+
+Typical extra runtime is ~15–25 s when the venv and MPS/CPU weights are already
+present. Labels can be incomplete or inaccurate for fine subcortical structures
+(ventricles, small nuclei), especially near the tumor — this is experimental,
+not a clinical parcellation.
+
 ## Layout (high level)
 
 ```
 src/pipeline/          # CLI: ingest → segment → reconstruct → validate → report
+                       # anatomy_optin.py: optional SynthSeg overlay via .venv-synthseg
+src/api/               # FastAPI UI + /api/analyze
 src/segmentation/      # v3 train / eval / compare_v3 (main path)
 src/preprocessing/ src/reconstruction/ src/validation/ …
 experiments/ablation_v1_v2/   # historical v1→v2 / loss-bug scripts only
+experiments/feasibility_parcellation/  # isolated SynthSeg prototype (not in main venv)
 scripts/               # make_paper_assets.py, real_patients_demo.py
 results/paper/         # submission tables & figures
 checkpoints/           # local weights (*.pt gitignored)

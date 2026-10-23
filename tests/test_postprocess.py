@@ -6,6 +6,7 @@ import pytest
 from segmentation.postprocess import (
     apply_binary_postprocess,
     apply_channel_postprocess,
+    enforce_brats_nesting,
     fill_holes_binary,
     fragmentation_stats,
     keep_components_min_size,
@@ -115,6 +116,30 @@ def test_lcc_min_mode_via_apply():
     assert out[2:12, 2:12, 2:12].all()
     assert out[18:28, 18:28, 18:28].all()
     assert not out[0, 0, 0]
+
+
+def test_enforce_nesting_drops_tc_island_outside_wt():
+    """Disconnected TC (as in the clinical 3D) must not survive outside WT."""
+    pred = np.zeros((3, 24, 24, 24), dtype=np.float32)
+    pred[2, 4:14, 4:14, 4:14] = 1.0  # WT cube
+    pred[1, 18:22, 18:22, 18:22] = 1.0  # TC island far away
+    out = enforce_brats_nesting(pred)
+    assert out[2, 8, 8, 8] == 1.0
+    assert out[1, 18:22, 18:22, 18:22].sum() == 0
+    assert np.all(out[1] <= out[2])
+    assert np.all(out[0] <= out[1])
+
+
+def test_enforce_nesting_keeps_core_inside_wt():
+    pred = np.zeros((3, 20, 20, 20), dtype=np.float32)
+    pred[2, 2:16, 2:16, 2:16] = 1.0
+    pred[1, 6:12, 6:12, 6:12] = 1.0
+    pred[0, 8:10, 8:10, 8:10] = 1.0
+    out = enforce_brats_nesting(pred)
+    assert out[1, 8, 8, 8] == 1.0
+    assert out[0, 8, 8, 8] == 1.0
+    assert np.all(out[1] <= out[2])
+    assert np.all(out[0] <= out[1])
 
 
 def test_fragmentation_stats_counts_components():

@@ -1,0 +1,11 @@
+{
+  "subject_id": "BraTS20_Training_001",
+  "t1": "/Users/cherrygadde/MRI/outputs/api_jobs/e2f4924984c3/out/preprocess/04_registered_1mm/T1_1mm.nii.gz",
+  "pred": "/Users/cherrygadde/MRI/outputs/api_jobs/e2f4924984c3/out/pred_label_lcc.nii.gz",
+  "undecimated_faces": 202980,
+  "decimated_faces": 55000,
+  "target_faces": 55000,
+  "previous_silently_undecimated_faces": 202980,
+  "html": "results/paper/figures/fig_mesh_brats001.html",
+  "png": "results/paper/figures/fig_mesh_brats001_decimated_55k.png"
+}
