@@ -100,15 +100,23 @@ Smoke ZIP (no BraTS): `make synthetic-case` → `outputs/synthetic_case.zip`.
 
 Default is **off**. Normal uploads skip SynthSeg and stay as fast as before.
 
-- **UI:** checkbox “Show brain anatomy (adds ~15–25s, experimental)”.
+- **UI:** checkbox “Show brain anatomy (adds ~2–3 min, experimental)”, plus a
+  “Sagittal cutaway” toggle next to it.
 - **API:** `POST /api/analyze?anatomy=true` (boolean query param, default `false`).
+  Optional `view=full` (default) or `view=cutaway`. Fetch a finished mesh with
+  `GET /api/jobs/{id}/mesh?view=cutaway`.
 - After the normal pipeline succeeds, the server shells out to the isolated
   interpreter `.venv-synthseg/bin/python` running
-  `experiments/feasibility_parcellation/run_synthseg_fullbrain.py` (60 s timeout).
+  `experiments/feasibility_parcellation/run_synthseg_fullbrain.py` with
+  native-resolution overlapping 192³ patches (240 s timeout).
   DIPY / SynthSeg are **not** imported into the main `.venv`.
 - On success the job’s `mesh_3d.html` is replaced with tumor meshes plus selected
   SynthSeg structures (left/right cortex, left/right WM, cerebellum, brainstem)
-  with a hole cut out for whole tumor.
+  with a hole cut out for whole tumor (translucent full-brain overlay). A second
+  file `mesh_3d_cutaway.html` is the same data clipped to one sagittal half
+  *before* marching cubes and drawn opaque — a workaround for Plotly’s
+  translucent Mesh3d depth-sorting. The gray brain shell is omitted in cutaway
+  so it does not cap the cut face.
 - On any failure (missing venv, crash, timeout, empty labels) the job still
   completes: tumor-only mesh is kept, and job status includes
   `"anatomy_status": "unavailable"` plus a short `anatomy_reason`.
@@ -119,8 +127,10 @@ A fresh clone that only ran `./setup.sh` will run uploads as usual; ticking the
 anatomy checkbox (or passing `anatomy=true`) yields `anatomy_status: unavailable`
 with a reason that the isolated env is missing — the rest of the job is unchanged.
 
-Typical extra runtime is ~15–25 s when the venv and MPS/CPU weights are already
-present. Labels can be incomplete or inaccurate for fine subcortical structures
+Typical extra runtime is ~2–3 min when the venv and MPS/CPU weights are already
+present (measured 94–145 s inference plus meshing on this Mac; overlapping
+native-resolution 192³ patches). The older letterbox path was ~5 s but blurred
+cortex/WM. Labels can be incomplete or inaccurate for fine subcortical structures
 (ventricles, small nuclei), especially near the tumor — this is experimental,
 not a clinical parcellation.
 

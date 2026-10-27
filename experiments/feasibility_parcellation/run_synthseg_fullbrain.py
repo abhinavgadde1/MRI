@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 """Full-FOV SynthSeg (isolated .venv-synthseg).
 
-Letterbox-resample the entire T1 into a cube the U-Net accepts (divisible by 32),
-run on MPS, nearest-neighbor warp labels back, then zero labels inside v3 WT.
+Default inference is overlapping native-resolution 192³ patches (logit average
+in overlap), then labels are written at the T1 grid and zeroed inside v3 WT.
+
+``--mode letterbox`` keeps the older full-FOV downsample-to-192³ path.
 
 Standalone prototype defaults to BraTS20_Training_001. The API opt-in path
-passes ``--t1``, ``--wt``, ``--out`` (and optional ``--json``).
+passes ``--t1``, ``--wt``, ``--out`` (and optional ``--json`` / ``--mode``).
 """
 from __future__ import annotations
 
@@ -203,6 +205,13 @@ def parse_args() -> argparse.Namespace:
         dest="json_path",
         help="Sidecar JSON with counts / timing",
     )
+    p.add_argument(
+        "--mode",
+        choices=("patches", "letterbox"),
+        default="patches",
+        help="patches = native-res overlapping 192³ (default); "
+        "letterbox = downsample full FOV to one 192³ cube",
+    )
     return p.parse_args()
 
 
@@ -238,14 +247,18 @@ def main() -> int:
 
     notes = [
         "224^3 single cube: MPS OOM / logits collapse to background.",
-        "Overlapping native 192^3 patches (n=4, 72s): ventricles still ~0; not worth the time.",
-        "Chosen: 192^3 letterbox — full FOV downsampled (no crop), one MPS forward.",
+        "Default: overlapping native 192^3 patches (stride 48) to keep full FOV resolution.",
+        "letterbox 192^3 remains available via --mode letterbox (faster, blurrier cortex/WM).",
     ]
     if device.type == "mps":
         torch.mps.empty_cache()
-    labels, infer_s, approach = run_size(ss, device, t1, 192)
+    if args.mode == "letterbox":
+        labels, infer_s, approach = run_size(ss, device, t1, 192)
+        print(f"  ok 192^3 letterbox in {infer_s:.1f}s")
+    else:
+        labels, infer_s, approach = run_patches(ss, device, t1, patch=192, stride=48)
+        print(f"  ok {approach} in {infer_s:.1f}s")
     chosen_size = 192
-    print(f"  ok 192^3 letterbox in {infer_s:.1f}s")
     notes.append(f"{approach} succeeded in {infer_s:.1f}s")
 
     raw_counts = count_labels(labels, ss.label_dict)

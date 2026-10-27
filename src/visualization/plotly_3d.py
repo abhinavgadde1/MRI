@@ -52,6 +52,13 @@ MESH_OPACITY: dict[str, float] = {
     "enhancing_tumor": 1.0,
 }
 
+# ``full`` = existing translucent whole-brain overlay (Plotly depth-sorts stacked
+# Mesh3d traces poorly, so many structures look muddy). ``cutaway`` = opaque
+# sagittal half, clipped on the volume *before* marching cubes.
+MESH_VIEWS = ("full", "cutaway")
+DEFAULT_MESH_VIEW = "full"
+CUTAWAY_OPACITY = 1.0
+
 # Short keys used in morphometrics CSVs / OBJ filenames
 SHORT_TO_REGION = {
     "WT": "whole_tumor",
@@ -147,6 +154,95 @@ def _spacing_tuple(
     return (float(spacing[0]), float(spacing[1]), float(spacing[2]))
 
 
+def normalize_mesh_view(view: str | None) -> str:
+    """Return ``full`` or ``cutaway``; unknown values fall back to ``full``."""
+    v = (view or DEFAULT_MESH_VIEW).strip().lower()
+    return v if v in MESH_VIEWS else DEFAULT_MESH_VIEW
+
+
+def sagittal_midline_index(shape: Sequence[int], *, axis: int = 0) -> int:
+    """Voxel index of the sagittal midline.
+
+    Axis 0 is X (L ← → R) in the index×spacing frame used by this project's
+    marching-cubes meshes (see ``mesh_index_affine``).
+    """
+    return int(np.asarray(shape)[int(axis)]) // 2
+
+
+def choose_sagittal_keep_low_x(
+    tumor_mask: np.ndarray,
+    *,
+    midline: int | None = None,
+    axis: int = 0,
+) -> tuple[int, bool]:
+    """Pick which sagittal half to keep so the tumor stays visible.
+
+    Returns ``(midline_index, keep_low_x)``. ``keep_low_x=True`` keeps voxels
+    with index ``< midline`` (the left / low-X half).
+
+    Policy (axis 0 = X / L-R):
+    - If the tumor is entirely on one side of the midline, keep that side.
+    - If it spans both halves, **keep the half with more tumor voxels**
+      (cut away the smaller-tumor side so the cut plane goes through the
+      bulk of the lesion rather than hiding it).
+    - Empty tumor or a tie → keep the low-X half.
+    """
+    tumor = np.asarray(tumor_mask, dtype=bool)
+    mid = sagittal_midline_index(tumor.shape, axis=axis) if midline is None else int(midline)
+    mid = max(0, min(mid, int(tumor.shape[axis])))
+    slicer_low = [slice(None)] * tumor.ndim
+    slicer_high = [slice(None)] * tumor.ndim
+    slicer_low[axis] = slice(0, mid)
+    slicer_high[axis] = slice(mid, None)
+    n_low = int(tumor[tuple(slicer_low)].sum())
+    n_high = int(tumor[tuple(slicer_high)].sum())
+    keep_low_x = n_low >= n_high
+    return mid, keep_low_x
+
+
+def clip_array_to_sagittal_half(
+    array: np.ndarray,
+    *,
+    keep_low_x: bool,
+    midline: int | None = None,
+    axis: int = 0,
+) -> np.ndarray:
+    """Zero the discarded sagittal half of a volume or mask.
+
+    Applied to the discrete array *before* marching cubes so the isosurface
+    includes a clean flat face at ``x = midline``. Clipping a finished triangle
+    mesh instead leaves ragged open edges along the cut.
+    """
+    arr = np.asarray(array)
+    mid = sagittal_midline_index(arr.shape, axis=axis) if midline is None else int(midline)
+    mid = max(0, min(mid, int(arr.shape[axis])))
+    out = arr.copy()
+    slicer: list[slice] = [slice(None)] * arr.ndim
+    slicer[axis] = slice(mid, None) if keep_low_x else slice(0, mid)
+    fill: Any = False if np.issubdtype(out.dtype, np.bool_) else 0
+    out[tuple(slicer)] = fill
+    return out
+
+
+def _apply_sagittal_field_clip(
+    field: np.ndarray,
+    *,
+    keep_low_x: bool | None,
+    midline: int | None,
+) -> np.ndarray:
+    """Re-zero the discarded half of a scalar field so the cut stays planar.
+
+    Gaussian / SDF smoothing of a clipped mask would otherwise bleed across
+    the midline and round the cut face. Zeroing the discarded half of the
+    field *after* smoothing keeps the 0.5 isosurface as a flat plane.
+    """
+    if keep_low_x is None:
+        return field
+    return clip_array_to_sagittal_half(
+        field, keep_low_x=bool(keep_low_x), midline=midline
+    )
+
+
 def mesh_index_affine(spacing: tuple[float, float, float]) -> np.ndarray:
     """Voxel-index → mm affine used by marching-cubes meshes in this project.
 
@@ -194,26 +290,47 @@ def binary_mask_to_trimesh(
     smooth_sigma: float = 0.9,
     taubin_iterations: int = 8,
     target_faces: int = 40_000,
+    sagittal_keep_low_x: bool | None = None,
+    sagittal_midline: int | None = None,
 ) -> trimesh.Trimesh | None:
     """Marching-cubes surface from a boolean / binary volume (vertices in mm).
 
     With ``smooth=True`` (default for viz), applies a light Gaussian on the mask
     then Taubin smoothing so tumor surfaces are organic rather than voxel stairs.
+
+    Cutaway: pass ``sagittal_keep_low_x`` to clip the mask (and the smoothed
+    scalar field) to one sagittal half *before* marching cubes. Taubin is
+    skipped in that mode so it cannot wrinkle the flat cut face.
     """
     if binary is None or not np.any(binary):
         return None
     mask = np.asarray(binary, dtype=bool)
-    sp = _spacing_tuple(spacing)
+    if sagittal_keep_low_x is not None:
+        mask = clip_array_to_sagittal_half(
+            mask,
+            keep_low_x=bool(sagittal_keep_low_x),
+            midline=sagittal_midline,
+        )
+        if not np.any(mask):
+            return None
+    cutaway = sagittal_keep_low_x is not None
 
     if smooth and float(smooth_sigma) > 0:
         # Soft band around the mask → LS isosurface (less blocky than raw MC).
         field = ndi.gaussian_filter(mask.astype(np.float32), sigma=float(smooth_sigma))
+        field = _apply_sagittal_field_clip(
+            field, keep_low_x=sagittal_keep_low_x, midline=sagittal_midline
+        )
         result = _marching_cubes_padded(
             field, spacing, level=0.5, step_size=step_size
         )
     else:
+        field = mask.astype(np.float32)
+        field = _apply_sagittal_field_clip(
+            field, keep_low_x=sagittal_keep_low_x, midline=sagittal_midline
+        )
         result = _marching_cubes_padded(
-            mask.astype(np.float32), spacing, level=0.5, step_size=step_size
+            field, spacing, level=0.5, step_size=step_size
         )
     if result is None:
         return None
@@ -224,7 +341,8 @@ def binary_mask_to_trimesh(
     if len(mesh.faces) == 0:
         return None
     mesh = _keep_largest_mesh_body(mesh)
-    if smooth and taubin_iterations > 0:
+    # Skip Taubin on cutaway meshes: it wrinkles the otherwise planar cut face.
+    if smooth and taubin_iterations > 0 and not cutaway:
         try:
             from trimesh.smoothing import filter_taubin
 
@@ -553,6 +671,29 @@ def _default_camera(meshes: list[trimesh.Trimesh]) -> dict[str, Any]:
     return dict(eye=eye, up=dict(x=0, y=0, z=1), center=dict(x=0, y=0, z=0))
 
 
+def _cutaway_camera(
+    meshes: list[trimesh.Trimesh],
+    *,
+    keep_low_x: bool | None = True,
+) -> dict[str, Any]:
+    """Look at the sagittal cut face from the discarded half."""
+    x_sign = 1.0 if keep_low_x else -1.0
+    if not meshes:
+        return dict(
+            eye=dict(x=x_sign * 2.3, y=0.2, z=0.45),
+            up=dict(x=0, y=0, z=1),
+        )
+    pts = np.concatenate([np.asarray(m.vertices) for m in meshes], axis=0)
+    center = pts.mean(axis=0)
+    extent = float(np.linalg.norm(pts.max(axis=0) - pts.min(axis=0)) + 1e-6)
+    eye = dict(
+        x=float(center[0] / extent + x_sign * 2.3),
+        y=float(center[1] / extent + 0.2),
+        z=float(center[2] / extent + 0.45),
+    )
+    return dict(eye=eye, up=dict(x=0, y=0, z=1), center=dict(x=0, y=0, z=0))
+
+
 def build_labeled_mesh_figure(
     meshes: Mapping[str, trimesh.Trimesh | None],
     *,
@@ -562,11 +703,18 @@ def build_labeled_mesh_figure(
     volumes_ml: Mapping[str, float] | None = None,
     title: str | None = None,
     height: int = 560,
+    view: str = DEFAULT_MESH_VIEW,
+    cutaway_keep_low_x: bool | None = None,
 ) -> go.Figure:
     """Multi-region Plotly figure with legend, hover volumes, orientation, camera.
 
     ``meshes`` keys may be region names (``whole_tumor`` …) or short codes (``WT``).
+
+    ``view="cutaway"`` drops the gray brain shell (its cut face would cap the
+    midline and hide anatomy/tumor) and forces remaining traces to opacity 1.0.
     """
+    view = normalize_mesh_view(view)
+    cutaway = view == "cutaway"
     fig = go.Figure()
     used: list[trimesh.Trimesh] = []
 
@@ -581,14 +729,21 @@ def build_labeled_mesh_figure(
         mesh = normalized.get(region)
         if mesh is None:
             continue
+        # Cutaway: drop the outer gray shell. Clipping it still produces a
+        # closed half-brain whose planar cut face sits on top of the anatomy
+        # and tumor cut faces and hides them. Cortex/WM already outline the
+        # kept hemisphere.
+        if cutaway and region == "brain":
+            continue
         label = MESH_LABELS[region]
         vol = _volume_ml_for(region, volumes_ml, mesh)
+        opacity = CUTAWAY_OPACITY if cutaway else MESH_OPACITY[region]
         fig.add_trace(
             mesh3d_from_trimesh(
                 mesh,
                 name=label,
                 color=MESH_COLORS[region],
-                opacity=MESH_OPACITY[region],
+                opacity=opacity,
                 hovertemplate=_hovertemplate(label, vol),
                 showlegend=True,
                 # Smooth shading for all regions (reads less “voxelly”).
@@ -600,6 +755,14 @@ def build_labeled_mesh_figure(
     if title is None:
         ckpt_short = Path(str(checkpoint)).name if checkpoint else "model"
         title = f"{subject_id} · predicted meshes ({postprocess}) · {ckpt_short}"
+        if cutaway:
+            title += " · sagittal cutaway"
+
+    camera = (
+        _cutaway_camera(used, keep_low_x=bool(cutaway_keep_low_x))
+        if cutaway
+        else _default_camera(used)
+    )
 
     fig.update_layout(
         title=dict(text=title, x=0.02, xanchor="left", font=dict(size=14)),
@@ -638,7 +801,7 @@ def build_labeled_mesh_figure(
                 gridcolor="#dde3ea",
                 showbackground=True,
             ),
-            camera=_default_camera(used),
+            camera=camera,
             annotations=[
                 dict(
                     showarrow=False,
@@ -679,6 +842,8 @@ def write_labeled_mesh_html(
     postprocess: str = "lcc",
     volumes_ml: Mapping[str, float] | None = None,
     title: str | None = None,
+    view: str = DEFAULT_MESH_VIEW,
+    cutaway_keep_low_x: bool | None = None,
 ) -> Path:
     """Build labeled figure and write a self-contained Plotly HTML file."""
     out_path = Path(out_path)
@@ -690,6 +855,8 @@ def write_labeled_mesh_html(
         postprocess=postprocess,
         volumes_ml=volumes_ml,
         title=title,
+        view=view,
+        cutaway_keep_low_x=cutaway_keep_low_x,
     )
     fig.write_html(str(out_path), include_plotlyjs="cdn", full_html=True)
     return out_path

@@ -18,10 +18,15 @@ import numpy as np
 from config import PROJECT_ROOT
 from preprocessing.registration import REGISTERED_NAMES
 from visualization.plotly_3d import (
+    CUTAWAY_OPACITY,
+    MESH_LABELS,
     binary_mask_to_trimesh,
     brain_surface_mesh,
     build_labeled_mesh_figure,
+    choose_sagittal_keep_low_x,
+    clip_array_to_sagittal_half,
     mesh3d_from_trimesh,
+    normalize_mesh_view,
 )
 
 logger = logging.getLogger(__name__)
@@ -30,18 +35,29 @@ SYNTHSEG_PYTHON = PROJECT_ROOT / ".venv-synthseg" / "bin" / "python"
 SYNTHSEG_SCRIPT = (
     PROJECT_ROOT / "experiments" / "feasibility_parcellation" / "run_synthseg_fullbrain.py"
 )
-ANATOMY_TIMEOUT_S = 60
+# Native-res overlapping 192³ patches are ~70s infer on this Mac; leave headroom
+# for init + meshing + larger FOVs.
+ANATOMY_TIMEOUT_S = 240
 # Cortex + WM voxel floor; synthetic/non-brain volumes typically fail this.
 MIN_CORTEX_WM_VOXELS = 5_000
+# Drop slivers instead of meshing unreliable fragments (e.g. letterbox brainstem).
+MIN_STRUCTURE_VOXELS = 400
 SPACING = (1.0, 1.0, 1.0)
+TUMOR_TRACE_NAMES = {
+    MESH_LABELS["whole_tumor"],
+    MESH_LABELS["tumor_core"],
+    MESH_LABELS["enhancing_tumor"],
+}
 
+# Distinct from WT green / TC blue / ET red / brain beige, and from each other
+# at low opacity (no pink-vs-purple pair).
 ANAT_SPEC = [
-    ("left_cortex", (3,), "#E89AB8", 0.42, "Left cerebral cortex"),
-    ("right_cortex", (42,), "#9B59B6", 0.42, "Right cerebral cortex"),
-    ("left_wm", (2,), "#F6E7C1", 0.38, "Left cerebral white matter"),
-    ("right_wm", (41,), "#C4A882", 0.38, "Right cerebral white matter"),
-    ("cerebellum", (7, 8, 46, 47), "#7A8450", 0.72, "Cerebellum"),
-    ("brainstem", (16,), "#6B4C9A", 0.92, "Brainstem"),
+    ("left_cortex", (3,), "#FF9F1C", 0.14, "Left cerebral cortex"),
+    ("right_cortex", (42,), "#7B2CBF", 0.14, "Right cerebral cortex"),
+    ("left_wm", (2,), "#00BBF9", 0.12, "Left cerebral white matter"),
+    ("right_wm", (41,), "#FEE440", 0.12, "Right cerebral white matter"),
+    ("cerebellum", (7, 8, 46, 47), "#BC6C25", 0.20, "Cerebellum"),
+    ("brainstem", (16,), "#1B4965", 0.22, "Brainstem"),
 ]
 
 
@@ -103,6 +119,8 @@ def _try_add_anatomy_mesh(out_dir: Path) -> tuple[str, str]:
         str(anat_nii),
         "--json",
         str(anat_json),
+        "--mode",
+        "patches",
     ]
     logger.info("Anatomy subprocess: %s", " ".join(cmd))
     try:
@@ -135,7 +153,9 @@ def _try_add_anatomy_mesh(out_dir: Path) -> tuple[str, str]:
         )
 
     hide_et = bool(meta.get("et_hidden"))
-    n_traces = _write_combined_mesh(
+    sidecar = _read_json(anat_json)
+    laterality = laterality_report(labels)
+    n_traces, structures = _write_combined_mesh(
         out_dir,
         t1_path=t1_path,
         pred=pred,
@@ -145,16 +165,136 @@ def _try_add_anatomy_mesh(out_dir: Path) -> tuple[str, str]:
         postprocess=str(meta.get("postprocess") or "lcc"),
     )
     if n_traces == 0:
+        _patch_meta(
+            meta_path,
+            anatomy_status="unavailable",
+            anatomy_reason="SynthSeg labels did not produce usable anatomy meshes",
+            anatomy_structures=structures,
+            anatomy_laterality=laterality,
+            anatomy_min_structure_voxels=MIN_STRUCTURE_VOXELS,
+            anatomy_approach=sidecar.get("approach"),
+            anatomy_infer_seconds=sidecar.get("infer_seconds"),
+        )
         return (
             "unavailable",
             "SynthSeg labels did not produce usable anatomy meshes",
         )
+    skipped = [s["key"] for s in structures if not s["rendered"]]
+    reason = f"cortex+WM voxels={cortex_wm}"
+    if skipped:
+        reason += f"; skipped {', '.join(skipped)} (below threshold, not rendered)"
+    views = ["full"]
+    if (out_dir / "mesh_3d_cutaway.html").is_file():
+        views.append("cutaway")
     _patch_meta(
         meta_path,
         anatomy_status="ok",
-        anatomy_reason=f"cortex+WM voxels={cortex_wm}",
+        anatomy_reason=reason,
+        anatomy_structures=structures,
+        anatomy_laterality=laterality,
+        anatomy_min_structure_voxels=MIN_STRUCTURE_VOXELS,
+        anatomy_approach=sidecar.get("approach"),
+        anatomy_infer_seconds=sidecar.get("infer_seconds"),
+        anatomy_views=views,
     )
-    return "ok", f"cortex+WM voxels={cortex_wm}"
+    return "ok", reason
+
+
+def plan_anatomy_structures(
+    labels: np.ndarray,
+    wt: np.ndarray,
+    *,
+    min_voxels: int = MIN_STRUCTURE_VOXELS,
+) -> list[dict[str, Any]]:
+    """Decide which ANAT_SPEC structures are large enough to mesh."""
+    wt_bool = np.asarray(wt, dtype=bool)
+    rows: list[dict[str, Any]] = []
+    for key, codes, color, opacity, title in ANAT_SPEC:
+        mask = np.isin(labels, codes) & np.logical_not(wt_bool)
+        n = int(mask.sum())
+        if n == 0:
+            reason = "empty after WT mask, not rendered"
+            rendered = False
+        elif n < int(min_voxels):
+            reason = "below threshold, not rendered"
+            rendered = False
+            logger.info(
+                "Anatomy %s: %d voxels < %d — below threshold, not rendered",
+                key,
+                n,
+                min_voxels,
+            )
+        else:
+            reason = None
+            rendered = True
+        rows.append(
+            {
+                "key": key,
+                "title": title,
+                "voxels": n,
+                "color": color,
+                "opacity": opacity,
+                "rendered": rendered,
+                "reason": reason,
+            }
+        )
+    return rows
+
+
+def laterality_report(labels: np.ndarray) -> dict[str, Any]:
+    """Check that left/right cortex and WM masks are spatially distinct.
+
+    SynthSeg assigns one label per voxel, so left/right never share voxels.
+    A true labeling bug would show as centroids on the same side of the
+    mid-plane or a very small X separation.
+    """
+    lab = np.asarray(labels)
+    out: dict[str, Any] = {
+        "label_convention": (
+            "SynthSeg 3/2 = left cortex/WM, 42/41 = right. "
+            "Discrete labels never share a voxel."
+        )
+    }
+    for name, left_code, right_code in (("cortex", 3, 42), ("wm", 2, 41)):
+        left = lab == left_code
+        right = lab == right_code
+        overlap = int(np.logical_and(left, right).sum())
+        lc = _centroid_ijk(left)
+        rc = _centroid_ijk(right)
+        sep = None if lc is None or rc is None else float(abs(lc[0] - rc[0]))
+        separated = bool(overlap == 0 and sep is not None and sep >= 8.0)
+        out[f"{name}_voxel_overlap"] = overlap
+        out[f"left_{name}_centroid_ijk"] = lc
+        out[f"right_{name}_centroid_ijk"] = rc
+        out[f"{name}_centroid_separation_x"] = sep
+        out[f"{name}_masks_spatially_separated"] = separated
+        if lc is not None and rc is not None:
+            out[f"{name}_left_centroid_x_lt_right"] = bool(lc[0] < rc[0])
+    return out
+
+
+def _centroid_ijk(mask: np.ndarray) -> list[float] | None:
+    if not np.any(mask):
+        return None
+    coords = np.argwhere(np.asarray(mask, dtype=bool))
+    return [float(x) for x in coords.mean(axis=0)]
+
+
+def _tumor_traces_on_top(fig: Any) -> None:
+    """Brain + translucent anatomy first; fully opaque tumor last (in front)."""
+    brain: list[Any] = []
+    anatomy: list[Any] = []
+    tumor: list[Any] = []
+    for tr in fig.data:
+        name = getattr(tr, "name", "") or ""
+        if name in TUMOR_TRACE_NAMES:
+            tr.opacity = 1.0
+            tumor.append(tr)
+        elif name == MESH_LABELS["brain"]:
+            brain.append(tr)
+        else:
+            anatomy.append(tr)
+    fig.data = tuple(brain + anatomy + tumor)
 
 
 def _subprocess_env() -> dict[str, str]:
@@ -168,6 +308,16 @@ def _subprocess_env() -> dict[str, str]:
     env.setdefault("PYTORCH_ENABLE_MPS_FALLBACK", "1")
     env.setdefault("PYTHONUNBUFFERED", "1")
     return env
+
+
+def _read_json(path: Path) -> dict[str, Any]:
+    if not path.is_file():
+        return {}
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return {}
+    return data if isinstance(data, dict) else {}
 
 
 def _patch_meta(meta_path: Path, **fields: Any) -> None:
@@ -190,60 +340,157 @@ def _write_combined_mesh(
     hide_et: bool,
     case_id: str,
     postprocess: str,
-) -> int:
+) -> tuple[int, list[dict[str, Any]]]:
+    """Write full (translucent) and cutaway (opaque) anatomy HTML files.
+
+    ``mesh_3d.html`` stays the existing full-brain overlay for backward
+    compatibility. ``mesh_3d_cutaway.html`` is the sagittal half at opacity 1.0.
+    """
     wt = pred > 0
-    tc = np.isin(pred, (1, 3))
-    et = pred == 3
-    tumor = {
-        "whole_tumor": wt,
-        "tumor_core": tc,
-        "enhancing_tumor": et if not hide_et else np.zeros_like(wt, dtype=bool),
-    }
-    meshes: dict[str, Any] = {}
-    volumes: dict[str, float] = {}
-    for key, mask in tumor.items():
-        if not np.any(mask):
-            continue
-        mesh = binary_mask_to_trimesh(mask, SPACING, smooth=True, target_faces=35_000)
-        if mesh is None:
-            continue
-        meshes[key] = mesh
-        volumes[key] = float(mask.sum()) / 1000.0
-
-    t1 = nib.load(str(t1_path)).get_fdata(dtype=np.float32)
-    include = {k: v for k, v in tumor.items() if np.any(v)}
-    brain = brain_surface_mesh(t1, SPACING, include_masks=include)
-    meshes_for_fig = {"brain": brain, **meshes}
-
-    extra_traces = []
     if labels.shape != pred.shape:
         logger.warning(
             "Anatomy shape %s != pred %s — skipping anatomy traces",
             labels.shape,
             pred.shape,
         )
-        return 0
-    for _key, codes, color, opacity, title in ANAT_SPEC:
-        mask = np.isin(labels, codes) & np.logical_not(wt)
+        return 0, []
+
+    structures = plan_anatomy_structures(labels, wt)
+    n_full = _write_anatomy_figure(
+        out_dir / "mesh_3d.html",
+        t1_path=t1_path,
+        pred=pred,
+        labels=labels,
+        hide_et=hide_et,
+        case_id=case_id,
+        postprocess=postprocess,
+        structures=structures,
+        view="full",
+    )
+    if n_full == 0:
+        return 0, structures
+    try:
+        _write_anatomy_figure(
+            out_dir / "mesh_3d_cutaway.html",
+            t1_path=t1_path,
+            pred=pred,
+            labels=labels,
+            hide_et=hide_et,
+            case_id=case_id,
+            postprocess=postprocess,
+            structures=structures,
+            view="cutaway",
+        )
+    except Exception:  # noqa: BLE001 — full overlay already written
+        logger.exception("Cutaway anatomy mesh failed for %s", case_id)
+    return n_full, structures
+
+
+def _write_anatomy_figure(
+    out_path: Path,
+    *,
+    t1_path: Path,
+    pred: np.ndarray,
+    labels: np.ndarray,
+    hide_et: bool,
+    case_id: str,
+    postprocess: str,
+    structures: list[dict[str, Any]],
+    view: str = "full",
+) -> int:
+    view = normalize_mesh_view(view)
+    cutaway = view == "cutaway"
+    midline: int | None = None
+    keep_low_x: bool | None = None
+    pred_m = pred
+    labels_m = labels
+    sag_kw: dict[str, Any] = {}
+    if cutaway:
+        midline, keep_low_x = choose_sagittal_keep_low_x(pred > 0)
+        pred_m = clip_array_to_sagittal_half(
+            pred, keep_low_x=keep_low_x, midline=midline
+        )
+        labels_m = clip_array_to_sagittal_half(
+            labels, keep_low_x=keep_low_x, midline=midline
+        )
+        sag_kw = {
+            "sagittal_keep_low_x": keep_low_x,
+            "sagittal_midline": midline,
+        }
+
+    wt = pred_m > 0
+    tc = np.isin(pred_m, (1, 3))
+    et = pred_m == 3
+    tumor = {
+        "whole_tumor": wt,
+        "tumor_core": tc,
+        "enhancing_tumor": et if not hide_et else np.zeros_like(wt, dtype=bool),
+    }
+    # Hover volumes are the full (unclipped) lesion so the legend still
+    # reports true tumor size, not the half shown in cutaway.
+    wt_full = pred > 0
+    volumes: dict[str, float] = {
+        "whole_tumor": float(wt_full.sum()) / 1000.0,
+        "tumor_core": float(np.isin(pred, (1, 3)).sum()) / 1000.0,
+        "enhancing_tumor": float((pred == 3).sum()) / 1000.0,
+    }
+    meshes: dict[str, Any] = {}
+    for key, mask in tumor.items():
         if not np.any(mask):
             continue
-        mesh = binary_mask_to_trimesh(mask, SPACING, smooth=True, target_faces=45_000)
+        mesh = binary_mask_to_trimesh(
+            mask, SPACING, smooth=True, target_faces=35_000, **sag_kw
+        )
         if mesh is None:
             continue
-        vol = float(mask.sum()) / 1000.0
-        extra_traces.append((mesh, title, color, opacity, vol))
+        meshes[key] = mesh
+
+    meshes_for_fig: dict[str, Any] = dict(meshes)
+    if not cutaway:
+        t1 = nib.load(str(t1_path)).get_fdata(dtype=np.float32)
+        include = {k: v for k, v in tumor.items() if np.any(v)}
+        brain = brain_surface_mesh(t1, SPACING, include_masks=include)
+        meshes_for_fig = {"brain": brain, **meshes}
+
+    extra_traces: list[tuple[Any, str, str, float, float]] = []
+    for spec, row in zip(ANAT_SPEC, structures):
+        _key, codes, color, opacity, title = spec
+        if not row["rendered"]:
+            continue
+        mask = np.isin(labels_m, codes) & np.logical_not(wt)
+        mesh = binary_mask_to_trimesh(
+            mask, SPACING, smooth=True, target_faces=45_000, **sag_kw
+        )
+        if mesh is None:
+            if not cutaway:
+                row["rendered"] = False
+                row["reason"] = "mesh extraction failed, not rendered"
+            continue
+        vol = float((np.isin(labels, codes) & np.logical_not(pred > 0)).sum()) / 1000.0
+        extra_traces.append(
+            (
+                mesh,
+                title,
+                color,
+                CUTAWAY_OPACITY if cutaway else opacity,
+                vol,
+            )
+        )
 
     if not extra_traces:
         return 0
 
+    suffix = " · sagittal cutaway" if cutaway else ""
     fig = build_labeled_mesh_figure(
         meshes_for_fig,
         subject_id=case_id,
         checkpoint="v3 + SynthSeg",
         postprocess=f"{postprocess} + WT-masked anatomy",
         volumes_ml=volumes,
-        title=f"{case_id} · tumor + experimental anatomy ({postprocess})",
+        title=f"{case_id} · tumor + experimental anatomy ({postprocess}){suffix}",
         height=640,
+        view=view,
+        cutaway_keep_low_x=keep_low_x,
     )
     for mesh, title, color, opacity, vol in extra_traces:
         fig.add_trace(
@@ -257,5 +504,6 @@ def _write_combined_mesh(
                 flatshading=False,
             )
         )
-    fig.write_html(str(out_dir / "mesh_3d.html"), include_plotlyjs="cdn", full_html=True)
+    _tumor_traces_on_top(fig)
+    fig.write_html(str(out_path), include_plotlyjs="cdn", full_html=True)
     return len(extra_traces)

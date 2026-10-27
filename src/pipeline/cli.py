@@ -109,6 +109,17 @@ def main(argv: list[str] | None = None) -> int:
         synthetic=args.synthetic,
     )
     print(f"Report → {report}")
+    meta_path = report.parent / "meta.json"
+    if meta_path.is_file():
+        import json
+
+        try:
+            meta = json.loads(meta_path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            meta = {}
+        msg = meta.get("volume_plausibility_message")
+        if msg:
+            print(msg)
     return 0
 
 

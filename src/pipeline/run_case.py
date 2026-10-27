@@ -31,6 +31,7 @@ from segmentation.pseudo_label import (
     regions_to_label_map,
 )
 from segmentation.train import post_transforms
+from pipeline.volume_plausibility import assess_wt_plausibility, wt_ml_from_metrics
 from validation.ellipsoid import diameters_from_binary, ellipsoid_volume_cm3, voxel_volume_ml_from_binary
 from visualization.plotly_3d import (
     binary_mask_to_trimesh,
@@ -285,6 +286,7 @@ def _write_report(
     ellipsoid: dict[str, Any],
     notes: list[str],
     t1c_is_standin: bool = False,
+    volume_plausibility_message: str | None = None,
 ) -> Path:
     rows = []
     for r in metrics.itertuples():
@@ -309,6 +311,13 @@ def _write_report(
   There is no clinical ground truth on this case. Whole-tumor (green) is FLAIR-driven
   and still a BraTS-pretrained guess, not a radiologist mask.
 </div>"""
+    plaus_banner = ""
+    if volume_plausibility_message:
+        plaus_banner = f"""
+<div class="warn" id="volume-plausibility-banner">
+  <b>Volume plausibility.</b>
+  {volume_plausibility_message}
+</div>"""
     html = f"""<!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8"/>
 <title>Pipeline report — {case_id}</title>
@@ -326,6 +335,7 @@ def _write_report(
 </style></head><body>
 <h1>Single-case pipeline report</h1>
 {banner}
+{plaus_banner}
 <div class="meta">
   <p><b>Case:</b> {case_id}</p>
   <p><b>Checkpoint:</b> <code>{checkpoint}</code></p>
@@ -500,6 +510,9 @@ def run_case(
         )
     metrics = pd.DataFrame(rows)
     metrics.to_csv(output_dir / "morphometrics.csv", index=False)
+    plaus = assess_wt_plausibility(wt_ml_from_metrics(metrics))
+    if plaus.message:
+        notes.append(plaus.message)
 
     # Brain surface (semi-transparent) + labeled Plotly HTML.
     # Union tumor masks into the brain shell and share the same index*spacing
@@ -591,6 +604,7 @@ def run_case(
         "t1c_is_standin": standin,
         "et_hidden": hide_et,
         "qualitative_only": standin,
+        **plaus.as_meta(),
     }
     (output_dir / "meta.json").write_text(json.dumps(meta, indent=2), encoding="utf-8")
 
@@ -603,6 +617,9 @@ def run_case(
         ellipsoid=ellipsoid,
         notes=notes,
         t1c_is_standin=standin,
+        volume_plausibility_message=plaus.message,
     )
     logger.info("Wrote report %s", report)
+    if plaus.message:
+        logger.info("Volume plausibility (%s): %s", plaus.status, plaus.message)
     return report

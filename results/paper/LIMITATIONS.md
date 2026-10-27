@@ -43,3 +43,13 @@
    (~0.15). Further improving the segmentation model would therefore **not**
    proportionally improve clinical volume estimates that use the ellipsoid
    method specifically (see Table 5; case 257).
+
+9. **Real-patient false-positive volume heuristic.** On 96 registered studies,
+   v3+LCC whole-tumor volume vs BraTS held-out GT bounds (20.9–223.0 mL) is
+   **84/96 below-floor**, **12/96 plausible**, **0/96 above-ceiling**
+   (`outputs/real_patient_fp_audit_hdbet/`). The original audit ran on
+   since-corrected Otsu-stripped data; HD-BET re-stripping increased rather
+   than decreased the below-floor rate because most of the original
+   “plausible” detections were extracranial tissue. The floor/ceiling
+   themselves come from BraTS GT masks, not this pipeline’s skull-stripping,
+   and are unchanged.

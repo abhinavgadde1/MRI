@@ -29,6 +29,7 @@ from config import PROJECT_ROOT
 from pipeline.anatomy_optin import try_add_anatomy_mesh
 from pipeline.run_case import DEFAULT_CHECKPOINT, run_case
 from preprocessing.registration import REGISTERED_NAMES
+from visualization.plotly_3d import MESH_VIEWS, normalize_mesh_view
 
 logger = logging.getLogger(__name__)
 
@@ -44,6 +45,7 @@ _jobs_lock = threading.Lock()
 
 ALLOWED_UPLOAD_SUFFIXES = {".zip", ".nii", ".gz"}  # .nii.gz handled via name
 ALLOWED_POSTPROCESS = {"raw", "lcc", "lcc_min"}
+ALLOWED_MESH_VIEWS = set(MESH_VIEWS)
 
 app = FastAPI(
     title="MRI pipeline API",
@@ -289,8 +291,16 @@ async def analyze(
         False,
         description=(
             "Opt-in SynthSeg anatomical overlay after the normal pipeline "
-            "(~15–25s extra; requires .venv-synthseg). Failures fall back to "
-            "the tumor-only mesh."
+            "(~2–3 min extra, native-resolution patches; requires .venv-synthseg). "
+            "Failures fall back to the tumor-only mesh."
+        ),
+    ),
+    view: str = Query(
+        "full",
+        description=(
+            "Anatomy mesh view: 'full' (translucent whole brain, default) or "
+            "'cutaway' (opaque sagittal half). Both HTML files are written when "
+            "anatomy succeeds; this selects the default iframe."
         ),
     ),
 ) -> JSONResponse:
@@ -300,6 +310,15 @@ async def analyze(
             content={
                 "error": f"Invalid postprocess={postprocess!r}; "
                 f"choose one of {sorted(ALLOWED_POSTPROCESS)}"
+            },
+        )
+    view_norm = (view or "full").strip().lower()
+    if view_norm not in ALLOWED_MESH_VIEWS:
+        return JSONResponse(
+            status_code=400,
+            content={
+                "error": f"Invalid view={view!r}; "
+                f"choose one of {sorted(ALLOWED_MESH_VIEWS)}"
             },
         )
 
@@ -341,12 +360,19 @@ async def analyze(
             "anatomy_requested": bool(anatomy),
             "anatomy_status": "queued" if anatomy else "skipped",
             "anatomy_reason": None,
+            "mesh_view": view_norm,
         }
 
     background_tasks.add_task(
         _run_job, job_id, pipeline_input, out_dir, ckpt, postprocess, bool(anatomy)
     )
-    return JSONResponse({"job_id": job_id, "anatomy_requested": bool(anatomy)})
+    return JSONResponse(
+        {
+            "job_id": job_id,
+            "anatomy_requested": bool(anatomy),
+            "mesh_view": view_norm,
+        }
+    )
 
 
 @app.get("/api/jobs/{job_id}")
@@ -364,6 +390,7 @@ def job_status(job_id: str) -> dict[str, Any]:
         "anatomy_requested": bool(job.get("anatomy_requested")),
         "anatomy_status": job.get("anatomy_status") or "skipped",
         "anatomy_reason": job.get("anatomy_reason"),
+        "mesh_view": job.get("mesh_view") or "full",
     }
     if job["status"] == "done":
         meta_path = Path(job["out_dir"]) / "meta.json"
@@ -376,6 +403,21 @@ def job_status(job_id: str) -> dict[str, Any]:
                 meta = {}
             payload["t1c_is_standin"] = bool(meta.get("t1c_is_standin"))
             payload["et_hidden"] = bool(meta.get("et_hidden"))
+            payload["volume_plausibility"] = meta.get("volume_plausibility")
+            payload["volume_plausibility_message"] = meta.get(
+                "volume_plausibility_message"
+            )
+            if meta.get("anatomy_structures") is not None:
+                payload["anatomy_structures"] = meta.get("anatomy_structures")
+            if meta.get("anatomy_laterality") is not None:
+                payload["anatomy_laterality"] = meta.get("anatomy_laterality")
+            if meta.get("anatomy_infer_seconds") is not None:
+                payload["anatomy_infer_seconds"] = meta.get("anatomy_infer_seconds")
+            if meta.get("anatomy_views") is not None:
+                payload["anatomy_views"] = meta.get("anatomy_views")
+            payload["has_cutaway_mesh"] = (
+                Path(job["out_dir"]) / "mesh_3d_cutaway.html"
+            ).is_file()
     return payload
 
 
@@ -391,11 +433,28 @@ def job_report(job_id: str) -> FileResponse:
 
 
 @app.get("/api/jobs/{job_id}/mesh")
-def job_mesh(job_id: str) -> FileResponse:
+def job_mesh(
+    job_id: str,
+    view: str = Query(
+        "full",
+        description="Mesh HTML: 'full' (default) or 'cutaway' sagittal half.",
+    ),
+) -> FileResponse:
     job = _get_job(job_id)
     if job["status"] != "done":
         raise HTTPException(status_code=409, detail=f"Job status is {job['status']}")
-    path = Path(job["out_dir"]) / "mesh_3d.html"
+    view_norm = normalize_mesh_view(view)
+    if (view or "full").strip().lower() not in ALLOWED_MESH_VIEWS:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid view={view!r}; choose one of {sorted(ALLOWED_MESH_VIEWS)}",
+        )
+    out = Path(job["out_dir"])
+    path = out / "mesh_3d.html"
+    if view_norm == "cutaway":
+        cut = out / "mesh_3d_cutaway.html"
+        if cut.is_file():
+            path = cut
     if not path.is_file():
         raise HTTPException(status_code=404, detail="mesh_3d.html not found for job")
     return FileResponse(path, media_type="text/html")
@@ -430,6 +489,8 @@ def job_volumes(job_id: str) -> dict[str, Any]:
         "regions": regions,
         "ellipsoid_wt": ellipsoid,
         "meta": meta,
+        "volume_plausibility": meta.get("volume_plausibility"),
+        "volume_plausibility_message": meta.get("volume_plausibility_message"),
     }
 
 

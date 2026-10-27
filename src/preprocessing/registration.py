@@ -12,7 +12,7 @@ import SimpleITK as sitk
 
 from preprocessing.bias_correction import n4_bias_correct
 from preprocessing.dicom_loader import ConvertedSeries, load_study_to_nifti
-from preprocessing.skull_strip import skull_strip
+from preprocessing.skull_strip import skull_strip, write_study_strip_summary
 
 logger = logging.getLogger(__name__)
 
@@ -46,6 +46,7 @@ class PatientPreprocessResult:
     bias_corrected: dict[str, Path] = field(default_factory=dict)
     skull_stripped: dict[str, Path] = field(default_factory=dict)
     skull_strip_methods: dict[str, str] = field(default_factory=dict)
+    skull_strip_reasons: dict[str, str] = field(default_factory=dict)
     registered_1mm: dict[str, Path] = field(default_factory=dict)
     transforms: dict[str, Path] = field(default_factory=dict)
     reference: str | None = None
@@ -371,6 +372,9 @@ def run_nifti_preprocessing(
             sitk.WriteImage(m, str(mask))
             result.skull_stripped[modality] = out
             result.skull_strip_methods[modality] = "pre_stripped"
+            result.skull_strip_reasons[modality] = (
+                "skip_skull_strip=True (volume treated as already brain-extracted)"
+            )
             logger.info("Skull strip %s skipped (pre-stripped copy)", modality)
             continue
         strip_result = skull_strip(
@@ -378,7 +382,15 @@ def run_nifti_preprocessing(
         )
         result.skull_stripped[modality] = strip_result.stripped_path
         result.skull_strip_methods[modality] = strip_result.method
+        result.skull_strip_reasons[modality] = strip_result.reason
         logger.info("Skull strip %s via %s", modality, strip_result.method)
+
+    write_study_strip_summary(
+        strip_dir,
+        study_name=study_name,
+        methods=result.skull_strip_methods,
+        reasons=result.skull_strip_reasons,
+    )
 
     reg_dir = output_dir / "04_registered_1mm"
     registered = register_modalities_to_reference(

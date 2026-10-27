@@ -110,6 +110,16 @@
       margin-bottom: 1rem;
       line-height: 1.45;
     }
+    .banner.low {
+      background: #fef3f2;
+      border-color: #fecdca;
+      color: var(--err);
+    }
+    .banner.high {
+      background: #fff4e5;
+      border-color: #f7d59a;
+      color: #8a5a00;
+    }
     tr.untrusted { color: #8a1f11; background: #fde2e1; }
     tr.untrusted td:first-child::after {
       content: " (untrusted)";
@@ -119,12 +129,28 @@
     .check-row {
       display: flex;
       align-items: flex-start;
-      gap: 0.55rem;
+      flex-wrap: wrap;
+      gap: 0.65rem 1.5rem;
       margin-top: 0.95rem;
       font-weight: 500;
     }
+    .check-row .opt {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.55rem;
+    }
     .check-row input { margin-top: 0.2rem; }
     .check-row label { font-weight: 600; margin: 0; }
+    .check-row .opt.disabled label { color: var(--muted); font-weight: 500; }
+    #meshViewToggle {
+      display: none;
+      gap: 0.85rem;
+      align-items: center;
+      flex-wrap: wrap;
+      margin: 0 0 0.75rem;
+      font-size: 0.88rem;
+    }
+    #meshViewToggle label { font-weight: 500; margin: 0; display: flex; gap: 0.35rem; align-items: center; }
     .limit-note {
       font-size: 0.82rem;
       color: var(--muted);
@@ -206,8 +232,14 @@
           </div>
         </div>
         <div class="check-row">
-          <input id="anatomy" type="checkbox"/>
-          <label for="anatomy">Show brain anatomy (adds ~15–25s, experimental)</label>
+          <span class="opt">
+            <input id="anatomy" type="checkbox"/>
+            <label for="anatomy">Show brain anatomy (adds ~2–3 min, experimental)</label>
+          </span>
+          <span class="opt disabled" id="viewCutawayOpt">
+            <input id="viewCutaway" type="checkbox" disabled/>
+            <label for="viewCutaway">Sagittal cutaway (opaque half-brain)</label>
+          </span>
         </div>
         <p class="limit-note" title="Anatomical labels may be incomplete or inaccurate for fine subcortical structures (ventricles, small nuclei), especially near the tumor region.">
           Anatomical labels may be incomplete or inaccurate for fine subcortical
@@ -226,6 +258,7 @@
     <div id="results">
       <section class="panel">
         <h2>Volumes &amp; morphometrics</h2>
+        <div id="plausibilityBanner" class="banner" role="alert"></div>
         <div id="volumes"></div>
       </section>
       <section class="panel">
@@ -234,6 +267,11 @@
       </section>
       <section class="panel">
         <h2>Labeled 3D mesh</h2>
+        <div id="meshViewToggle">
+          <span>View:</span>
+          <label><input type="radio" name="meshView" value="full" checked/> Full translucent</label>
+          <label><input type="radio" name="meshView" value="cutaway"/> Sagittal cutaway</label>
+        </div>
         <div id="meshLegend"></div>
         <iframe id="meshFrame" class="iframe-mesh" title="3D mesh"></iframe>
       </section>
@@ -247,6 +285,17 @@
     const submitBtn = document.getElementById("submitBtn");
     let pollTimer = null;
     let wantAnatomy = false;
+    let currentJobId = null;
+    let preferredView = "full";
+
+    const anatomyBox = document.getElementById("anatomy");
+    const viewCutawayBox = document.getElementById("viewCutaway");
+    const viewCutawayOpt = document.getElementById("viewCutawayOpt");
+    anatomyBox.addEventListener("change", () => {
+      viewCutawayBox.disabled = !anatomyBox.checked;
+      viewCutawayOpt.classList.toggle("disabled", !anatomyBox.checked);
+      if (!anatomyBox.checked) viewCutawayBox.checked = false;
+    });
 
     const TUMOR_LEGEND = [
       ["#C9B8A6", "Brain surface"],
@@ -255,12 +304,12 @@
       ["#C44E52", "Enhancing Tumor (ET)"],
     ];
     const ANAT_LEGEND = [
-      ["#E89AB8", "Left cerebral cortex"],
-      ["#9B59B6", "Right cerebral cortex"],
-      ["#F6E7C1", "Left cerebral white matter"],
-      ["#C4A882", "Right cerebral white matter"],
-      ["#7A8450", "Cerebellum"],
-      ["#6B4C9A", "Brainstem"],
+      ["#FF9F1C", "Left cerebral cortex"],
+      ["#7B2CBF", "Right cerebral cortex"],
+      ["#00BBF9", "Left cerebral white matter"],
+      ["#FEE440", "Right cerebral white matter"],
+      ["#BC6C25", "Cerebellum"],
+      ["#1B4965", "Brainstem"],
     ];
 
     function renderMeshLegend(includeAnatomy) {
@@ -285,6 +334,18 @@
       const standin = !!(data.meta && data.meta.t1c_is_standin);
       const banner = document.getElementById("standinBanner");
       banner.style.display = standin ? "block" : "none";
+      const pb = document.getElementById("plausibilityBanner");
+      const flag = data.volume_plausibility || (data.meta && data.meta.volume_plausibility);
+      const msg = data.volume_plausibility_message
+        || (data.meta && data.meta.volume_plausibility_message);
+      if ((flag === "low" || flag === "high") && msg) {
+        pb.className = "banner " + flag;
+        pb.textContent = msg;
+        pb.style.display = "block";
+      } else {
+        pb.style.display = "none";
+        pb.textContent = "";
+      }
       const rows = (data.regions || []).map(r => {
         const sph = (r.sphericity != null && !Number.isNaN(Number(r.sphericity)))
           ? Number(r.sphericity).toFixed(3) : "—";
@@ -334,6 +395,7 @@
           return;
         }
         statusEl.className = "done";
+        currentJobId = jobId;
         const anat = data.anatomy_status || "skipped";
         statusEl.textContent = `Job ${jobId}: done` +
           (wantAnatomy ? ` (anatomy: ${anat})` : "");
@@ -347,7 +409,15 @@
         }
         renderMeshLegend(wantAnatomy && anat === "ok");
         document.getElementById("reportFrame").src = `/api/jobs/${jobId}/report`;
-        document.getElementById("meshFrame").src = `/api/jobs/${jobId}/mesh`;
+        const hasCutaway = !!(data.has_cutaway_mesh || (data.anatomy_views || []).includes("cutaway"));
+        const toggle = document.getElementById("meshViewToggle");
+        toggle.style.display = hasCutaway ? "flex" : "none";
+        const initialView = hasCutaway && preferredView === "cutaway" ? "cutaway" : "full";
+        toggle.querySelectorAll("input[name=meshView]").forEach((el) => {
+          el.checked = el.value === initialView;
+        });
+        document.getElementById("meshFrame").src =
+          `/api/jobs/${jobId}/mesh?view=${initialView}`;
         const volRes = await fetch(`/api/jobs/${jobId}/volumes`);
         const volData = await volRes.json();
         if (!volRes.ok) throw new Error(volData.detail || "volumes failed");
@@ -361,12 +431,21 @@
       }
     }
 
+    document.getElementById("meshViewToggle").addEventListener("change", (e) => {
+      const target = e.target;
+      if (!currentJobId || !target || target.name !== "meshView") return;
+      document.getElementById("meshFrame").src =
+        `/api/jobs/${currentJobId}/mesh?view=${target.value}`;
+    });
+
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
       clearError();
       results.style.display = "none";
       document.getElementById("standinBanner").style.display = "none";
       document.getElementById("anatNote").style.display = "none";
+      document.getElementById("plausibilityBanner").style.display = "none";
+      document.getElementById("meshViewToggle").style.display = "none";
       if (pollTimer) clearInterval(pollTimer);
 
       const fileInput = document.getElementById("file");
@@ -380,9 +459,10 @@
       const postprocess = document.getElementById("postprocess").value;
       const checkpoint = document.getElementById("checkpoint").value.trim();
       wantAnatomy = document.getElementById("anatomy").checked;
+      preferredView = (wantAnatomy && viewCutawayBox.checked) ? "cutaway" : "full";
       let url = `/api/analyze?postprocess=${encodeURIComponent(postprocess)}`;
       if (checkpoint) url += `&checkpoint=${encodeURIComponent(checkpoint)}`;
-      if (wantAnatomy) url += `&anatomy=true`;
+      if (wantAnatomy) url += `&anatomy=true&view=${preferredView}`;
 
       submitBtn.disabled = true;
       statusEl.className = "";

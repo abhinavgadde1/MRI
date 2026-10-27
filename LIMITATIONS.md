@@ -19,5 +19,10 @@ Short summary for reuse:
    Fine subcortical labels (ventricles, small nuclei) are often incomplete,
    especially near tumor; missing `.venv-synthseg` disables the overlay without
    failing the job.
+7. **Real-patient FP volume heuristic** (v3-lcc, HD-BET-stripped): **84/96
+   below-floor**, **12/96 plausible**, **0/96 above-ceiling**. The original
+   audit ran on since-corrected Otsu-stripped data; HD-BET re-stripping
+   increased rather than decreased the below-floor rate because most of the
+   original “plausible” detections were extracranial tissue.
 
 Read the full list before interpreting clinical or paper numbers.

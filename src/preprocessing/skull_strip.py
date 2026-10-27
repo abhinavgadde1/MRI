@@ -26,6 +26,7 @@ class SkullStripResult:
     stripped_path: Path
     mask_path: Path
     method: SkullStripMethod
+    reason: str = ""
 
 
 def hd_bet_available() -> bool:
@@ -138,11 +139,17 @@ def skull_strip(
     mask_path.parent.mkdir(parents=True, exist_ok=True)
     device = device or default_hd_bet_device()
     mode = mode or default_hd_bet_mode()
+    available = hd_bet_available()
+    fallback_reason: str | None = None
 
-    if prefer_hd_bet and hd_bet_available():
+    if prefer_hd_bet and available:
         try:
-            _run_hd_bet(
+            backend = _run_hd_bet(
                 input_path, output_path, mask_path, device=device, mode=mode
+            )
+            reason = (
+                f"HD-BET inference succeeded (backend={backend}, "
+                f"device={device}, mode={mode})"
             )
             logger.info(
                 "Skull stripping used HD-BET for %s -> %s (mask=%s, device=%s)",
@@ -152,11 +159,27 @@ def skull_strip(
                 device,
             )
             result = SkullStripResult(
-                stripped_path=output_path, mask_path=mask_path, method="hd-bet"
+                stripped_path=output_path,
+                mask_path=mask_path,
+                method="hd-bet",
+                reason=reason,
             )
-            _write_method_sidecar(mask_path, result.method)
+            _write_method_sidecar(
+                mask_path,
+                result.method,
+                reason=reason,
+                prefer_hd_bet=prefer_hd_bet,
+                hd_bet_available=available,
+                device=device,
+                mode=mode,
+                backend=backend,
+            )
             return result
         except Exception as exc:  # noqa: BLE001
+            fallback_reason = (
+                f"HD-BET failed ({type(exc).__name__}: {exc}); "
+                "falling back to SimpleITK Otsu"
+            )
             logger.warning(
                 "HD-BET failed for %s (%s: %s); falling back to SimpleITK Otsu",
                 input_path,
@@ -166,6 +189,11 @@ def skull_strip(
             )
     elif prefer_hd_bet:
         status = hd_bet_status()
+        fallback_reason = (
+            "HD-BET is not installed "
+            f"(python_package={status['python_package']}, cli={status['cli_path']}); "
+            "using SimpleITK Otsu fallback"
+        )
         logger.warning(
             "HD-BET is not installed; using SimpleITK Otsu fallback for %s "
             "(python_package=%s, cli=%s). Install hint: %s",
@@ -174,6 +202,8 @@ def skull_strip(
             status["cli_path"],
             status["install_hint"],
         )
+    else:
+        fallback_reason = "prefer_hd_bet=False; using SimpleITK Otsu"
 
     _run_simpleitk_otsu(
         input_path,
@@ -188,10 +218,23 @@ def skull_strip(
         output_path,
         mask_path,
     )
+    reason = fallback_reason or "SimpleITK Otsu fallback"
     result = SkullStripResult(
-        stripped_path=output_path, mask_path=mask_path, method="simpleitk_otsu"
+        stripped_path=output_path,
+        mask_path=mask_path,
+        method="simpleitk_otsu",
+        reason=reason,
     )
-    _write_method_sidecar(mask_path, result.method)
+    _write_method_sidecar(
+        mask_path,
+        result.method,
+        reason=reason,
+        prefer_hd_bet=prefer_hd_bet,
+        hd_bet_available=available,
+        device=device,
+        mode=mode,
+        backend=None,
+    )
     return result
 
 
@@ -237,7 +280,17 @@ def _hd_bet_cli() -> str | None:
     return None
 
 
-def _write_method_sidecar(mask_path: Path, method: SkullStripMethod) -> None:
+def _write_method_sidecar(
+    mask_path: Path,
+    method: SkullStripMethod,
+    *,
+    reason: str,
+    prefer_hd_bet: bool,
+    hd_bet_available: bool,
+    device: str | None = None,
+    mode: str | None = None,
+    backend: str | None = None,
+) -> None:
     name = mask_path.name
     if name.endswith("_brainmask.nii.gz"):
         side = mask_path.with_name(
@@ -245,10 +298,43 @@ def _write_method_sidecar(mask_path: Path, method: SkullStripMethod) -> None:
         )
     else:
         side = mask_path.with_suffix("").with_suffix(".skullstrip_method.json")
-    side.write_text(
-        json.dumps({"method": method, "mask_path": str(mask_path)}, indent=2) + "\n",
+    payload = {
+        "method": method,
+        "reason": reason,
+        "mask_path": str(mask_path),
+        "prefer_hd_bet": prefer_hd_bet,
+        "hd_bet_available": hd_bet_available,
+        "device": device,
+        "mode": mode,
+        "backend": backend,
+    }
+    side.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+
+
+def write_study_strip_summary(
+    strip_dir: str | Path,
+    *,
+    study_name: str,
+    methods: dict[str, str],
+    reasons: dict[str, str],
+) -> Path:
+    """Write ``03_skull/skullstrip_methods.json`` aggregating per-modality sidecars."""
+    strip_dir = Path(strip_dir)
+    strip_dir.mkdir(parents=True, exist_ok=True)
+    path = strip_dir / "skullstrip_methods.json"
+    path.write_text(
+        json.dumps(
+            {
+                "study_name": study_name,
+                "methods": methods,
+                "reasons": reasons,
+            },
+            indent=2,
+        )
+        + "\n",
         encoding="utf-8",
     )
+    return path
 
 
 def _default_mask_path(output_path: Path) -> Path:
@@ -269,8 +355,12 @@ def _run_hd_bet(
     *,
     device: str,
     mode: str,
-) -> None:
-    """Run HD-BET via CLI (preferred), v2 API, or legacy v1 API."""
+) -> str:
+    """Run HD-BET via CLI (preferred), v2 API, or legacy v1 API.
+
+    Returns the backend name that produced output (``cli``, ``v2_api``, or
+    ``legacy``).
+    """
     use_tta = mode != "fast"
     errors: list[str] = []
 
@@ -280,7 +370,7 @@ def _run_hd_bet(
             _run_hd_bet_cli(
                 input_path, output_path, mask_path, device=device, use_tta=use_tta
             )
-            return
+            return "cli"
         except Exception as exc:  # noqa: BLE001
             errors.append(f"CLI: {type(exc).__name__}: {exc}")
             logger.warning("HD-BET CLI failed (%s); trying Python API", exc)
@@ -294,7 +384,7 @@ def _run_hd_bet(
             _run_hd_bet_v2_api(
                 input_path, output_path, mask_path, device=device, use_tta=use_tta
             )
-            return
+            return "v2_api"
         except Exception as exc:  # noqa: BLE001
             errors.append(f"v2 API: {type(exc).__name__}: {exc}")
             logger.warning("HD-BET v2 API failed (%s); trying legacy API", exc)
@@ -316,7 +406,7 @@ def _run_hd_bet(
         except TypeError:
             run_hd_bet(str(input_path), str(output_path))
         _ensure_mask_alongside(input_path, output_path, mask_path)
-        return
+        return "legacy"
 
     detail = "; ".join(errors) if errors else "no backend available"
     raise RuntimeError(f"HD-BET could not run ({detail})")

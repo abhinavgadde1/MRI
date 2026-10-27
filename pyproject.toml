@@ -14,6 +14,7 @@ keywords = ["mri", "dicom", "nifti", "monai", "segmentation", "tractography"]
 dependencies = [
     "pydicom",
     "SimpleITK",
+    "hd-bet==2.0.1",
     "monai",
     "nibabel",
     "scikit-image",
