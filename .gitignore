@@ -7,8 +7,10 @@ __pycache__/
 
 # Virtual environments
 .venv/
+.venv*/
 .venv_smoke/
 .venv-synthseg/
+.venv-hdglio/
 venv/
 env/
 
@@ -44,15 +46,39 @@ data/
 archive/
 MRI DATA/
 mri_anonymizer/
+PROJECT/
+
+# Desktop / local backups (PHI risk)
+**/mri_backup*/
+~/Desktop/mri_backup*/
 
 # Model weights and run outputs
-checkpoints/*.pt
-checkpoints/**/*.pt
+checkpoints/
 *.pt
 *.pth
 *.ckpt
 outputs/
 runs/
+logs/
+
+# Patient-identifying / study-named tables (keep SUMMARY.md only under results/)
+**/radiologist_reads.csv
+**/reader_form.csv
+**/per_case*.csv
+**/scores*.csv
+**/agreement.csv
+**/manifest.csv
+**/fold_metrics.csv
+**/forgetting_check.csv
+**/group_standardized_diffs.csv
+**/summary_table.csv
+**/loso_metrics.csv
+**/nondraft_inference.csv
+**/run_meta.json
+**/qa_meta.json
+**/shortcut_check.json
+**/auc_table.csv
+splits/batch2_pos_neg/
 
 # Large imaging / binary formats (typically >>50MB)
 *.nii
