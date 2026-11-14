@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import argparse
 import json
 import logging
 import sys
@@ -40,10 +41,11 @@ logging.basicConfig(
 logger = logging.getLogger("run_hd_bet_fix")
 
 OUT = ROOT / "outputs" / "hd_bet_fix"
-CASES = [
-    "26070613014390354814_MR_Study1",
-    "26070614152390454835_MR_Study1",
-    "26070605394269334502_MR_Study1",
+# Anon IDs only; resolved via gitignored data/private/id_map.csv or --study.
+CASE_ANON_IDS = [
+    "patient_A09",
+    "patient_A10",
+    "patient_A08",
 ]
 
 
@@ -103,6 +105,26 @@ def find_pred(sid: str) -> Path | None:
 
 
 def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--study",
+        nargs="*",
+        default=None,
+        help="Study IDs (anon patient_A## or raw folder names). "
+        "Default: CASE_ANON_IDS via data/private/id_map.csv",
+    )
+    args = parser.parse_args()
+    from privacy.study_ids import resolve_raw_ids
+
+    try:
+        cases = resolve_raw_ids(args.study if args.study else CASE_ANON_IDS)
+    except Exception as exc:  # noqa: BLE001
+        print(
+            f"Cannot resolve studies ({exc}). Pass --study ... or create id_map.csv.",
+            file=sys.stderr,
+        )
+        return 2
+
     status = hd_bet_status()
     print("HD-BET status:", json.dumps(status, indent=2))
     print("device:", default_hd_bet_device())
@@ -113,7 +135,7 @@ def main() -> int:
     OUT.mkdir(parents=True, exist_ok=True)
     summary: list[dict] = []
 
-    for sid in CASES:
+    for sid in cases:
         print(f"\n======== {sid} ========")
         study = ROOT / "data/processed/real_patients" / sid
         bias_t1 = study / "02_bias" / "T1.nii.gz"

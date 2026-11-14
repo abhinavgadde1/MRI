@@ -139,7 +139,11 @@ def main() -> int:
     )
     app = load_config()
     patients_root = Path(app.paths.processed) / "real_patients"
-    cases = sorted((OUT / "cases").glob("*_MR_Study1"))
+    # Prefer anonymized patient_* dirs; fall back to any case subdirectory.
+    cases_root = OUT / "cases"
+    cases = sorted(cases_root.glob("patient_*"))
+    if not cases:
+        cases = sorted(p for p in cases_root.iterdir() if p.is_dir()) if cases_root.is_dir() else []
     for case_dir in cases:
         if not (case_dir / "morphometrics.csv").is_file():
             continue

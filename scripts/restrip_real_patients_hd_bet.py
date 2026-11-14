@@ -36,14 +36,29 @@ logger = logging.getLogger("restrip_hd_bet")
 
 PATIENTS = ROOT / "data" / "processed" / "real_patients"
 OUT = ROOT / "outputs" / "hd_bet_restrip"
-DEMO_CASES = [
-    "26070314071267604026_MR_Study1",
-    "26072008063136939243_MR_Study1",
-    "26072110054761049720_MR_Study1",
-    "26072209432761090085_MR_Study1",
+# Anon IDs only in-repo; resolved to on-disk folder names via gitignored id_map.
+DEMO_ANON_IDS = [
+    "patient_A03",
+    "patient_A39",
+    "patient_A41",
+    "patient_A45",
 ]
 SKIP_DIRS = {"corrected"}
 MODALITIES = ("T1", "T1c", "T2", "FLAIR")
+
+
+def _demo_raw_ids(cli_studies: list[str] | None = None) -> list[str]:
+    from privacy.study_ids import resolve_raw_ids
+
+    if cli_studies:
+        return resolve_raw_ids(cli_studies)
+    try:
+        return resolve_raw_ids(DEMO_ANON_IDS)
+    except Exception as exc:  # noqa: BLE001
+        raise SystemExit(
+            "Cannot resolve demo study folders. Pass --study RAW_OR_ANON ... "
+            f"or create data/private/id_map.csv ({exc})"
+        ) from exc
 
 
 def mask_fraction(path: Path) -> float | None:
@@ -57,16 +72,18 @@ def mask_fraction(path: Path) -> float | None:
     return float((arr > 0).sum()) / float(n)
 
 
-def discover_studies(root: Path) -> list[Path]:
+def discover_studies(
+    root: Path, *, demo_raw_ids: list[str] | None = None
+) -> list[Path]:
     studies = [
         p
         for p in sorted(root.iterdir())
         if p.is_dir() and not p.name.startswith(".") and p.name not in SKIP_DIRS
     ]
-    demo = [p for p in studies if p.name in DEMO_CASES]
-    rest = [p for p in studies if p.name not in DEMO_CASES]
+    demo_ids = set(demo_raw_ids or _demo_raw_ids())
+    rest = [p for p in studies if p.name not in demo_ids]
     # Demo cases first so meshes / UI can proceed before the full cohort finishes.
-    demo_ordered = [root / sid for sid in DEMO_CASES if (root / sid).is_dir()]
+    demo_ordered = [root / sid for sid in (demo_raw_ids or _demo_raw_ids()) if (root / sid).is_dir()]
     return demo_ordered + rest
 
 
@@ -281,6 +298,13 @@ def main() -> int:
     parser.add_argument("--out", type=Path, default=OUT)
     parser.add_argument("--limit", type=int, default=None)
     parser.add_argument(
+        "--study",
+        nargs="*",
+        default=None,
+        help="Demo/priority study IDs (anon patient_A## or raw folder names). "
+        "Default: DEMO_ANON_IDS resolved via data/private/id_map.csv",
+    )
+    parser.add_argument(
         "--resume",
         action=argparse.BooleanOptionalAction,
         default=True,
@@ -303,7 +327,8 @@ def main() -> int:
         logger.error("HD-BET is not available; aborting so we do not rewrite Otsu masks")
         return 1
 
-    studies = discover_studies(args.root)
+    demo_raw = _demo_raw_ids(args.study)
+    studies = discover_studies(args.root, demo_raw_ids=demo_raw)
     if args.limit is not None:
         studies = studies[: args.limit]
     logger.info("Studies to consider: %d", len(studies))

@@ -1,32 +1,32 @@
 [
   {
-    "case": "26070613014390354814_MR_Study1",
+    "case": "patient_A09",
     "method": "hd-bet",
     "reg_method": "hd-bet",
     "mask_voxels": 572738,
     "mesh_sav": 0.08102291816781979,
     "faces": 45000,
-    "overlay": "/Users/cherrygadde/MRI/outputs/hd_bet_fix/26070613014390354814_MR_Study1/mask_overlay_axial.png",
-    "mesh_html": "/Users/cherrygadde/MRI/outputs/hd_bet_fix/26070613014390354814_MR_Study1/mesh_3d.html"
+    "overlay": "outputs/hd_bet_fix/patient_A09/mask_overlay_axial.png",
+    "mesh_html": "outputs/hd_bet_fix/patient_A09/mesh_3d.html"
   },
   {
-    "case": "26070614152390454835_MR_Study1",
+    "case": "patient_A10",
     "method": "hd-bet",
     "reg_method": "hd-bet",
     "mask_voxels": 573925,
     "mesh_sav": 0.061114111648708974,
     "faces": 45000,
-    "overlay": "/Users/cherrygadde/MRI/outputs/hd_bet_fix/26070614152390454835_MR_Study1/mask_overlay_axial.png",
-    "mesh_html": "/Users/cherrygadde/MRI/outputs/hd_bet_fix/26070614152390454835_MR_Study1/mesh_3d.html"
+    "overlay": "outputs/hd_bet_fix/patient_A10/mask_overlay_axial.png",
+    "mesh_html": "outputs/hd_bet_fix/patient_A10/mesh_3d.html"
   },
   {
-    "case": "26070605394269334502_MR_Study1",
+    "case": "patient_A08",
     "method": "hd-bet",
     "reg_method": "hd-bet",
     "mask_voxels": 355682,
     "mesh_sav": 0.06592469987671659,
     "faces": 44998,
-    "overlay": "/Users/cherrygadde/MRI/outputs/hd_bet_fix/26070605394269334502_MR_Study1/mask_overlay_axial.png",
-    "mesh_html": "/Users/cherrygadde/MRI/outputs/hd_bet_fix/26070605394269334502_MR_Study1/mesh_3d.html"
+    "overlay": "outputs/hd_bet_fix/patient_A08/mask_overlay_axial.png",
+    "mesh_html": "outputs/hd_bet_fix/patient_A08/mesh_3d.html"
   }
 ]

@@ -94,7 +94,7 @@ def test_api_find_pipeline_input_ignores_macosx_and_unwraps_study(tmp_path: Path
     from api.app import _find_pipeline_input
 
     extract = tmp_path / "extracted"
-    study = extract / "26070305080270453758_MR_Study1"
+    study = extract / "patient_A02"
     series = study / "1.2.3.series"
     series.mkdir(parents=True)
     (extract / "__MACOSX").mkdir()

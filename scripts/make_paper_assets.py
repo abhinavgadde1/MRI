@@ -135,16 +135,31 @@ def table1_dataset_preprocessing() -> Path:
     df.to_csv(out, index=False)
 
     # Full real-patient study-id roster for the dataset report.
+    # Anonymize folder tokens → patient_A## (map in gitignored data/private/id_map.csv).
+    from privacy.study_ids import anonymize_study_id, load_id_map, save_id_map
+
+    id_map = load_id_map()
     roster = batch[
         ["study_id", "status", "modalities_found", "modalities_processed", "error"]
     ].copy()
+    roster["study_id"] = [
+        anonymize_study_id(str(s), id_map, assign_missing=True) for s in roster["study_id"]
+    ]
+    save_id_map(id_map)
     roster = roster.sort_values(["status", "study_id"], ascending=[False, True])
     roster.insert(0, "index", range(1, len(roster) + 1))
     roster_csv = TAB / "table1_real_patient_study_ids.csv"
     roster.to_csv(roster_csv, index=False)
 
-    success_ids = sorted(ok["study_id"].astype(str).tolist())
-    failed_ids = sorted(failed["study_id"].astype(str).tolist())
+    success_ids = sorted(
+        anonymize_study_id(str(s), id_map, assign_missing=True)
+        for s in ok["study_id"].astype(str).tolist()
+    )
+    failed_ids = sorted(
+        anonymize_study_id(str(s), id_map, assign_missing=True)
+        for s in failed["study_id"].astype(str).tolist()
+    )
+    save_id_map(id_map)
     success_rows = [
         {"#": i, "study_id": sid, "status": "success"}
         for i, sid in enumerate(success_ids, start=1)

@@ -60,10 +60,10 @@ These still have unused extra series (mostly DWI / Survey), just not hemorrhage-
 
 | study_id | n series | unused extra SeriesDescription (instance count) |
 | --- | ---: | --- |
-| `26070216161267453698_MR_Study1` | 5 | `dReg - DWI` (22), `isoReg - DWI` (22), `Survey` (5) |
-| `26071304320513066722_MR_Study1` | 5 | `Reg - DWI` (115), `DWI` (115) |
-| `26072506341762140975_MR_Study1` | 6 | `dDWI` (23), `isoDWI` (23), `Survey` (5) |
-| `26073006234885442426_MR_Study1` | 12 | `BTFE_RT SENSE` (45), `isoDWI` (23), `STIR_longTE` (23), `SURVEY_bFFE` (17), `BTFE_RT SENSE` (50), `dDWI` (23), `BTFE_RT SENSE` (75) |
+| `patient_A01` | 5 | `dReg - DWI` (22), `isoReg - DWI` (22), `Survey` (5) |
+| `patient_A23` | 5 | `Reg - DWI` (115), `DWI` (115) |
+| `patient_A50` | 6 | `dDWI` (23), `isoDWI` (23), `Survey` (5) |
+| `patient_A62` | 12 | `BTFE_RT SENSE` (45), `isoDWI` (23), `STIR_longTE` (23), `SURVEY_bFFE` (17), `BTFE_RT SENSE` (50), `dDWI` (23), `BTFE_RT SENSE` (75) |
 
 ## Extra series the pipeline currently ignores
 
@@ -111,106 +111,106 @@ Multiple matches in one study are joined with ` || `. Empty description/count me
 
 | study_id | has_swi_or_gre | matching_series_description | series_instance_count |
 | --- | --- | --- | --- |
-| `26070216161267453698_MR_Study1` | no | — | — |
-| `26070305080270453758_MR_Study1` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 260 |
-| `26070314071267604026_MR_Study1` | yes | SWIp_fast \|\| VSWIp_fast MINI MIP | 280 || 19 |
-| `26070408200268074217_MR_Study1` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 260 |
-| `26070409265767144257_MR_Study1` | yes | SWIp_fast \|\| VSWIp_fast MINI MIP | 280 || 19 |
-| `26070409540769354286_MR_Study1` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 280 |
-| `26070409540769354286_MR_Study1 2` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 280 |
-| `26070605394269334502_MR_Study1` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 260 |
-| `26070613014390354814_MR_Study1` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 280 |
-| `26070614152390454835_MR_Study1` | yes | SWIp_fast \|\| VSWIp_fast MINI MIP | 280 || 19 |
-| `26070707084390895010_MR_Study1` | yes | SWIp_fast \|\| VSWIp_fast MINI MIP | 260 || 19 |
-| `26070708365890165072_MR_Study1` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 260 |
-| `26070709151891795096_MR_Study1` | yes | SWIp_fast \|\| VSWIp_fast MINI MIP | 260 || 19 |
-| `26070709594892225134_MR_Study1` | yes | SWIp_fast \|\| VSWIp_fast MINI MIP | 260 || 19 |
-| `26070905302392205679_MR_Study1` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 260 |
-| `26070906421390285747_MR_Study1` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 260 |
-| `26070911455390915925_MR_Study1` | yes | SWIp_fast \|\| VSWIp_fast MINI MIP | 280 || 19 |
-| `26070912134892975927_MR_Study1` | yes | SWIp_fast \|\| VSWIp_fast MINI MIP | 280 || 19 |
-| `26071007172890826108_MR_Study1` | yes | SWIp_fast \|\| VSWIp_fast MINI MIP | 260 || 19 |
-| `26071011152890086256_MR_Study1` | yes | SWIp_fast \|\| VSWIp_fast MINI MIP | 280 || 19 |
-| `26071012590390146272_MR_Study1` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 280 |
-| `26071304012516286710_MR_Study1` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 280 |
-| `26071304320513066722_MR_Study1` | no | — | — |
-| `26071308571015536948_MR_Study1` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 260 |
-| `26071313115513007068_MR_Study1` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 260 |
-| `26071404271014157110_MR_Study1` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 280 |
-| `26071406563514347220_MR_Study1` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 280 |
-| `26071408185516237288_MR_Study1` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 260 |
-| `26071409424013477341_MR_Study1` | yes | SWIp_fast \|\| VSWIp_fast MINI MIP | 260 || 19 |
-| `26071413483512457432_MR_Study1` | yes | SWIp_fast \|\| VSWIp_fast MINI MIP | 260 || 19 |
-| `26071413495515087434_MR_Study1` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 260 |
-| `26071508002014517662_MR_Study1` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 280 |
-| `26071508245013857670_MR_Study1` | yes | VSWIp_fast MINI MIP \|\| VSWIp_fast MINI MIP \|\| SWIp_fast \|\| SWIp_fast | 19 || 19 || 280 || 280 |
-| `26071511453513707764_MR_Study1` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 280 |
-| `26071608095638498039_MR_Study1` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 260 |
-| `26071609030141018101_MR_Study1` | yes | SWIp_fast \|\| VSWIp_fast MINI MIP | 260 || 19 |
-| `26071612044138988181_MR_Study1` | yes | SWIp_fast \|\| VSWIp_fast MINI MIP | 260 || 19 |
-| `26072007242137269199_MR_Study1` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 280 |
-| `26072008063136939243_MR_Study1` | yes | SWIp_fast \|\| VSWIp_fast MINI MIP | 280 || 19 |
-| `26072109394762409708_MR_Study1` | yes | VSWIp_fast MINI MIP \|\| VSWIp_fast MINI MIP \|\| SWIp_fast \|\| SWIp_fast | 19 || 19 || 260 || 280 |
-| `26072110054761049720_MR_Study1` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 280 |
-| `26072110054761049720_MR_Study1 2` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 280 |
-| `26072113304759879786_MR_Study1` | yes | SWIp_fast \|\| VSWIp_fast MINI MIP | 280 || 19 |
-| `26072114125261929790_MR_Study1` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 280 |
-| `26072209432761090085_MR_Study1` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 260 |
-| `26072306520261330311_MR_Study1` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 260 |
-| `26072310183761270463_MR_Study1` | yes | SWIp_fast \|\| VSWIp_fast MINI MIP | 260 || 19 |
-| `26072312074760640521_MR_Study1` | yes | SWIp_fast \|\| VSWIp_fast MINI MIP | 260 || 19 |
-| `26072413462262120855_MR_Study1` | yes | SWIp_fast \|\| VSWIp_fast MINI MIP | 260 || 19 |
-| `26072506341762140975_MR_Study1` | no | — | — |
-| `26072510562762381109_MR_Study1` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 260 |
-| `26072708432886901452_MR_Study1` | yes | SWIp_fast \|\| VSWIp_fast MINI MIP | 260 || 19 |
-| `26072710225385761524_MR_Study1` | yes | SWIp_fast \|\| VSWIp_fast MINI MIP | 260 || 19 |
-| `26072711473884981574_MR_Study1` | yes | SWIp_fast \|\| VSWIp_fast MINI MIP | 260 || 19 |
-| `26072904510384911995_MR_Study1` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 260 |
-| `26072906541386952125_MR_Study1` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 260 |
-| `26072911164385742279_MR_Study1` | yes | SWIp_fast \|\| VSWIp_fast MINI MIP | 260 || 19 |
-| `26072912020385312283_MR_Study1` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 260 |
-| `26072912460887602295_MR_Study1` | yes | SWIp_fast \|\| VSWIp_fast MINI MIP | 260 || 19 |
-| `26072913580886662307_MR_Study1` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 260 |
-| `26072914582884332315_MR_Study1` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 260 |
-| `26073006234885442426_MR_Study1` | no | — | — |
-| `26073007020887122462_MR_Study1` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 260 |
-| `26073009564886362586_MR_Study1` | yes | SWIp_fast \|\| VSWIp_fast MINI MIP | 290 || 19 |
-| `26073011501385172644_MR_Study1` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 290 |
-| `26073105544886072756_MR_Study1` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 260 |
-| `26073107263508562864_MR_Study1` | yes | SWIp_fast \|\| VSWIp_fast MINI MIP | 260 || 19 |
-| `26073108355508012892_MR_Study1` | yes | SWIp_fast \|\| VSWIp_fast MINI MIP | 260 || 19 |
-| `26073109163009922908_MR_Study1` | yes | SWIp_fast \|\| VSWIp_fast MINI MIP | 260 || 19 |
-| `26073109560034012914_MR_Study1` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 260 |
-| `26073110381008022940_MR_Study1` | yes | SWIp_fast \|\| VSWIp_fast MINI MIP | 260 || 19 |
-| `26080106174008113074_MR_Study1` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 290 |
-| `26080106414508393088_MR_Study1` | yes | SWIp_fast \|\| VSWIp_fast MINI MIP | 260 || 19 |
-| `26080109094509783162_MR_Study1` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 290 |
-| `26080109411703950057_MR_Study1` | yes | SWIp_fast \|\| VSWIp_fast MINI MIP | 260 || 19 |
-| `26080109440916670059_MR_Study1` | yes | SWIp_fast \|\| VSWIp_fast MINI MIP | 260 || 19 |
-| `26080304521011253338_MR_Study1` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 260 |
-| `26080309094008153581_MR_Study1` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 260 |
-| `26080312074008673751_MR_Study1` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 260 |
-| `26080409020110314029_MR_Study1` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 290 |
-| `26080411131609064091_MR_Study1` | yes | SWIp_fast \|\| VSWIp_fast MINI MIP \|\| VSWIp_fast MINI MIP \|\| SWIp_fast | 280 || 19 || 19 || 280 |
-| `26080508352607484385_MR_Study1` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 260 |
-| `26080607105609534682_MR_Study1` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 280 |
-| `26080610235109424796_MR_Study1` | yes | VSWIp_fast MINI MIP \|\| VSWIp_fast MINI MIP \|\| SWIp_fast \|\| SWIp_fast | 19 || 19 || 280 || 280 |
-| `26080705433108294942_MR_Study1` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 260 |
-| `26080706533610904998_MR_Study1` | yes | SWIp_fast \|\| VSWIp_fast MINI MIP | 260 || 19 |
-| `26080707233109445020_MR_Study1` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 260 |
-| `26080708573609205118_MR_Study1` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 260 |
-| `26080709560611015148_MR_Study1` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 260 |
-| `26080711190110325174_MR_Study1` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 260 |
-| `26080810164210735473_MR_Study1` | yes | SWIp_fast \|\| VSWIp_fast MINI MIP | 260 || 19 |
-| `26081004291713445679_MR_Study1` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 260 |
-| `26081006095708455780_MR_Study1` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 280 |
-| `26081009054708325987_MR_Study1` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 260 |
-| `26081009243210326011_MR_Study1` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 260 |
-| `26081011444209986065_MR_Study1` | yes | SWIp_fast \|\| VSWIp_fast MINI MIP | 260 || 19 |
-| `26081012130710966071_MR_Study1` | yes | SWIp_fast \|\| VSWIp_fast MINI MIP | 260 || 19 |
-| `26081013263710686081_MR_Study1` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 260 |
-| `CHINNAMMAI.PRATHIPATI   50Y F_MR_Study1` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 260 |
-| `MADHU U  29Y M_MR_Study1` | yes | VSWIp_fast MINI MIP \|\| VSWIp_fast MINI MIP \|\| SWIp_fast \|\| SWIp_fast | 19 || 19 || 280 || 280 |
+| `patient_A01` | no | — | — |
+| `patient_A02` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 260 |
+| `patient_A03` | yes | SWIp_fast \|\| VSWIp_fast MINI MIP | 280 || 19 |
+| `patient_A04` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 260 |
+| `patient_A05` | yes | SWIp_fast \|\| VSWIp_fast MINI MIP | 280 || 19 |
+| `patient_A06` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 280 |
+| `patient_A07` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 280 |
+| `patient_A08` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 260 |
+| `patient_A09` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 280 |
+| `patient_A10` | yes | SWIp_fast \|\| VSWIp_fast MINI MIP | 280 || 19 |
+| `patient_A11` | yes | SWIp_fast \|\| VSWIp_fast MINI MIP | 260 || 19 |
+| `patient_A12` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 260 |
+| `patient_A13` | yes | SWIp_fast \|\| VSWIp_fast MINI MIP | 260 || 19 |
+| `patient_A14` | yes | SWIp_fast \|\| VSWIp_fast MINI MIP | 260 || 19 |
+| `patient_A15` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 260 |
+| `patient_A16` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 260 |
+| `patient_A17` | yes | SWIp_fast \|\| VSWIp_fast MINI MIP | 280 || 19 |
+| `patient_A18` | yes | SWIp_fast \|\| VSWIp_fast MINI MIP | 280 || 19 |
+| `patient_A19` | yes | SWIp_fast \|\| VSWIp_fast MINI MIP | 260 || 19 |
+| `patient_A20` | yes | SWIp_fast \|\| VSWIp_fast MINI MIP | 280 || 19 |
+| `patient_A21` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 280 |
+| `patient_A22` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 280 |
+| `patient_A23` | no | — | — |
+| `patient_A24` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 260 |
+| `patient_A25` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 260 |
+| `patient_A26` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 280 |
+| `patient_A27` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 280 |
+| `patient_A28` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 260 |
+| `patient_A29` | yes | SWIp_fast \|\| VSWIp_fast MINI MIP | 260 || 19 |
+| `patient_A30` | yes | SWIp_fast \|\| VSWIp_fast MINI MIP | 260 || 19 |
+| `patient_A31` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 260 |
+| `patient_A32` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 280 |
+| `patient_A33` | yes | VSWIp_fast MINI MIP \|\| VSWIp_fast MINI MIP \|\| SWIp_fast \|\| SWIp_fast | 19 || 19 || 280 || 280 |
+| `patient_A34` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 280 |
+| `patient_A35` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 260 |
+| `patient_A36` | yes | SWIp_fast \|\| VSWIp_fast MINI MIP | 260 || 19 |
+| `patient_A37` | yes | SWIp_fast \|\| VSWIp_fast MINI MIP | 260 || 19 |
+| `patient_A38` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 280 |
+| `patient_A39` | yes | SWIp_fast \|\| VSWIp_fast MINI MIP | 280 || 19 |
+| `patient_A40` | yes | VSWIp_fast MINI MIP \|\| VSWIp_fast MINI MIP \|\| SWIp_fast \|\| SWIp_fast | 19 || 19 || 260 || 280 |
+| `patient_A41` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 280 |
+| `patient_A42` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 280 |
+| `patient_A43` | yes | SWIp_fast \|\| VSWIp_fast MINI MIP | 280 || 19 |
+| `patient_A44` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 280 |
+| `patient_A45` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 260 |
+| `patient_A46` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 260 |
+| `patient_A47` | yes | SWIp_fast \|\| VSWIp_fast MINI MIP | 260 || 19 |
+| `patient_A48` | yes | SWIp_fast \|\| VSWIp_fast MINI MIP | 260 || 19 |
+| `patient_A49` | yes | SWIp_fast \|\| VSWIp_fast MINI MIP | 260 || 19 |
+| `patient_A50` | no | — | — |
+| `patient_A51` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 260 |
+| `patient_A52` | yes | SWIp_fast \|\| VSWIp_fast MINI MIP | 260 || 19 |
+| `patient_A53` | yes | SWIp_fast \|\| VSWIp_fast MINI MIP | 260 || 19 |
+| `patient_A54` | yes | SWIp_fast \|\| VSWIp_fast MINI MIP | 260 || 19 |
+| `patient_A55` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 260 |
+| `patient_A56` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 260 |
+| `patient_A57` | yes | SWIp_fast \|\| VSWIp_fast MINI MIP | 260 || 19 |
+| `patient_A58` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 260 |
+| `patient_A59` | yes | SWIp_fast \|\| VSWIp_fast MINI MIP | 260 || 19 |
+| `patient_A60` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 260 |
+| `patient_A61` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 260 |
+| `patient_A62` | no | — | — |
+| `patient_A63` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 260 |
+| `patient_A64` | yes | SWIp_fast \|\| VSWIp_fast MINI MIP | 290 || 19 |
+| `patient_A65` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 290 |
+| `patient_A66` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 260 |
+| `patient_A67` | yes | SWIp_fast \|\| VSWIp_fast MINI MIP | 260 || 19 |
+| `patient_A68` | yes | SWIp_fast \|\| VSWIp_fast MINI MIP | 260 || 19 |
+| `patient_A69` | yes | SWIp_fast \|\| VSWIp_fast MINI MIP | 260 || 19 |
+| `patient_A70` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 260 |
+| `patient_A71` | yes | SWIp_fast \|\| VSWIp_fast MINI MIP | 260 || 19 |
+| `patient_A72` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 290 |
+| `patient_A73` | yes | SWIp_fast \|\| VSWIp_fast MINI MIP | 260 || 19 |
+| `patient_A74` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 290 |
+| `patient_A75` | yes | SWIp_fast \|\| VSWIp_fast MINI MIP | 260 || 19 |
+| `patient_A76` | yes | SWIp_fast \|\| VSWIp_fast MINI MIP | 260 || 19 |
+| `patient_A77` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 260 |
+| `patient_A78` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 260 |
+| `patient_A79` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 260 |
+| `patient_A80` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 290 |
+| `patient_A81` | yes | SWIp_fast \|\| VSWIp_fast MINI MIP \|\| VSWIp_fast MINI MIP \|\| SWIp_fast | 280 || 19 || 19 || 280 |
+| `patient_A82` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 260 |
+| `patient_A83` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 280 |
+| `patient_A84` | yes | VSWIp_fast MINI MIP \|\| VSWIp_fast MINI MIP \|\| SWIp_fast \|\| SWIp_fast | 19 || 19 || 280 || 280 |
+| `patient_A85` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 260 |
+| `patient_A86` | yes | SWIp_fast \|\| VSWIp_fast MINI MIP | 260 || 19 |
+| `patient_A87` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 260 |
+| `patient_A88` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 260 |
+| `patient_A89` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 260 |
+| `patient_A90` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 260 |
+| `patient_A91` | yes | SWIp_fast \|\| VSWIp_fast MINI MIP | 260 || 19 |
+| `patient_A92` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 260 |
+| `patient_A93` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 280 |
+| `patient_A94` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 260 |
+| `patient_A95` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 260 |
+| `patient_A96` | yes | SWIp_fast \|\| VSWIp_fast MINI MIP | 260 || 19 |
+| `patient_A97` | yes | SWIp_fast \|\| VSWIp_fast MINI MIP | 260 || 19 |
+| `patient_A98` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 260 |
+| `patient_A99` | yes | VSWIp_fast MINI MIP \|\| SWIp_fast | 19 || 260 |
+| `patient_A100` | yes | VSWIp_fast MINI MIP \|\| VSWIp_fast MINI MIP \|\| SWIp_fast \|\| SWIp_fast | 19 || 19 || 280 || 280 |
 
 ## Files
 
