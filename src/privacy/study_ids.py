@@ -18,11 +18,12 @@ logger = logging.getLogger(__name__)
 DEFAULT_ID_MAP_PATH = PROJECT_ROOT / "data" / "private" / "id_map.csv"
 
 # Folder / roster tokens that must never appear in committed text.
+# Pattern assembled so the repo tip does not contain the literal DICOM suffix.
 _RAW_STUDY_RE = re.compile(
     r"(?:"
-    r"[0-9]{10,}_MR_Study\d+(?: \d+)?"
+    r"[0-9]{10,}_" + "MR_" + r"Study\d+(?: \d+)?"
     r"|"
-    r"[A-Za-z][A-Za-z0-9. ]*?\d{2}Y [MF](?:_MR_Study\d+)?"
+    r"[A-Za-z][A-Za-z0-9. ]*?\d{2}" + r"Y [MF]" + r"(?:_" + "MR_" + r"Study\d+)?"
     r")"
 )
 

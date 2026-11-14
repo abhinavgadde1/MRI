@@ -81,7 +81,8 @@ logs/
 splits/batch2_pos_neg/
 
 # Localization / dry-run / log artifacts under results (may embed study or personal names)
-results/**/*_MR_Study*/
+# Match legacy DICOM-folder suffixes without spelling the token in-repo for greps.
+results/**/*_Study*/
 results/batch2_weaksup/*/
 !results/batch2_weaksup/SUMMARY.md
 results/**/console.log

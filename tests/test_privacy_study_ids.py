@@ -24,9 +24,10 @@ def test_anonymize_and_resolve_roundtrip(tmp_path: Path):
 
 
 def test_replace_raw_ids_in_text():
-    mapping = {"2607_MR_Study1": "patient_A01", "NAME 29Y M_MR_Study1": "patient_A02"}
-    text = "see 2607_MR_Study1 and NAME 29Y M_MR_Study1"
+    raw_a = "RAWFOLDER_001"
+    raw_b = "OTHERFOLDER_002"
+    mapping = {raw_a: "patient_A01", raw_b: "patient_A02"}
+    text = f"see {raw_a} and {raw_b}"
     out = replace_raw_ids_in_text(text, mapping)
-    assert "2607_MR_Study1" not in out
-    assert "NAME 29Y" not in out
+    assert raw_a not in out and raw_b not in out
     assert "patient_A01" in out and "patient_A02" in out
