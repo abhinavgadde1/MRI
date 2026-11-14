@@ -15,15 +15,16 @@ INPUT_MODALITIES: tuple[str, ...] = MODALITY_NAMES  # FLAIR, T1, T1c, T2
 IN_CHANNELS = len(INPUT_MODALITIES)
 
 # BraTS evaluation regions (3 output channels, multi-label style).
-# Derived from single-channel labels 0–3 stored in mask.nii.gz:
+# Derived from single-channel labels stored in mask.nii.gz:
 #   0 = background
 #   1 = necrotic / non-enhancing tumor core
 #   2 = edema (peritumoral)
-#   3 = enhancing tumor
+#   3 = enhancing tumor (project / BraTS-NIfTI cache)
+#   4 = enhancing tumor (classic BraTS / batch2 corrected masks)
 BRATS_REGIONS: tuple[str, ...] = (
-    "enhancing_tumor",   # ET: label == 3
-    "tumor_core",        # TC: labels 1 + 3
-    "whole_tumor",       # WT: labels 1 + 2 + 3 (includes edema)
+    "enhancing_tumor",   # ET: label in {3, 4}
+    "tumor_core",        # TC: labels 1 + {3,4}
+    "whole_tumor",       # WT: labels 1 + 2 + {3,4}
 )
 OUT_CHANNELS = len(BRATS_REGIONS)
 
@@ -49,13 +50,31 @@ class BraTSModelConfig:
 
 
 def brats_label_to_regions(label: torch.Tensor) -> torch.Tensor:
-    """Convert single-channel BraTS labels (0–3) to 3 binary region channels.
+    """Convert single-channel BraTS labels to 3 binary region channels.
+
+    Accepts **either** the project's internal encoding ``{0,1,2,3}``
+    (enhancing=3) **or** classic BraTS ``{0,1,2,4}`` (enhancing=4), but not
+    both enhancing codes in the same volume.
+
+    Nested regions (channel order ``[ET, TC, WT]``):
+
+    - ET: enhancing (3 **or** 4, exclusive convention per volume)
+    - TC: necrotic (1) ∪ enhancing
+    - WT: necrotic (1) ∪ edema (2) ∪ enhancing
+
+    Mixed-convention policy
+    -----------------------
+    If labels **3 and 4 both appear** in one volume, raise ``ValueError``.
+    They are semantically the same class under two encodings; coexistence
+    almost always means a labeling/pipeline bug (e.g. partially remapped
+    mask). Pure ``{0,1,2,3}`` and pure ``{0,1,2,4}`` volumes with the same
+    necrotic/edema/enhancing geometry yield **identical** ET/TC/WT masks.
 
     Parameters
     ----------
     label:
         Tensor shaped ``(B, 1, *spatial)`` or ``(B, *spatial)`` with integer
-        values in ``{0, 1, 2, 3}``.
+        label values.
 
     Returns
     -------
@@ -70,9 +89,18 @@ def brats_label_to_regions(label: torch.Tensor) -> torch.Tensor:
         raise ValueError(f"Expected one label channel, got shape {tuple(label.shape)}")
 
     lbl = label.long()
+    has3 = bool(torch.any(lbl == 3).item())
+    has4 = bool(torch.any(lbl == 4).item())
+    if has3 and has4:
+        raise ValueError(
+            "Label volume mixes enhancing codes 3 and 4. Use a single "
+            "convention per volume: project {0,1,2,3} or classic BraTS "
+            "{0,1,2,4}."
+        )
+
     necrotic = lbl == 1
     edema = lbl == 2
-    enhancing = lbl == 3
+    enhancing = (lbl == 3) | (lbl == 4)
 
     et = enhancing
     tc = necrotic | enhancing

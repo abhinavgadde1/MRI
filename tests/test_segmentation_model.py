@@ -27,6 +27,11 @@ def test_brats_region_mapping():
     assert regions[0, 0, 1, 0] == 0.0
     assert regions[0, 1, 1, 0] == 0.0
     assert regions[0, 2, 1, 0] == 1.0
+    # Classic BraTS enhancing label 4 is accepted as ET.
+    label4 = torch.tensor([[[[4]]]], dtype=torch.long)
+    r4 = brats_label_to_regions(label4)
+    assert r4.shape == (1, 3, 1, 1)
+    assert torch.equal(r4[0, :, 0, 0], torch.tensor([1.0, 1.0, 1.0]))
 
 
 def test_model_io_shapes():
