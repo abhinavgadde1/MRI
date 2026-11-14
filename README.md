@@ -149,6 +149,61 @@ results/paper/         # submission tables & figures
 checkpoints/           # local weights (*.pt gitignored)
 ```
 
+## Batch2 fine-tune CV (native-T1c reference masks)
+
+After corrected masks exist at
+`outputs/batch2_labeling/<study_id>/corrected_label.nii.gz` (classic BraTS
+labels 1/2/4 on the package 1 mm grid), run patient-grouped cross-validation
+from the v3 checkpoint. Masks are **reference masks** (single-annotator
+corrections from a v3 draft), **not** clinical ground truth.
+
+```bash
+# Leave-one-patient-out (≤12 patients) or 5-fold; BraTS replay 1:1; domain augs on.
+# Does NOT overwrite checkpoints/brats_scale_full (CLI/API default stays v3).
+PYTHONPATH=src python -m segmentation.batch2_cv \
+  --device mps \
+  --epochs 30
+
+# Optional: after CV, fine-tune on ALL labeled cases → checkpoints/batch2_finetune_final/
+PYTHONPATH=src python -m segmentation.batch2_cv \
+  --device mps \
+  --epochs 30 \
+  --train-final
+
+# Smoke only (draft labels; not reportable):
+PYTHONPATH=src python -m segmentation.batch2_cv --dry-run --device mps
+```
+
+Wrap long runs with `caffeinate -d -i -m -s` (see `docs/SLEEP_PREVENTION.md`).
+Use `--resume` to continue a fold from `latest.pt`. Results land in
+`results/batch2_finetune/` (`per_case_metrics.csv`, `summary.md`,
+`forgetting_check.csv`, `cv_config.json`).
+
+## Batch2 weakly supervised CV (scan-level labels only)
+
+Fine-tune v3 with **scan-level** labels only (no pixel masks for real patients):
+19 tumor positives vs 99 radiologist-reported tumor-free scans
+(`splits/batch2_pos_neg/`; tumor-free status is **verbal and unverified**).
+BraTS replay keeps voxel-wise DiceCE. Checkpoints go under
+`checkpoints/batch2_weaksup_fold_k/` and `checkpoints/batch2_weaksup_final/` —
+**never** replaces `checkpoints/brats_scale_full` (v3 remains the default).
+
+Held-out localization writes `results/batch2_weaksup/<study_id>/weaksup_pred_label.nii.gz`
+plus a 6-slice montage. **These regions are unvalidated model proposals; no volume
+or outline accuracy can be claimed without reference masks.**
+
+```bash
+# Smoke (1 fold / 2 epochs) — stamped DRY RUN
+PYTHONPATH=src python -m segmentation.batch2_weaksup --dry-run --device mps
+
+# Full 5-fold CV (after smoke estimate < 8 h); wrap with caffeinate
+caffeinate -d -i -m -s env PYTHONPATH=src python -m segmentation.batch2_weaksup \
+  --device mps --epochs 15
+
+# --train-final trains on all 19+99 → checkpoints/batch2_weaksup_final/
+# Only run after explicit confirmation (does not change the v3 default).
+```
+
 ## Known limitations
 
 See [`LIMITATIONS.md`](LIMITATIONS.md) (points to the full paper list).

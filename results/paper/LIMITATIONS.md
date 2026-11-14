@@ -53,3 +53,16 @@
    “plausible” detections were extracranial tissue. The floor/ceiling
    themselves come from BraTS GT masks, not this pipeline’s skull-stripping,
    and are unchanged.
+
+10. **No verified real-patient masks.** The clinical / batch2 cohort has **no
+    verified reference masks**. After correcting a v3 channel-order bug
+    (inputs must be FLAIR,T1,T1c,T2), **v3 and HD-GLIO** often show **partial or
+    agreeing WT overlap** on native-T1c studies (3/10 WT Dice > 0.7; 5/10
+    partial) — earlier “complete location disagreement” claims that used stale
+    wrong-order `v3_draft_label.nii.gz` files are withdrawn. **Intensity-based
+    drafts still do not agree** with v3/HD-GLIO on main enhancing-component
+    location (three-way centroid agree = none). A non-tumor **scanner /
+    acquisition shortcut** confound reached AUC ≈ 0.85 from features unrelated
+    to tumor tissue (`results/pos_neg_separation/`). Results on this cohort are
+    therefore **qualitative only** and must not be reported as validated
+    segmentation performance.

@@ -931,9 +931,34 @@ def write_limitations() -> Path:
    “plausible” detections were extracranial tissue. The floor/ceiling
    themselves come from BraTS GT masks, not this pipeline’s skull-stripping,
    and are unchanged.
+
+10. **No verified real-patient masks.** The clinical / batch2 cohort has **no
+    verified reference masks**. After correcting a v3 channel-order bug
+    (inputs must be FLAIR,T1,T1c,T2), **v3 and HD-GLIO** often show **partial or
+    agreeing WT overlap** on native-T1c studies (3/10 WT Dice > 0.7; 5/10
+    partial) — earlier “complete location disagreement” claims that used stale
+    wrong-order `v3_draft_label.nii.gz` files are withdrawn. **Intensity-based
+    drafts still do not agree** with v3/HD-GLIO on main enhancing-component
+    location (three-way centroid agree = none). A non-tumor **scanner /
+    acquisition shortcut** confound reached AUC ≈ 0.85 from features unrelated
+    to tumor tissue (`results/pos_neg_separation/`). Results on this cohort are
+    therefore **qualitative only** and must not be reported as validated
+    segmentation performance.
 """
     out = OUT / "LIMITATIONS.md"
     out.write_text(text, encoding="utf-8")
+    # Keep top-level pointer in sync with a short echo of the new item.
+    root_lim = ROOT / "LIMITATIONS.md"
+    root_lim.write_text(
+        "# Limitations\n\n"
+        "Canonical write-up for the paper submission lives at\n"
+        "[`results/paper/LIMITATIONS.md`](results/paper/LIMITATIONS.md).\n\n"
+        "**Real-patient cohort:** no verified masks; after channel-order fix, "
+        "v3 vs HD-GLIO often partial/agree on WT while intensity drafts still "
+        "disagree on ET location; scanner shortcut AUC ≈ 0.85; results remain "
+        "**qualitative only**.\n",
+        encoding="utf-8",
+    )
     return out
 
 

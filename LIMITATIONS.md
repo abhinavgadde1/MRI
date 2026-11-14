@@ -24,5 +24,10 @@ Short summary for reuse:
    audit ran on since-corrected Otsu-stripped data; HD-BET re-stripping
    increased rather than decreased the below-floor rate because most of the
    original “plausible” detections were extracranial tissue.
+8. **No verified real-patient masks (batch2).** After fixing a v3 channel-order
+   bug, v3 vs HD-GLIO often partially/agree on WT; intensity drafts still do not
+   match them on ET location; scanner-shortcut AUC ≈ 0.85. Cohort results remain
+   **qualitative only** (see paper LIMITATIONS §10;
+   `outputs/batch2_audit_after_channel_fix/`).
 
 Read the full list before interpreting clinical or paper numbers.
