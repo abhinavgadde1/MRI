@@ -80,6 +80,21 @@ logs/
 **/auc_table.csv
 splits/batch2_pos_neg/
 
+# Localization / dry-run / log artifacts under results (may embed study or personal names)
+results/**/*_MR_Study*/
+results/batch2_weaksup/*/
+!results/batch2_weaksup/SUMMARY.md
+results/**/console.log
+results/**/make_test.log
+results/**/*.log
+results/**/cv_config.json
+results/**/timing.json
+results/**/shuffle_fold_checkpoints/
+results/**/*DRYRUN*/
+results/batch2_brats_regression/
+results/**/*.png
+results/**/v3_sha256_*.txt
+
 # Large imaging / binary formats (typically >>50MB)
 *.nii
 *.nii.gz
