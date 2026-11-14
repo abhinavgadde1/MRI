@@ -23,21 +23,78 @@ logger = logging.getLogger(__name__)
 
 ModalityLabel = Literal["T1", "T1c", "T2", "FLAIR", "other"]
 
-# Ordered rules: first match wins (FLAIR / T1c before generic T1 / T2).
-_MODALITY_RULES: tuple[tuple[ModalityLabel, re.Pattern[str]], ...] = (
-    ("FLAIR", re.compile(r"flair", re.I)),
-    (
-        "T1c",
-        re.compile(
-            r"(t1\s*[c+]|\+?\s*c\b|gad|gado|gd[\s_-]?dtpa|post[\s_-]?contrast|"
-            r"contrast|ce[\s_-]?t1|t1[\s_-]?ce|t1w?[\s_-]?post|mprage.*post|"
-            r"\bgd\b)",
-            re.I,
-        ),
-    ),
-    ("T2", re.compile(r"\bt2(?!\s*flair)|t2w|t2[\s_-]?tse|t2[\s_-]?fse", re.I)),
-    ("T1", re.compile(r"\bt1\b|t1w|t1[\s_-]?se|t1[\s_-]?ffe|mprage|spgr|bravo", re.I)),
+# Treat underscore / hyphen / plus as token separators so ``T1W_3D_TFE_GD``
+# exposes a standalone ``gd`` token (``\bgd\b`` fails when ``_`` is a word char).
+_TOKEN_SPLIT = re.compile(r"[^A-Za-z0-9]+")
+
+# Angiography / MR-angio — never promote to T1c (``s3DI_MC`` used to match via
+# a bare trailing ``C`` rule).
+_ANGIO_TOKENS = frozenset({"s3di", "tof", "mra", "3di"})
+_ANGIO_BLOB = re.compile(r"\b(angio|angiograph|pca)\b", re.I)
+
+_FLAIR_RE = re.compile(r"flair", re.I)
+_T2_RE = re.compile(r"(?<![a-z])t2(?!\s*flair)|t2w|t2[\s_-]?tse|t2[\s_-]?fse", re.I)
+_T1_LIKE_RE = re.compile(
+    r"(?<![a-z])t1(?![0-9])|t1w|t1[\s_-]?se|t1[\s_-]?ffe|t1[\s_-]?tfe|"
+    r"mprage|spgr|bravo",
+    re.I,
 )
+# Contrast markers as whole tokens after separator normalization, plus a few
+# glued forms that survive tokenization (cet1, t1ce, t1c).
+_CONTRAST_TOKENS = frozenset(
+    {
+        "gd",
+        "gad",
+        "gado",
+        "gadovist",
+        "gadobutrol",
+        "dtpa",
+        "contrast",
+        "post",
+        "ce",
+        "t1c",
+        "t1ce",
+        "cet1",
+    }
+)
+_CONTRAST_BLOB = re.compile(
+    r"(post[\s_-]?contrast|gd[\s_-]?dtpa|ce[\s_-]?t1|t1[\s_-]?ce|"
+    r"t1w?[\s_-]?post|mprage.*post|\+c\b)",
+    re.I,
+)
+
+
+def _normalized_blob(
+    series_description: str | None,
+    protocol_name: str | None = None,
+    sequence_name: str | None = None,
+) -> str:
+    parts = [p for p in (series_description, protocol_name, sequence_name) if p]
+    return " | ".join(parts)
+
+
+def _tokens(text: str) -> list[str]:
+    return [t for t in _TOKEN_SPLIT.split(text.lower()) if t]
+
+
+def _is_angio(blob: str, tokens: Sequence[str]) -> bool:
+    if any(t in _ANGIO_TOKENS for t in tokens):
+        return True
+    return bool(_ANGIO_BLOB.search(blob))
+
+
+def _is_t1_like(blob: str) -> bool:
+    return bool(_T1_LIKE_RE.search(blob))
+
+
+def _has_contrast(blob: str, tokens: Sequence[str]) -> bool:
+    if any(t in _CONTRAST_TOKENS for t in tokens):
+        return True
+    # Lone ``c`` token only counts when the series is already T1-like
+    # (covers ``T1_C`` / ``T1 +C`` after separator split).
+    if "c" in tokens and _is_t1_like(blob):
+        return True
+    return bool(_CONTRAST_BLOB.search(blob))
 
 
 @dataclass(frozen=True)
@@ -120,15 +177,28 @@ def identify_modality(
     *,
     sequence_name: str | None = None,
 ) -> ModalityLabel:
-    """Map SeriesDescription / ProtocolName text to T1 / T1c / T2 / FLAIR / other."""
-    blob = " | ".join(
-        part for part in (series_description, protocol_name, sequence_name) if part
-    )
+    """Map SeriesDescription / ProtocolName text to T1 / T1c / T2 / FLAIR / other.
+
+    Underscore / hyphen / plus are treated as separators so Philips names like
+    ``T1W_3D_TFE_GD`` classify as post-contrast T1c. Angiography series
+    (``s3DI_MC``, TOF, MRA, ``3DI``) are returned as ``other`` (angio/other).
+    """
+    blob = _normalized_blob(series_description, protocol_name, sequence_name)
     if not blob.strip():
         return "other"
-    for label, pattern in _MODALITY_RULES:
-        if pattern.search(blob):
-            return label
+    tokens = _tokens(blob)
+
+    # Angio / MR-angio before any T1c rule (avoids false T1c on s3DI_MC).
+    if _is_angio(blob, tokens):
+        return "other"
+    if _FLAIR_RE.search(blob):
+        return "FLAIR"
+    if _is_t1_like(blob) and _has_contrast(blob, tokens):
+        return "T1c"
+    if _T2_RE.search(blob):
+        return "T2"
+    if _is_t1_like(blob):
+        return "T1"
     return "other"
 
 

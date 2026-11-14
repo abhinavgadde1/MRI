@@ -51,6 +51,8 @@ class PatientPreprocessResult:
     transforms: dict[str, Path] = field(default_factory=dict)
     reference: str | None = None
     manifest_path: Path | None = None
+    # Per-modality winner metadata from ``_select_primary_series``.
+    series_selection: dict[str, dict[str, Any]] = field(default_factory=dict)
 
 
 def register_to_reference(
@@ -290,15 +292,28 @@ def run_patient_preprocessing(
         modalities=list(TARGET_MODALITIES),
         include_other=False,
     )
-    selected = _select_primary_series(converted)
-    result.dicom_nifti = dict(selected)
-    logger.info("DICOM conversion selected modalities: %s", sorted(selected))
+    selected_paths, selection_meta = _select_primary_series(converted)
+    result.dicom_nifti = dict(selected_paths)
+    result.series_selection = selection_meta
+    selection_path = output_study_dir / "series_selection.json"
+    selection_path.write_text(
+        json.dumps(selection_meta, indent=2, default=str) + "\n",
+        encoding="utf-8",
+    )
+    logger.info("DICOM conversion selected modalities: %s", sorted(selected_paths))
+    for modality, meta in selection_meta.items():
+        logger.info(
+            "Selected %s: %s (%s)",
+            modality,
+            meta.get("series_description"),
+            meta.get("reason"),
+        )
 
-    if not selected:
+    if not selected_paths:
         raise RuntimeError(f"No T1/T1c/T2/FLAIR series found in {study_dicom_dir}")
 
     return run_nifti_preprocessing(
-        selected,
+        selected_paths,
         output_study_dir,
         study_name=study_name,
         atlas_path=atlas_path,
@@ -411,20 +426,82 @@ def run_nifti_preprocessing(
     return result
 
 
-def _select_primary_series(converted: Sequence[ConvertedSeries]) -> dict[str, Path]:
-    """Pick one series per modality (most instances wins)."""
-    best: dict[str, ConvertedSeries] = {}
+def _series_preference_key(item: ConvertedSeries) -> tuple[int, float, int]:
+    """Rank series for a modality role: more slices, then thinner slices.
+
+    Returns a tuple suitable for ``max`` (higher is better). Missing thickness
+    is treated as very thick so known-thin series win ties.
+    """
+    n = int(item.meta.number_of_instances or 0)
+    thickness = item.meta.slice_thickness
+    # Negative thickness so thinner sorts higher when using max().
+    thin_score = -float(thickness) if thickness is not None else -999.0
+    # Stable tie-breaker: prefer lower series number when present.
+    series_no = item.meta.series_number
+    series_tie = -int(series_no) if series_no is not None else 0
+    return (n, thin_score, series_tie)
+
+
+def _select_primary_series(
+    converted: Sequence[ConvertedSeries],
+) -> tuple[dict[str, Path], dict[str, dict[str, Any]]]:
+    """Pick one series per modality; prefer more slices, then thinner slices.
+
+    Returns ``(paths_by_modality, selection_metadata)``. Metadata logs the
+    winner, runners-up, and the human-readable reason for the choice.
+    """
+    by_label: dict[str, list[ConvertedSeries]] = {}
     for item in converted:
         label = item.meta.modality_label
         if label not in TARGET_MODALITIES:
             continue
-        current = best.get(label)
-        if (
-            current is None
-            or item.meta.number_of_instances > current.meta.number_of_instances
-        ):
-            best[label] = item
-    return {label: item.nifti_path for label, item in best.items()}
+        by_label.setdefault(label, []).append(item)
+
+    paths: dict[str, Path] = {}
+    meta_out: dict[str, dict[str, Any]] = {}
+    for label, items in by_label.items():
+        ranked = sorted(items, key=_series_preference_key, reverse=True)
+        winner = ranked[0]
+        win_n = int(winner.meta.number_of_instances or 0)
+        win_th = winner.meta.slice_thickness
+        if len(ranked) == 1:
+            reason = (
+                f"only candidate for {label} "
+                f"({win_n} slices, thickness={win_th})"
+            )
+        else:
+            runner = ranked[1]
+            reason = (
+                f"preferred over {len(ranked) - 1} other {label} candidate(s): "
+                f"more slices then thinner "
+                f"(winner={win_n} sl / {win_th} mm vs "
+                f"next={runner.meta.number_of_instances} sl / "
+                f"{runner.meta.slice_thickness} mm; "
+                f"next desc={runner.meta.series_description!r})"
+            )
+        paths[label] = winner.nifti_path
+        meta_out[label] = {
+            "series_description": winner.meta.series_description,
+            "protocol_name": winner.meta.protocol_name,
+            "series_instance_uid": winner.meta.series_instance_uid,
+            "series_number": winner.meta.series_number,
+            "n_slices": win_n,
+            "slice_thickness_mm": win_th,
+            "nifti_path": str(winner.nifti_path),
+            "reason": reason,
+            "n_candidates": len(ranked),
+            "candidates": [
+                {
+                    "series_description": c.meta.series_description,
+                    "n_slices": c.meta.number_of_instances,
+                    "slice_thickness_mm": c.meta.slice_thickness,
+                    "series_number": c.meta.series_number,
+                }
+                for c in ranked
+            ],
+        }
+        logger.info("Series selection [%s]: %s", label, reason)
+    return paths, meta_out
 
 
 def _write_manifest(result: PatientPreprocessResult, path: Path) -> None:
